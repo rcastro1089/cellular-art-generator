@@ -1,0 +1,23 @@
+schema: spec-driven
+version: 1
+change_name: v1-web-engine
+description: "Complete web app: WebGL2 CA engine + 3D + HD export + Printful POD + SEO content"
+author: Ricardo Castro
+created: 2026-07-15
+status: planning
+milestones:
+  - name: "Sprint 1 - Core Engine"
+    description: "WebGL2 CA simulation, 20+ palettes, bloom, HD export, basic UI"
+    estimated_hours: 26
+  - name: "Sprint 2 - Surfaces + 3D"
+    description: "Toroidal, spherical, 3D voxel mode"
+    estimated_hours: 20
+  - name: "Sprint 3 - Monetization"
+    description: "Gumroad digital downloads, Printful POD integration"
+    estimated_hours: 15
+  - name: "Sprint 4 - Content + SEO"
+    description: "Blog, gallery, FAQ, meta tags, deployment"
+    estimated_hours: 26
+  - name: "Sprint 5 - Launch"
+    description: "Reddit, HN, Product Hunt, feedback"
+    estimated_hours: 4

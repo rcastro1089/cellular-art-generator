@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cellular Automata Art Generator — Free Generative Art Tool</title>
+<meta name="description" content="Create stunning generative wall art with Conway's Game of Life and 30+ cellular automata rules. GPU-accelerated, 20+ neon color palettes, 4K PNG export. Free online tool.">
+<meta property="og:title" content="Cellular Automata Art Generator">
+<meta property="og:description" content="Turn mathematics into wall art. Life-like cellular automata with neon bloom, 20+ palettes and 4K export.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦠</text></svg>">
+<style>
+:root{
+  --bg:#07070f;
+  --panel:rgba(22,22,40,.55);
+  --panel-border:rgba(255,255,255,.08);
+  --text:#e8e8f2;
+  --muted:#8a8aa3;
+  --accent:#00d4ff;
+  --accent2:#7b2ff7;
+  --glow:#00d4ff;
+  --danger:#ff3366;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  background-image:
+    radial-gradient(1200px 700px at 15% -10%, rgba(123,47,247,.14), transparent 60%),
+    radial-gradient(1000px 600px at 100% 110%, rgba(0,212,255,.10), transparent 60%);
+  color:var(--text);
+  font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* ── Header ─────────────────────────── */
+header{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 18px;
+  border-bottom:1px solid var(--panel-border);
+  background:rgba(10,10,20,.6);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  flex:0 0 auto;z-index:5;
+}
+header h1{
+  font-size:1.05rem;font-weight:700;letter-spacing:.02em;white-space:nowrap;
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.badge{
+  font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 9px;border-radius:99px;border:1px solid var(--panel-border);
+  color:var(--muted);background:rgba(255,255,255,.04);white-space:nowrap;
+}
+.badge.gpu{color:#39ffb0;border-color:rgba(57,255,176,.3)}
+.badge.cpu{color:#ffb347;border-color:rgba(255,179,71,.3)}
+#headStats{margin-left:auto;display:flex;gap:16px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.72rem;color:var(--muted)}
+#headStats b{color:var(--text);font-weight:600}
+
+/* ── Layout ─────────────────────────── */
+main{display:flex;flex:1;min-height:0}
+#stage{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:18px;min-width:0;gap:12px;
+}
+#canvasWrap{
+  position:relative;border-radius:var(--radius);
+  padding:8px;background:rgba(255,255,255,.03);
+  border:1px solid var(--panel-border);
+  box-shadow:0 0 80px -18px var(--glow), 0 24px 60px -20px rgba(0,0,0,.8);
+  transition:box-shadow .6s ease;
+  max-width:100%;max-height:100%;
+}
+#caCanvas{
+  display:block;border-radius:8px;cursor:crosshair;touch-action:none;
+  image-rendering:pixelated;background:#000;
+  max-width:100%;max-height:100%;
+}
+#hint{font-size:.7rem;color:var(--muted);text-align:center;line-height:1.6}
+#hint kbd{
+  background:rgba(255,255,255,.07);border:1px solid var(--panel-border);
+  border-radius:4px;padding:1px 6px;font-family:inherit;font-size:.65rem;color:var(--text);
+}
+
+/* ── Sidebar ────────────────────────── */
+#sidebar{
+  flex:0 0 320px;overflow-y:auto;overscroll-behavior:contain;
+  padding:16px;display:flex;flex-direction:column;gap:14px;
+  border-left:1px solid var(--panel-border);
+  background:rgba(12,12,24,.5);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+#sidebar::-webkit-scrollbar{width:8px}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+.card{
+  background:var(--panel);border:1px solid var(--panel-border);
+  border-radius:var(--radius);padding:14px;
+}
+.card h3{
+  font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+}
+
+/* ── Controls ───────────────────────── */
+.btn{
+  appearance:none;border:1px solid var(--panel-border);border-radius:9px;
+  background:rgba(255,255,255,.06);color:var(--text);
+  padding:9px 12px;font-size:.8rem;font-weight:600;cursor:pointer;
+  transition:all .18s ease;font-family:inherit;
+}
+.btn:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.primary{
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  border:none;color:#fff;
+  box-shadow:0 4px 20px -4px rgba(0,212,255,.5);
+}
+.btn.primary:hover{filter:brightness(1.15)}
+.btn.danger{color:#ff6b8a;border-color:rgba(255,51,102,.3)}
+.btn.danger:hover{background:rgba(255,51,102,.15)}
+.btn.full{width:100%}
+.btn-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.btn-row .btn{padding:9px 4px;font-size:.74rem}
+
+.field{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.field label{font-size:.74rem;color:var(--muted);flex:0 0 66px}
+.field .val{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--accent);flex:0 0 42px;text-align:right}
+input[type=range]{
+  flex:1;appearance:none;-webkit-appearance:none;height:4px;border-radius:2px;
+  background:rgba(255,255,255,.12);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  box-shadow:0 0 10px rgba(0,212,255,.6);border:none;cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;border:none;
+  background:linear-gradient(120deg,var(--accent),var(--accent2));cursor:pointer;
+}
+input[type=text]{
+  background:rgba(0,0,0,.35);border:1px solid var(--panel-border);border-radius:8px;
+  color:var(--text);padding:8px 10px;font-size:.85rem;width:100%;
+  font-family:ui-monospace,Menlo,monospace;outline:none;transition:border-color .2s;
+}
+input[type=text]:focus{border-color:var(--accent)}
+input[type=text].invalid{border-color:var(--danger)}
+select{
+  background:rgba(0,0,0,.35);border:1px solid var(--panel-border);border-radius:8px;
+  color:var(--text);padding:8px 10px;font-size:.8rem;width:100%;outline:none;
+  cursor:pointer;font-family:inherit;
+}
+select:focus{border-color:var(--accent)}
+select option{background:#14142a}
+.rule-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.rule-inputs .sub{font-size:.62rem;color:var(--muted);margin-bottom:4px;display:block;letter-spacing:.05em}
+#ruleName{font-size:.7rem;color:var(--muted);margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace}
+
+/* toggle switch */
+.switch{position:relative;width:38px;height:21px;flex:0 0 auto;cursor:pointer}
+.switch input{opacity:0;width:0;height:0}
+.switch .track{
+  position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.12);
+  transition:background .2s;
+}
+.switch .track::after{
+  content:'';position:absolute;top:2.5px;left:3px;width:16px;height:16px;border-radius:50%;
+  background:#fff;transition:transform .2s;
+}
+.switch input:checked + .track{background:linear-gradient(120deg,var(--accent),var(--accent2))}
+.switch input:checked + .track::after{transform:translateX(16px)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.toggle-row span{font-size:.78rem;color:var(--text)}
+
+/* palettes */
+#paletteGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.pal{
+  border:1.5px solid var(--panel-border);border-radius:8px;overflow:hidden;
+  cursor:pointer;transition:all .18s;background:none;padding:0;
+}
+.pal .strip{height:24px}
+.pal .nm{
+  display:block;font-size:.55rem;color:var(--muted);padding:3px 2px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,.3);
+}
+.pal:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.3)}
+.pal.active{border-color:var(--accent);box-shadow:0 0 12px -2px var(--accent)}
+.pal.active .nm{color:var(--accent)}
+
+/* checkbox */
+.check-row{display:flex;align-items:center;gap:8px;margin:9px 0;font-size:.75rem;color:var(--muted);cursor:pointer}
+.check-row input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
+
+/* toast */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:rgba(20,20,40,.92);border:1px solid var(--panel-border);
+  backdrop-filter:blur(12px);border-radius:12px;padding:12px 20px;
+  font-size:.8rem;color:var(--text);z-index:99;opacity:0;
+  transition:all .35s cubic-bezier(.2,.9,.3,1.2);pointer-events:none;
+  box-shadow:0 10px 40px rgba(0,0,0,.6);max-width:90vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:rgba(57,255,176,.4)}
+#toast.err{border-color:rgba(255,51,102,.5)}
+
+/* export progress */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Responsive ─────────────────────── */
+@media(max-width:860px){
+  body{overflow:auto}
+  #app{height:auto}
+  main{flex-direction:column}
+  #stage{padding:12px}
+  #canvasWrap{width:100%;max-width:94vw}
+  #caCanvas{width:100%!important;height:auto!important}
+  #sidebar{flex:1 1 auto;border-left:none;border-top:1px solid var(--panel-border)}
+  #headStats{display:none}
+  #hint{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>🦠 Cellular Automata Art</h1>
+    <span class="badge" id="rendererBadge">…</span>
+    <div id="headStats">
+      <span>RULE <b id="stRule">B3/S23</b></span>
+      <span>GEN <b id="stGen">0</b></span>
+      <span>POP <b id="stPop">0</b></span>
+      <span>FPS <b id="stFps">0</b></span>
+    </div>
+  </header>
+
+  <main>
+    <div id="stage">
+      <div id="canvasWrap">
+        <canvas id="caCanvas" width="800" height="800"></canvas>
+      </div>
+      <div id="hint">
+        Click / drag = paint &nbsp;·&nbsp; Shift+click or right-click = erase<br>
+        <kbd>Space</kbd> play/pause &nbsp; <kbd>S</kbd> step &nbsp; <kbd>R</kbd> random &nbsp; <kbd>C</kbd> clear
+      </div>
+    </div>
+
+    <aside id="sidebar">
+      <!-- PLAYBACK -->
+      <div class="card">
+        <h3>Playback</h3>
+        <div class="btn-row">
+          <button class="btn primary" id="playBtn">⏸</button>
+          <button class="btn" id="stepBtn" title="Step one generation">⏭</button>
+          <button class="btn" id="randomBtn" title="Random fill">🎲</button>
+          <button class="btn danger" id="clearBtn" title="Clear grid">✕</button>
+        </div>
+        <div class="field">
+          <label>Speed</label>
+          <input type="range" id="speedRange" min="1" max="120" value="30">
+          <span class="val" id="speedVal">30</span>
+        </div>
+        <div class="field">
+          <label>Density</label>
+          <input type="range" id="densityRange" min="1" max="99" value="15">
+          <span class="val" id="densityVal">15%</span>
+        </div>
+        <div class="field">
+          <label>Grid</label>
+          <select id="gridSelect" style="flex:1">
+            <option value="100">100 × 100</option>
+            <option value="250">250 × 250</option>
+            <option value="500" selected>500 × 500</option>
+            <option value="1000">1000 × 1000</option>
+            <option value="2000">2000 × 2000</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- RULES -->
+      <div class="card">
+        <h3>Rules (Life-like B/S)</h3>
+        <div class="rule-inputs">
+          <div>
+            <span class="sub">BIRTH (B)</span>
+            <input type="text" id="birthInput" value="3" maxlength="9" inputmode="numeric">
+          </div>
+          <div>
+            <span class="sub">SURVIVAL (S)</span>
+            <input type="text" id="surviveInput" value="23" maxlength="9" inputmode="numeric">
+          </div>
+        </div>
+        <button class="btn full" id="applyRuleBtn">✓ Apply Rules</button>
+        <div style="margin-top:10px">
+          <select id="ruleSelect"></select>
+        </div>
+        <div id="ruleName">B3/S23 — Conway's Life</div>
+      </div>
+
+      <!-- PATTERNS -->
+      <div class="card">
+        <h3>Patterns</h3>
+        <select id="patternSelect">
+          <option value="">— Load a pattern —</option>
+        </select>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="card">
+        <h3>Appearance</h3>
+        <div id="paletteGrid"></div>
+        <div class="toggle-row" style="margin-top:12px">
+          <span>✨ Bloom (neon glow)</span>
+          <label class="switch"><input type="checkbox" id="bloomToggle" checked><span class="track"></span></label>
+        </div>
+        <div class="field">
+          <label>Intensity</label>
+          <input type="range" id="bloomRange" min="0" max="30" value="12">
+          <span class="val" id="bloomVal">1.2</span>
+        </div>
+      </div>
+
+      <!-- EXPORT -->
+      <div class="card">
+        <h3>Export HD</h3>
+        <div class="field">
+          <label>Size</label>
+          <select id="exportSelect" style="flex:1">
+            <option value="1920x1080">1920 × 1080 (Full HD)</option>
+            <option value="3840x2160" selected>3840 × 2160 (4K)</option>
+            <option value="4000x4000">4000 × 4000 (Square)</option>
+            <option value="6000x4000">6000 × 4000 (Print)</option>
+          </select>
+        </div>
+        <label class="check-row"><input type="checkbox" id="overlayCheck"> Overlay rule &amp; generation</label>
+        <button class="btn primary full" id="exportBtn">⬇ Export PNG</button>
+      </div>
+    </aside>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════════
+   CELLULAR AUTOMATA ART GENERATOR — single-file engine
+   Sections: 1 Palettes · 2 Presets · 3 Shaders · 4 WebGL2 Engine
+             5 Canvas2D Engine · 6 Export · 7 UI · 8 Init/Selftest
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. PALETTES ─────────────────────────────────────────────────
+   Each: bg color + 2-5 stops. Live cells interpolate across stops
+   by age (generations alive); dead cells leave a fading trail. */
+const PALETTES = [
+  { name:'Neon',       bg:'#05010d', stops:['#00f0ff','#ff00ea','#7b2ff7'] },
+  { name:'Fire',       bg:'#0a0200', stops:['#ff2200','#ff8c00','#ffd900','#fff5c0'] },
+  { name:'Matrix',     bg:'#010801', stops:['#00ff41','#00b32e','#0a4d14'] },
+  { name:'Ocean',      bg:'#010b18', stops:['#00e5ff','#0090d4','#003d66'] },
+  { name:'Gold',       bg:'#0d0800', stops:['#ffe680','#ffbf00','#8a5a00'] },
+  { name:'Pastel',     bg:'#14121c', stops:['#ffb3d9','#d9b3ff','#b3d9ff'] },
+  { name:'Monochrome', bg:'#050505', stops:['#ffffff','#aaaaaa','#4d4d4d'] },
+  { name:'Alien',      bg:'#060010', stops:['#7cff00','#3ecf5a','#b400ff'] },
+  { name:'Sunset',     bg:'#12041a', stops:['#ff6600','#ff2e88','#b13fff'] },
+  { name:'Forest',     bg:'#071006', stops:['#9fe870','#2e8b3a','#5a3a1a'] },
+  { name:'Ice',        bg:'#04101c', stops:['#ffffff','#63b3ff','#0fd6c0'] },
+  { name:'Blood',      bg:'#0a0000', stops:['#ff1a1a','#b30000','#4d0000'] },
+  { name:'Electric',   bg:'#00030d', stops:['#ffffff','#00aaff','#0044ff'] },
+  { name:'Retro',      bg:'#0d0a00', stops:['#ffb000','#cc8400','#664200'] },
+  { name:'Vaporwave',  bg:'#0d0221', stops:['#ff71ce','#01cdfe','#b967ff'] },
+  { name:'Nord',       bg:'#2e3440', stops:['#88c0d0','#81a1c1','#5e81ac','#eceff4'] },
+  { name:'Solarized',  bg:'#fdf6e3', stops:['#b58900','#cb4b16','#268bd2'] },
+  { name:'Dracula',    bg:'#282a36', stops:['#50fa7b','#ff79c6','#bd93f9'] },
+  { name:'Rose Gold',  bg:'#14080a', stops:['#f7cac9','#e8b4b8','#b76e79'] },
+  { name:'Midnight',   bg:'#020617', stops:['#e2e8f0','#64748b','#1e3a8a'] },
+  { name:'Cyberpunk',  bg:'#060014', stops:['#fcee09','#00f0ff','#ff003c'] },
+  { name:'Aurora',     bg:'#02040d', stops:['#00ff9f','#00b8ff','#8b5cf6'] },
+];
+function hex2rgb(h){
+  return [parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255];
+}
+function luma(rgb){ return 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]; }
+PALETTES.forEach(p => {
+  p.bgRGB = hex2rgb(p.bg);
+  p.stopsRGB = p.stops.map(hex2rgb);
+  p.lightBg = luma(p.bgRGB) > 0.5;
+});
+
+/* ── 2. PRESETS: rules + patterns ──────────────────────────────── */
+const PRESET_RULES = [
+  { name:'Conway',        b:'3',     s:'23' },
+  { name:'HighLife',      b:'36',    s:'23' },
+  { name:'Seeds',         b:'2',     s:'' },
+  { name:'Day & Night',   b:'3678',  s:'34678' },
+  { name:'Maze',          b:'3',     s:'12345' },
+  { name:'Mazectric',     b:'3',     s:'1234' },
+  { name:'Life No Death', b:'3',     s:'012345678' },
+  { name:'2x2',           b:'36',    s:'125' },
+  { name:'Coral',         b:'3',     s:'45678' },
+  { name:'Iceballs',      b:'25678', s:'5678' },
+  { name:'Virus',         b:'36',    s:'235' },
+  { name:'Bacteria',      b:'34',    s:'456' },
+  { name:'Pedestrian',    b:'38',    s:'23' },
+  { name:'Stains',        b:'3678',  s:'235678' },
+  { name:'Gnarl',         b:'1',     s:'1' },
+  { name:'Replicator',    b:'1357',  s:'1357' },
+  { name:'Live Free/Die', b:'2',     s:'0' },
+  { name:'Assimilation',  b:'345',   s:'4567' },
+  { name:'Coagulations',  b:'378',   s:'235678' },
+  { name:'Long Life',     b:'345',   s:'5' },
+  { name:'Diamoeba',      b:'35678', s:'5678' },
+  { name:'Amoeba',        b:'357',   s:'1358' },
+  { name:'Morley',        b:'368',   s:'245' },
+  { name:'DryLife',       b:'37',    s:'23' },
+  { name:'DrighLife',     b:'367',   s:'23' },
+  { name:'Vote',          b:'5678',  s:'45678' },
+  { name:'Anneal',        b:'4678',  s:'35678' },
+  { name:'Walled Cities', b:'45678', s:'2345' },
+  { name:'Flock',         b:'3',     s:'12' },
+  { name:'SnowLife',      b:'3',     s:'1237' },
+  { name:'3-4 Life',      b:'34',    s:'34' },
+  { name:'H-trees',       b:'1',     s:'012345678' },
+];
+
+/* Pattern coordinates as [row,col], row grows downward. */
+const PATTERNS = {
+  'Glider':          [[0,1],[1,2],[2,0],[2,1],[2,2]],
+  'Blinker':         [[0,0],[0,1],[0,2]],
+  'Toad':            [[0,1],[0,2],[0,3],[1,0],[1,1],[1,2]],
+  'Beacon':          [[0,0],[0,1],[1,0],[1,1],[2,2],[2,3],[3,2],[3,3]],
+  'Pulsar':          [[0,2],[0,3],[0,4],[0,8],[0,9],[0,10],[2,0],[2,5],[2,7],[2,12],[3,0],[3,5],[3,7],[3,12],[4,0],[4,5],[4,7],[4,12],[5,2],[5,3],[5,4],[5,8],[5,9],[5,10],[7,2],[7,3],[7,4],[7,8],[7,9],[7,10],[8,0],[8,5],[8,7],[8,12],[9,0],[9,5],[9,7],[9,12],[10,0],[10,5],[10,7],[10,12],[12,2],[12,3],[12,4],[12,8],[12,9],[12,10]],
+  'R-Pentomino':     [[0,1],[0,2],[1,0],[1,1],[2,1]],
+  'Diehard':         [[0,6],[1,0],[1,1],[2,1],[2,5],[2,6],[2,7]],
+  'Acorn':           [[0,1],[1,3],[2,0],[2,1],[2,4],[2,5],[2,6]],
+  'Gosper Glider Gun':[[0,24],[1,22],[1,24],[2,12],[2,13],[2,20],[2,21],[2,34],[2,35],[3,11],[3,15],[3,20],[3,21],[3,34],[3,35],[4,0],[4,1],[4,10],[4,16],[4,20],[4,21],[5,0],[5,1],[5,10],[5,14],[5,16],[5,17],[5,22],[5,24],[6,10],[6,16],[6,24],[7,11],[7,15],[8,12],[8,13]],
+  'LWSS':            [[0,0],[0,3],[1,4],[2,0],[2,4],[3,1],[3,2],[3,3],[3,4]],
+  'MWSS':            [[0,2],[1,0],[1,4],[2,5],[3,0],[3,5],[4,1],[4,2],[4,3],[4,4],[4,5]],
+  'HWSS':            [[0,2],[0,3],[1,0],[1,5],[2,6],[3,0],[3,6],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6]],
+  'Pentadecathlon':  [[0,2],[0,7],[1,0],[1,1],[1,3],[1,4],[1,5],[1,6],[1,8],[1,9],[2,2],[2,7]],
+  'Queen Bee':       [[0,1],[1,0],[1,2],[2,1],[3,1],[4,1],[5,0],[5,2]],
+  'Eater':           [[0,0],[0,1],[1,0],[1,1],[1,2],[2,3],[3,2],[3,3]],
+  'Block':           [[0,0],[0,1],[1,0],[1,1]],
+  'Loaf':            [[0,1],[0,2],[1,0],[1,3],[2,1],[2,3],[3,2]],
+  'Boat':            [[0,0],[0,1],[1,0],[1,2],[2,1]],
+  'Tub':             [[0,1],[1,0],[1,2],[2,1]],
+  'Snake':           [[0,0],[0,1],[1,0],[1,2],[2,2],[2,3]],
+  'Switch Engine':   [[0,1],[0,2],[1,0],[1,1],[1,3],[2,0],[2,1],[2,2],[2,3]],
+  'Puffer Train':    [[0,2],[1,0],[1,1],[1,3],[1,4],[2,0],[2,1],[2,3],[2,4],[3,1],[3,2],[3,3]],
+  'Rabbits':         [[0,1],[0,2],[1,0],[1,1],[1,4],[1,5],[1,6],[2,1],[2,2]],
+  'Pi-Heptomino':    [[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,2]],
+  'Light Bulb':      [[0,0],[0,1],[1,0],[1,1],[1,2],[2,2],[2,3],[3,0],[3,3],[4,0],[4,3],[5,1],[5,2]],
+  'Tumbler':         [[0,2],[0,3],[0,4],[1,0],[1,1],[1,5],[1,6],[2,2],[2,3],[2,4],[3,2],[3,3],[3,4],[4,0],[4,1],[4,5],[4,6],[5,2],[5,3],[5,4]],
+};
+
+/* ── APP STATE ───────────────────────────────────────────────── */
+const state = {
+  grid: 500,
+  birth: [3], survive: [2,3],
+  running: true,
+  speed: 30,           // generations per second
+  gen: 0,
+  palette: PALETTES[0],
+  bloom: true,
+  bloomIntensity: 1.2,
+  density: 0.15,
+  ageSpan: 60.0,       // generations mapped across the palette gradient
+};
+const digitsToMask = d => d.reduce((m,n) => m | (1 << n), 0);
+
+/* ── 3. SHADERS (GLSL ES 3.00) ─────────────────────────────────── */
+const VS_FULLSCREEN = `#version 300 es
+out vec2 v_uv;
+void main(){
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  v_uv = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+/* CA step. State texture: R = alive(0/1), G = age, B = trail heat. */
+const FS_SIM = `#version 300 es
+precision highp float;
+precision highp int;
+uniform highp sampler2D u_state;
+uniform ivec2 u_size;
+uniform int u_birth;
+uniform int u_survive;
+out vec4 outColor;
+void main(){
+  ivec2 p = ivec2(gl_FragCoord.xy);
+  int n = 0;
+  for (int dy = -1; dy <= 1; dy++)
+  for (int dx = -1; dx <= 1; dx++){
+    if (dx == 0 && dy == 0) continue;
+    ivec2 q = (p + ivec2(dx, dy) + u_size) % u_size;   // toroidal wrap
+    n += int(texelFetch(u_state, q, 0).r + 0.5);
+  }
+  vec4 prev = texelFetch(u_state, p, 0);
+  bool alive = prev.r > 0.5;
+  bool next = alive ? (((u_survive >> n) & 1) == 1)
+                    : (((u_birth   >> n) & 1) == 1);
+  float age   = next ? (alive ? min(prev.g + 1.0, 1e6) : 1.0) : 0.0;
+  float trail = next ? 1.0 : prev.b * 0.90;
+  outColor = vec4(next ? 1.0 : 0.0, age, trail, 1.0);
+}`;
+
+/* State → palette colors. u_uvScale/offset implement cover-crop for export. */
+const FS_COLOR = `#version 300 es
+precision highp float;
+uniform highp sampler2D u_state;
+uniform vec3 u_bg;
+uniform vec3 u_stops[5];
+uniform int u_numStops;
+uniform float u_ageSpan;
+uniform vec2 u_uvScale;
+uniform vec2 u_uvOffset;
+in vec2 v_uv;
+out vec4 outColor;
+vec3 grad(float t){
+  float f = t * float(u_numStops - 1);
+  int i = int(clamp(floor(f), 0.0, float(u_numStops - 2)));
+  return mix(u_stops[i], u_stops[i+1], clamp(f - float(i), 0.0, 1.0));
+}
+void main(){
+  vec2 uv = v_uv * u_uvScale + u_uvOffset;
+  vec4 s = texture(u_state, uv);
+  vec3 col = u_bg;
+  if (s.r > 0.5) {
+    col = grad(clamp(s.g / u_ageSpan, 0.0, 1.0));
+  } else if (s.b > 0.02) {
+    col = mix(u_bg, grad(0.0), s.b * 0.30);   // fading trail
+  }
+  outColor = vec4(col, 1.0);
+}`;
+
+const FS_BRIGHT = `#version 300 es
+precision highp float;
+uniform sampler2D u_tex;
+uniform float u_threshold;
+in vec2 v_uv;
+out vec4 outColor;
+void main(){
+  vec3 c = texture(u_tex, v_uv).rgb;
+  float l = dot(c, vec3(0.299, 0.587, 0.114));
+  outColor = vec4(c * smoothstep(u_threshold, u_threshold + 0.3, l), 1.0);
+}`;
+
+const FS_BLUR = `#version 300 es
+precision highp float;
+uniform sampler2D u_tex;
+uniform vec2 u_dir;
+in vec2 v_uv;
+out vec4 outColor;
+void main(){
+  float w[5];
+  w[0]=0.227027; w[1]=0.1945946; w[2]=0.1216216; w[3]=0.054054; w[4]=0.016216;
+  vec3 c = texture(u_tex, v_uv).rgb * w[0];
+  for (int i = 1; i < 5; i++){
+    c += texture(u_tex, v_uv + u_dir * float(i)).rgb * w[i];
+    c += texture(u_tex, v_uv - u_dir * float(i)).rgb * w[i];
+  }
+  outColor = vec4(c, 1.0);
+}`;
+
+const FS_COMPOSITE = `#version 300 es
+precision highp float;
+uniform sampler2D u_scene;
+uniform sampler2D u_bloom;
+uniform float u_intensity;
+in vec2 v_uv;
+out vec4 outColor;
+void main(){
+  vec3 c = texture(u_scene, v_uv).rgb + texture(u_bloom, v_uv).rgb * u_intensity;
+  outColor = vec4(c, 1.0);
+}`;
+
+/* Block-sum reduction for population counting (64x64 output). */
+const FS_REDUCE = `#version 300 es
+precision highp float;
+precision highp int;
+uniform highp sampler2D u_state;
+uniform ivec2 u_size;
+uniform int u_block;
+out vec4 outColor;
+void main(){
+  ivec2 base = ivec2(gl_FragCoord.xy) * u_block;
+  float sum = 0.0;
+  for (int y = 0; y < u_block; y++)
+  for (int x = 0; x < u_block; x++){
+    ivec2 q = base + ivec2(x, y);
+    if (q.x < u_size.x && q.y < u_size.y) sum += texelFetch(u_state, q, 0).r;
+  }
+  outColor = vec4(sum, 0.0, 0.0, 1.0);
+}`;
+
+/* ── 4. WEBGL2 ENGINE ──────────────────────────────────────────── */
+class GLEngine {
+  constructor(canvas){
+    this.name = 'WebGL2';
+    this.canvas = canvas;
+    const gl = canvas.getContext('webgl2', { antialias:false, alpha:false, preserveDrawingBuffer:false });
+    if (!gl) throw new Error('WebGL2 not available');
+    if (!gl.getExtension('EXT_color_buffer_float'))
+      throw new Error('EXT_color_buffer_float not available');
+    this.gl = gl;
+
+    this.vao = gl.createVertexArray();
+    gl.bindVertexArray(this.vao);
+
+    this.progs = {
+      sim:       this._program(VS_FULLSCREEN, FS_SIM),
+      color:     this._program(VS_FULLSCREEN, FS_COLOR),
+      bright:    this._program(VS_FULLSCREEN, FS_BRIGHT),
+      blur:      this._program(VS_FULLSCREEN, FS_BLUR),
+      composite: this._program(VS_FULLSCREEN, FS_COMPOSITE),
+      reduce:    this._program(VS_FULLSCREEN, FS_REDUCE),
+    };
+    this.fbo = gl.createFramebuffer();      // scratch FBO, re-attached per pass
+    this.n = 0;
+    this.stateTex = [null, null];
+    this.cur = 0;
+    this.viewTex = {};                       // scene/bloom textures for display
+    this.REDUCE = 64;
+    this.reduceTex = this._tex(this.REDUCE, this.REDUCE, gl.RGBA32F, gl.NEAREST);
+    this.reduceBuf = new Float32Array(this.REDUCE * this.REDUCE * 4);
+    this.maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  }
+
+  _program(vsSrc, fsSrc){
+    const gl = this.gl;
+    const sh = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+        throw new Error('Shader: ' + gl.getShaderInfoLog(s));
+      return s;
+    };
+    const p = gl.createProgram();
+    gl.attachShader(p, sh(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS))
+      throw new Error('Link: ' + gl.getProgramInfoLog(p));
+    const uni = {}, count = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < count; i++){
+      const info = gl.getActiveUniform(p, i);
+      uni[info.name.replace('[0]','')] = gl.getUniformLocation(p, info.name);
+    }
+    return { p, uni };
+  }
+
+  _tex(w, h, internal, filter){
+    const gl = this.gl;
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, internal, w, h);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return t;
+  }
+
+  _target(tex){ // bind scratch FBO to a texture (null = default framebuffer)
+    const gl = this.gl;
+    if (tex === null){ gl.bindFramebuffer(gl.FRAMEBUFFER, null); return; }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  }
+
+  createGrid(n){
+    const gl = this.gl;
+    this.stateTex.forEach(t => t && gl.deleteTexture(t));
+    this.n = n;
+    this.stateTex = [
+      this._tex(n, n, gl.RGBA32F, gl.NEAREST),
+      this._tex(n, n, gl.RGBA32F, gl.NEAREST),
+    ];
+    this.cur = 0;
+  }
+
+  uploadCells(cells){ // Uint8Array n*n, index = y*n+x with y-up
+    const gl = this.gl, n = this.n;
+    const buf = new Float32Array(n * n * 4);
+    for (let i = 0; i < n * n; i++){
+      const s = cells[i];
+      const j = i * 4;
+      buf[j] = s; buf[j+1] = s; buf[j+2] = s; buf[j+3] = 1;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, n, gl.RGBA, gl.FLOAT, buf);
+  }
+
+  step(){
+    const gl = this.gl, n = this.n, P = this.progs.sim;
+    const src = this.stateTex[this.cur], dst = this.stateTex[1 - this.cur];
+    this._target(dst);
+    gl.viewport(0, 0, n, n);
+    gl.useProgram(P.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, src);
+    gl.uniform1i(P.uni.u_state, 0);
+    gl.uniform2i(P.uni.u_size, n, n);
+    gl.uniform1i(P.uni.u_birth, digitsToMask(state.birth));
+    gl.uniform1i(P.uni.u_survive, digitsToMask(state.survive));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    this.cur = 1 - this.cur;
+  }
+
+  paint(x, y, alive, radius){
+    const gl = this.gl, n = this.n;
+    const r = radius | 0;
+    const x0 = Math.max(0, x - r), y0 = Math.max(0, y - r);
+    const x1 = Math.min(n - 1, x + r), y1 = Math.min(n - 1, y + r);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if (w <= 0 || h <= 0) return;
+    const v = alive ? 1 : 0;
+    const buf = new Float32Array(w * h * 4);
+    for (let i = 0; i < w * h; i++){ const j = i*4; buf[j]=v; buf[j+1]=v; buf[j+2]=v; buf[j+3]=1; }
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, x0, y0, w, h, gl.RGBA, gl.FLOAT, buf);
+  }
+
+  getCell(x, y){
+    const gl = this.gl;
+    this._target(this.stateTex[this.cur]);
+    const px = new Float32Array(4);
+    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.FLOAT, px);
+    return px[0] > 0.5 ? 1 : 0;
+  }
+
+  population(){
+    const gl = this.gl, P = this.progs.reduce, R = this.REDUCE;
+    const block = Math.ceil(this.n / R);
+    this._target(this.reduceTex);
+    gl.viewport(0, 0, R, R);
+    gl.useProgram(P.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.uniform1i(P.uni.u_state, 0);
+    gl.uniform2i(P.uni.u_size, this.n, this.n);
+    gl.uniform1i(P.uni.u_block, block);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.readPixels(0, 0, R, R, gl.RGBA, gl.FLOAT, this.reduceBuf);
+    let sum = 0;
+    for (let i = 0; i < R * R; i++) sum += this.reduceBuf[i * 4];
+    return Math.round(sum);
+  }
+
+  _ensureViewTargets(w, h){
+    const gl = this.gl, V = this.viewTex;
+    if (V.w === w && V.h === h) return;
+    ['scene','pingA','pingB'].forEach(k => V[k] && gl.deleteTexture(V[k]));
+    V.w = w; V.h = h;
+    const hw = Math.max(1, w >> 1), hh = Math.max(1, h >> 1);
+    V.scene = this._tex(w, h, gl.RGBA8, gl.LINEAR);
+    V.pingA = this._tex(hw, hh, gl.RGBA8, gl.LINEAR);
+    V.pingB = this._tex(hw, hh, gl.RGBA8, gl.LINEAR);
+    V.hw = hw; V.hh = hh;
+  }
+
+  _colorPass(target, w, h, uvScale, uvOffset){
+    const gl = this.gl, P = this.progs.color, pal = state.palette;
+    this._target(target);
+    gl.viewport(0, 0, w, h);
+    gl.useProgram(P.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.uniform1i(P.uni.u_state, 0);
+    gl.uniform3fv(P.uni.u_bg, pal.bgRGB);
+    const stops = new Float32Array(15);
+    pal.stopsRGB.forEach((c, i) => stops.set(c, i * 3));
+    gl.uniform3fv(P.uni.u_stops, stops);
+    gl.uniform1i(P.uni.u_numStops, pal.stopsRGB.length);
+    gl.uniform1f(P.uni.u_ageSpan, state.ageSpan);
+    gl.uniform2fv(P.uni.u_uvScale, uvScale);
+    gl.uniform2fv(P.uni.u_uvOffset, uvOffset);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  _simplePass(prog, target, w, h, tex, setUniforms){
+    const gl = this.gl;
+    this._target(target);
+    gl.viewport(0, 0, w, h);
+    gl.useProgram(prog.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    setUniforms(prog.uni);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /* Full pipeline: color → (bright → blur×4 → composite) → target */
+  _renderPipeline(target, w, h, uvScale, uvOffset, blurScale){
+    const gl = this.gl;
+    if (!state.bloom || state.palette.lightBg){
+      this._colorPass(target, w, h, uvScale, uvOffset);
+      return;
+    }
+    this._ensureViewTargets(w, h);
+    const V = this.viewTex;
+    this._colorPass(V.scene, w, h, uvScale, uvOffset);
+    // bright extract → pingA (half res)
+    this._simplePass(this.progs.bright, V.pingA, V.hw, V.hh, V.scene, u => {
+      gl.uniform1i(u.u_tex, 0);
+      gl.uniform1f(u.u_threshold, 0.32);
+    });
+    // two blur iterations (H+V), second with wider spread
+    const spreads = [1.0, 2.2];
+    for (const s of spreads){
+      this._simplePass(this.progs.blur, V.pingB, V.hw, V.hh, V.pingA, u => {
+        gl.uniform1i(u.u_tex, 0);
+        gl.uniform2f(u.u_dir, s * blurScale / V.hw, 0);
+      });
+      this._simplePass(this.progs.blur, V.pingA, V.hw, V.hh, V.pingB, u => {
+        gl.uniform1i(u.u_tex, 0);
+        gl.uniform2f(u.u_dir, 0, s * blurScale / V.hh);
+      });
+    }
+    // composite
+    this._target(target);
+    gl.viewport(0, 0, w, h);
+    const P = this.progs.composite;
+    gl.useProgram(P.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, V.scene);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, V.pingA);
+    gl.uniform1i(P.uni.u_scene, 0);
+    gl.uniform1i(P.uni.u_bloom, 1);
+    gl.uniform1f(P.uni.u_intensity, state.bloomIntensity);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+
+  render(){
+    const w = this.canvas.width, h = this.canvas.height;
+    this._renderPipeline(null, w, h, [1,1], [0,0], 1.0);
+  }
+
+  /* ── 6a. HD EXPORT (WebGL path) ── */
+  renderToPixels(w, h){
+    if (w > this.maxTex || h > this.maxTex)
+      throw new Error(`Resolution exceeds GPU limit (${this.maxTex}px)`);
+    const gl = this.gl;
+    // cover-crop UV so the square grid fills the frame
+    let uvScale = [1,1], uvOffset = [0,0];
+    if (w > h){ const f = h / w; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
+    else if (h > w){ const f = w / h; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+
+    const out = this._tex(w, h, gl.RGBA8, gl.NEAREST);
+    const savedView = this.viewTex;
+    this.viewTex = {};                        // temporary bloom chain at export res
+    try {
+      this._renderPipeline(out, w, h, uvScale, uvOffset, Math.max(1, h / 900));
+      this._target(out);
+      const pixels = new Uint8Array(w * h * 4);
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      // flip vertically (GL origin is bottom-left)
+      const flipped = new Uint8ClampedArray(w * h * 4);
+      const row = w * 4;
+      for (let y = 0; y < h; y++)
+        flipped.set(pixels.subarray(y * row, (y + 1) * row), (h - 1 - y) * row);
+      return { data: flipped, w, h };
+    } finally {
+      const V = this.viewTex;
+      ['scene','pingA','pingB'].forEach(k => V[k] && gl.deleteTexture(V[k]));
+      gl.deleteTexture(out);
+      this.viewTex = savedView;
+    }
+  }
+
+  dispose(){
+    const gl = this.gl;
+    this.stateTex.forEach(t => t && gl.deleteTexture(t));
+    const V = this.viewTex;
+    ['scene','pingA','pingB'].forEach(k => V[k] && gl.deleteTexture(V[k]));
+    gl.deleteTexture(this.reduceTex);
+    gl.deleteFramebuffer(this.fbo);
+  }
+}
+
+/* ── 5. CANVAS 2D FALLBACK ENGINE ──────────────────────────────── */
+class CPUEngine {
+  constructor(canvas){
+    this.name = 'Canvas2D';
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.n = 0;
+    this.off = document.createElement('canvas');   // grid-resolution buffer
+    this.offCtx = this.off.getContext('2d');
+    this._pop = 0;
+  }
+  createGrid(n){
+    this.n = n;
+    this.cells = new Uint8Array(n * n);
+    this.next  = new Uint8Array(n * n);
+    this.age   = new Float32Array(n * n);
+    this.trail = new Float32Array(n * n);
+    this.off.width = n; this.off.height = n;
+    this.img = this.offCtx.createImageData(n, n);
+    this._pop = 0;
+  }
+  uploadCells(cells){
+    this.cells.set(cells);
+    this.age.fill(0); this.trail.fill(0);
+    let pop = 0;
+    for (let i = 0; i < cells.length; i++){
+      if (cells[i]){ this.age[i] = 1; this.trail[i] = 1; pop++; }
+    }
+    this._pop = pop;
+  }
+  step(){
+    const n = this.n, c = this.cells, nx = this.next, age = this.age, tr = this.trail;
+    const bMask = digitsToMask(state.birth), sMask = digitsToMask(state.survive);
+    let pop = 0;
+    for (let y = 0; y < n; y++){
+      const yu = ((y + 1) % n) * n, yd = ((y + n - 1) % n) * n, y0 = y * n;
+      for (let x = 0; x < n; x++){
+        const xl = (x + n - 1) % n, xr = (x + 1) % n;
+        const cnt = c[yu+xl] + c[yu+x] + c[yu+xr]
+                  + c[y0+xl]           + c[y0+xr]
+                  + c[yd+xl] + c[yd+x] + c[yd+xr];
+        const i = y0 + x;
+        const alive = c[i] === 1;
+        const nextAlive = alive ? ((sMask >> cnt) & 1) : ((bMask >> cnt) & 1);
+        nx[i] = nextAlive;
+        if (nextAlive){ age[i] = alive ? age[i] + 1 : 1; tr[i] = 1; pop++; }
+        else { age[i] = 0; tr[i] *= 0.90; }
+      }
+    }
+    this.cells = nx; this.next = c;
+    this._pop = pop;
+  }
+  paint(x, y, alive, radius){
+    const n = this.n, r = radius | 0;
+    for (let dy = -r; dy <= r; dy++)
+    for (let dx = -r; dx <= r; dx++){
+      const px = x + dx, py = y + dy;
+      if (px < 0 || py < 0 || px >= n || py >= n) continue;
+      const i = py * n + px;
+      const was = this.cells[i];
+      this.cells[i] = alive ? 1 : 0;
+      this.age[i] = alive ? 1 : 0;
+      this.trail[i] = alive ? 1 : this.trail[i];
+      this._pop += (alive ? 1 : 0) - was;
+    }
+  }
+  getCell(x, y){ return this.cells[y * this.n + x]; }
+  population(){ return this._pop; }
+
+  _drawGridBuffer(){
+    const n = this.n, d = this.img.data, pal = state.palette;
+    const bg = pal.bgRGB.map(v => v * 255);
+    const stops = pal.stopsRGB.map(c => c.map(v => v * 255));
+    const ns = stops.length, span = state.ageSpan;
+    const g0 = stops[0];
+    for (let y = 0; y < n; y++){
+      const rowTop = (n - 1 - y) * n;                 // flip: engine y-up → image top-down
+      for (let x = 0; x < n; x++){
+        const i = y * n + x, j = (rowTop + x) * 4;
+        let r = bg[0], g = bg[1], b = bg[2];
+        if (this.cells[i]){
+          const t = Math.min(this.age[i] / span, 1) * (ns - 1);
+          const k = Math.min(Math.floor(t), ns - 2), f = t - k;
+          r = stops[k][0] + (stops[k+1][0] - stops[k][0]) * f;
+          g = stops[k][1] + (stops[k+1][1] - stops[k][1]) * f;
+          b = stops[k][2] + (stops[k+1][2] - stops[k][2]) * f;
+        } else if (this.trail[i] > 0.02){
+          const f = this.trail[i] * 0.30;
+          r = bg[0] + (g0[0] - bg[0]) * f;
+          g = bg[1] + (g0[1] - bg[1]) * f;
+          b = bg[2] + (g0[2] - bg[2]) * f;
+        }
+        d[j] = r; d[j+1] = g; d[j+2] = b; d[j+3] = 255;
+      }
+    }
+    this.offCtx.putImageData(this.img, 0, 0);
+  }
+
+  _drawScaled(ctx, W, H){
+    const n = this.n;
+    // cover-crop from square grid
+    let sx = 0, sy = 0, sw = n, sh = n;
+    if (W > H){ sh = n * H / W; sy = (n - sh) / 2; }
+    else if (H > W){ sw = n * W / H; sx = (n - sw) / 2; }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, W, H);
+    if (state.bloom && !state.palette.lightBg && 'filter' in ctx){
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.filter = `blur(${Math.max(4, H / 90)}px)`;
+      ctx.globalAlpha = Math.min(1, state.bloomIntensity * 0.55);
+      ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, W, H);
+      ctx.restore();
+    }
+  }
+
+  render(){
+    this._drawGridBuffer();
+    this._drawScaled(this.ctx, this.canvas.width, this.canvas.height);
+  }
+
+  renderToPixels(w, h){
+    this._drawGridBuffer();
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    this._drawScaled(c.getContext('2d'), w, h);
+    const img = c.getContext('2d').getImageData(0, 0, w, h);
+    return { data: img.data, w, h };
+  }
+  dispose(){}
+}
+
+/* ── ENGINE SELECTION ──────────────────────────────────────────── */
+const canvas = document.getElementById('caCanvas');
+let engine;
+try {
+  engine = new GLEngine(canvas);
+} catch (e) {
+  console.warn('WebGL2 unavailable, falling back to Canvas 2D:', e.message);
+  engine = new CPUEngine(canvas);
+}
+{
+  const badge = document.getElementById('rendererBadge');
+  badge.textContent = engine.name;
+  badge.classList.add(engine.name === 'WebGL2' ? 'gpu' : 'cpu');
+}
+
+/* ── GRID OPERATIONS (engine-agnostic; y-up convention) ────────── */
+function newCells(){ return new Uint8Array(state.grid * state.grid); }
+
+function randomFill(){
+  const n = state.grid, cells = newCells();
+  for (let i = 0; i < cells.length; i++) cells[i] = Math.random() < state.density ? 1 : 0;
+  engine.uploadCells(cells);
+  state.gen = 0;
+  refreshStats(true);
+}
+function clearGrid(){
+  engine.uploadCells(newCells());
+  state.gen = 0;
+  refreshStats(true);
+}
+function loadPattern(name){
+  const coords = PATTERNS[name];
+  if (!coords) return;
+  const n = state.grid, cells = newCells();
+  let maxR = 0, maxC = 0;
+  coords.forEach(([r, c]) => { maxR = Math.max(maxR, r); maxC = Math.max(maxC, c); });
+  const cx = Math.floor(n / 2 - maxC / 2), cy = Math.floor(n / 2 + maxR / 2);
+  coords.forEach(([r, c]) => {
+    const x = cx + c, y = cy - r;      // pattern rows grow downward, engine y grows up
+    if (x >= 0 && y >= 0 && x < n && y < n) cells[y * n + x] = 1;
+  });
+  engine.uploadCells(cells);
+  state.gen = 0;
+  refreshStats(true);
+  toast(`Pattern loaded: ${name}`, 'ok');
+}
+function setGridSize(n){
+  state.grid = n;
+  engine.createGrid(n);
+  randomFill();
+}
+
+/* ── 7. UI ─────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+let toastTimer;
+function toast(msg, cls){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show' + (cls ? ' ' + cls : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 2800);
+}
+
+function parseDigits(str){
+  const set = new Set();
+  for (const ch of str) if (ch >= '0' && ch <= '8') set.add(+ch);
+  return [...set].sort();
+}
+function ruleString(){ return `B${state.birth.join('')}/S${state.survive.join('')}`; }
+
+function applyRules(bStr, sStr, fromPreset){
+  const bOk = /^[0-8]*$/.test(bStr), sOk = /^[0-8]*$/.test(sStr);
+  $('birthInput').classList.toggle('invalid', !bOk);
+  $('surviveInput').classList.toggle('invalid', !sOk);
+  if (!bOk || !sOk){ toast('Rules accept digits 0-8 only', 'err'); return; }
+  state.birth = parseDigits(bStr);
+  state.survive = parseDigits(sStr);
+  $('birthInput').value = state.birth.join('');
+  $('surviveInput').value = state.survive.join('');
+  const match = PRESET_RULES.find(r => r.b === state.birth.join('') && r.s === state.survive.join(''));
+  $('ruleName').textContent = `${ruleString()} — ${match ? match.name : 'Custom'}`;
+  $('stRule').textContent = ruleString();
+  $('ruleSelect').value = match ? match.name : '';
+  if (!fromPreset) toast(`Rules applied: ${ruleString()}`, 'ok');
+}
+
+/* playback */
+function setRunning(run){
+  state.running = run;
+  $('playBtn').textContent = run ? '⏸' : '▶';
+  $('playBtn').title = run ? 'Pause' : 'Play';
+}
+$('playBtn').addEventListener('click', () => setRunning(!state.running));
+$('stepBtn').addEventListener('click', () => { setRunning(false); engine.step(); state.gen++; refreshStats(true); });
+$('randomBtn').addEventListener('click', randomFill);
+$('clearBtn').addEventListener('click', () => { setRunning(false); clearGrid(); });
+$('speedRange').addEventListener('input', e => { state.speed = +e.target.value; $('speedVal').textContent = state.speed; });
+$('densityRange').addEventListener('input', e => { state.density = e.target.value / 100; $('densityVal').textContent = e.target.value + '%'; });
+$('gridSelect').addEventListener('change', e => {
+  const n = +e.target.value;
+  if (engine.name === 'Canvas2D' && n > 1000){
+    toast('⚠ Large grids are slow without WebGL2', 'err');
+  }
+  setGridSize(n);
+  toast(`Grid: ${n} × ${n}`, 'ok');
+});
+
+/* rules */
+$('applyRuleBtn').addEventListener('click', () => applyRules($('birthInput').value, $('surviveInput').value));
+[$('birthInput'), $('surviveInput')].forEach(inp =>
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') $('applyRuleBtn').click(); }));
+{
+  const sel = $('ruleSelect');
+  PRESET_RULES.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.name;
+    o.textContent = `${r.name}  (B${r.b}/S${r.s})`;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => {
+    const r = PRESET_RULES.find(x => x.name === sel.value);
+    if (r){ applyRules(r.b, r.s, true); toast(`Rule: ${r.name} (B${r.b}/S${r.s})`, 'ok'); }
+  });
+}
+
+/* patterns */
+{
+  const sel = $('patternSelect');
+  Object.keys(PATTERNS).forEach(name => {
+    const o = document.createElement('option');
+    o.value = o.textContent = name;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => {
+    if (!sel.value) return;
+    setRunning(false);
+    loadPattern(sel.value);
+    sel.value = '';
+  });
+}
+
+/* palettes */
+function setPalette(p){
+  state.palette = p;
+  document.querySelectorAll('.pal').forEach(el => el.classList.toggle('active', el.dataset.name === p.name));
+  document.documentElement.style.setProperty('--glow', p.stops[0]);
+}
+{
+  const grid = $('paletteGrid');
+  PALETTES.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'pal' + (p === state.palette ? ' active' : '');
+    b.dataset.name = p.name;
+    b.title = p.name;
+    b.innerHTML = `<div class="strip" style="background:linear-gradient(90deg,${p.stops.join(',')})"></div><span class="nm">${p.name}</span>`;
+    b.addEventListener('click', () => setPalette(p));
+    grid.appendChild(b);
+  });
+  document.documentElement.style.setProperty('--glow', state.palette.stops[0]);
+}
+
+/* bloom */
+$('bloomToggle').addEventListener('change', e => { state.bloom = e.target.checked; });
+$('bloomRange').addEventListener('input', e => {
+  state.bloomIntensity = e.target.value / 10;
+  $('bloomVal').textContent = state.bloomIntensity.toFixed(1);
+});
+
+/* ── 6b. EXPORT UI ── */
+async function exportPNG(){
+  const btn = $('exportBtn');
+  const [w, h] = $('exportSelect').value.split('x').map(Number);
+  const wasRunning = state.running;
+  setRunning(false);
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Rendering…';
+  await new Promise(r => setTimeout(r, 30));    // let the button repaint
+  try {
+    const { data, w: W, h: H } = engine.renderToPixels(w, h);
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    ctx.putImageData(new ImageData(data, W, H), 0, 0);
+    if ($('overlayCheck').checked){
+      const fs = Math.round(H / 60);
+      const text = `${ruleString()}  ·  Generation ${state.gen}`;
+      ctx.font = `600 ${fs}px Inter, system-ui, sans-serif`;
+      const tw = ctx.measureText(text).width;
+      const pad = fs * 0.8, x = W - tw - pad * 2 - fs, y = H - fs * 2.6;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.beginPath();
+      ctx.roundRect(x, y, tw + pad * 2, fs * 1.9, fs * 0.5);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillText(text, x + pad, y + fs * 1.32);
+    }
+    const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ca-art-${ruleString().replace('/','')}-gen${state.gen}-${W}x${H}.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast(`✓ Exported ${W} × ${H} PNG`, 'ok');
+  } catch (err) {
+    console.error(err);
+    toast('Export failed: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬇ Export PNG';
+    setRunning(wasRunning);
+  }
+}
+$('exportBtn').addEventListener('click', exportPNG);
+
+/* ── INTERACTION (pointer events: mouse + touch) ───────────────── */
+let painting = false, paintValue = 1;
+function eventToCell(e){
+  const rect = canvas.getBoundingClientRect();
+  const xN = (e.clientX - rect.left) / rect.width;
+  const yN = (e.clientY - rect.top) / rect.height;
+  if (xN < 0 || yN < 0 || xN >= 1 || yN >= 1) return null;
+  const n = state.grid;
+  return { x: Math.floor(xN * n), y: n - 1 - Math.floor(yN * n) };   // engine y-up
+}
+function brushRadius(){ return state.grid >= 1000 ? (state.grid >= 2000 ? 3 : 1) : 0; }
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  canvas.setPointerCapture(e.pointerId);
+  const cell = eventToCell(e);
+  if (!cell) return;
+  const kill = e.button === 2 || e.shiftKey;
+  paintValue = kill ? 0 : (engine.getCell(cell.x, cell.y) ? 0 : 1);  // toggle on tap
+  painting = true;
+  engine.paint(cell.x, cell.y, paintValue, brushRadius());
+});
+canvas.addEventListener('pointermove', e => {
+  if (!painting) return;
+  const cell = eventToCell(e);
+  if (cell) engine.paint(cell.x, cell.y, paintValue, brushRadius());
+});
+['pointerup','pointercancel'].forEach(ev => canvas.addEventListener(ev, () => painting = false));
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+/* keyboard */
+document.addEventListener('keydown', e => {
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  switch (e.key){
+    case ' ': e.preventDefault(); setRunning(!state.running); break;
+    case 'r': case 'R': randomFill(); break;
+    case 'c': case 'C': setRunning(false); clearGrid(); break;
+    case 's': case 'S': setRunning(false); engine.step(); state.gen++; refreshStats(true); break;
+  }
+});
+
+/* ── CANVAS SIZING ─────────────────────────────────────────────── */
+function fitCanvas(){
+  const stage = $('stage');
+  const pad = 60;
+  const size = Math.max(220, Math.min(stage.clientWidth - pad, stage.clientHeight - pad));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const px = Math.min(Math.round(size * dpr), 1600);
+  canvas.style.width = canvas.style.height = size + 'px';
+  if (canvas.width !== px){ canvas.width = canvas.height = px; }
+}
+new ResizeObserver(fitCanvas).observe($('stage'));
+fitCanvas();
+
+/* ── STATS + MAIN LOOP ─────────────────────────────────────────── */
+let lastPopTime = 0;
+function refreshStats(forcePop){
+  $('stGen').textContent = state.gen;
+  const now = performance.now();
+  if (forcePop || now - lastPopTime > 400){
+    lastPopTime = now;
+    try { $('stPop').textContent = engine.population().toLocaleString(); } catch(_){}
+  }
+}
+let lastTime = performance.now(), acc = 0, frames = 0, fpsTime = performance.now();
+function frame(now){
+  const dt = Math.min(now - lastTime, 250);
+  lastTime = now;
+  if (state.running){
+    acc += dt * state.speed / 1000;
+    let steps = Math.min(Math.floor(acc), 4);   // cap catch-up work per frame
+    acc -= Math.floor(acc);
+    while (steps-- > 0){ engine.step(); state.gen++; }
+  }
+  engine.render();
+  refreshStats(false);
+  frames++;
+  if (now - fpsTime > 1000){
+    $('stFps').textContent = Math.round(frames * 1000 / (now - fpsTime));
+    frames = 0; fpsTime = now;
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ── 8. INIT ───────────────────────────────────────────────────── */
+canvas.addEventListener('webglcontextlost', e => {
+  e.preventDefault();
+  toast('GPU context lost — reload the page', 'err');
+});
+engine.createGrid(state.grid);
+randomFill();
+applyRules('3', '23', true);
+requestAnimationFrame(frame);
+console.log(`%c🦠 Cellular Automata Art Generator`, 'font-size:16px;color:#00d4ff;font-weight:bold');
+console.log(`Renderer: ${engine.name} · Grid: ${state.grid}² · Rule: ${ruleString()}`);
+
+/* ── SELFTEST (open with #selftest) ────────────────────────────── */
+if (location.hash === '#selftest'){
+  setTimeout(() => {
+    const results = [];
+    const check = (name, ok) => { results.push(`${ok ? 'PASS' : 'FAIL'} ${name}`); return ok; };
+    try {
+      setRunning(false);
+      clearGrid();
+      const n = state.grid, cx = n >> 1, cy = n >> 1;
+      // horizontal blinker
+      [[cx-1,cy],[cx,cy],[cx+1,cy]].forEach(([x,y]) => engine.paint(x, y, 1, 0));
+      engine.step();
+      const vertical = engine.getCell(cx, cy-1) === 1 && engine.getCell(cx, cy+1) === 1
+                    && engine.getCell(cx-1, cy) === 0 && engine.getCell(cx+1, cy) === 0
+                    && engine.getCell(cx, cy) === 1;
+      check('conway-blinker-period-1', vertical);
+      engine.step();
+      const horizontal = engine.getCell(cx-1, cy) === 1 && engine.getCell(cx+1, cy) === 1
+                      && engine.getCell(cx, cy-1) === 0 && engine.getCell(cx, cy+1) === 0;
+      check('conway-blinker-period-2', horizontal);
+      check('population-count', engine.population() === 3);
+      // export pipeline: bg must differ from cell pixels
+      const { data, w, h } = engine.renderToPixels(320, 180);
+      const bg = state.palette.bgRGB.map(v => Math.round(v * 255));
+      let litPixels = 0;
+      for (let i = 0; i < w * h; i++){
+        const j = i * 4;
+        if (Math.abs(data[j] - bg[0]) > 40 || Math.abs(data[j+1] - bg[1]) > 40 || Math.abs(data[j+2] - bg[2]) > 40) litPixels++;
+      }
+      check('export-renders-cells', litPixels > 0 && litPixels < w * h);
+      // custom rule: Seeds (B2/S) — two adjacent cells die, corners around them are born
+      applyRules('2', '', true);
+      clearGrid();
+      engine.paint(cx, cy, 1, 0); engine.paint(cx+1, cy, 1, 0);
+      engine.step();
+      const seedsOk = engine.getCell(cx, cy) === 0 && engine.getCell(cx+1, cy) === 0
+                   && engine.getCell(cx, cy+1) === 1 && engine.getCell(cx+1, cy-1) === 1;
+      check('seeds-rule-B2S', seedsOk);
+      applyRules('3', '23', true);
+    } catch (err) {
+      results.push('FAIL exception: ' + err.message);
+    }
+    const allPass = results.every(r => r.startsWith('PASS'));
+    results.forEach(r => console.log('SELFTEST ' + r));
+    console.log('SELFTEST ' + (allPass ? 'ALL-PASS' : 'HAS-FAILURES') + ' [' + engine.name + ']');
+    document.title = 'SELFTEST ' + (allPass ? 'ALL-PASS' : 'HAS-FAILURES');
+  }, 600);
+}
+</script>
+</body>
+</html>
