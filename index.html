@@ -210,6 +210,30 @@ select option{background:#14142a}
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ── Surface / 3D mode ──────────────── */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.seg .btn{padding:9px 4px;font-size:.72rem}
+.seg .btn.on{
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  border-color:transparent;color:#fff;
+  box-shadow:0 4px 16px -4px rgba(0,212,255,.5);
+}
+#threeCanvas{
+  display:none;border-radius:8px;background:#000;cursor:grab;
+  touch-action:none;max-width:100%;max-height:100%;
+}
+#threeCanvas:active{cursor:grabbing}
+#canvasWrap.mode3d #caCanvas{display:none}
+#canvasWrap.mode3d #threeCanvas{display:block}
+#loading3d{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;background:rgba(5,5,15,.72);
+  border-radius:var(--radius);z-index:4;font-size:.8rem;color:var(--muted);
+}
+#loading3d.show{display:flex}
+#loading3d .spin{width:28px;height:28px;border-width:3px;margin:0}
+.hiddenCard{display:none!important}
+
 /* ── Responsive ─────────────────────── */
 @media(max-width:860px){
   body{overflow:auto}
@@ -241,6 +265,8 @@ select option{background:#14142a}
     <div id="stage">
       <div id="canvasWrap">
         <canvas id="caCanvas" width="800" height="800"></canvas>
+        <canvas id="threeCanvas" width="800" height="800"></canvas>
+        <div id="loading3d"><span class="spin"></span>Loading 3D engine…</div>
       </div>
       <div id="hint">
         Click / drag = paint &nbsp;·&nbsp; Shift+click or right-click = erase<br>
@@ -277,6 +303,82 @@ select option{background:#14142a}
             <option value="1000">1000 × 1000</option>
             <option value="2000">2000 × 2000</option>
           </select>
+        </div>
+      </div>
+
+      <!-- SURFACE / 3D -->
+      <div class="card">
+        <h3>Surface / 3D</h3>
+        <div class="seg" id="modeSeg">
+          <button class="btn on" data-mode="planar">▦ Planar</button>
+          <button class="btn" data-mode="torus">🍩 Torus</button>
+          <button class="btn" data-mode="sphere">🌐 Sphere</button>
+        </div>
+        <button class="btn full" id="voxelBtn" style="margin-bottom:10px">🧊 3D Voxel Mode</button>
+        <div class="toggle-row">
+          <span>Edge wrapping (toroidal)</span>
+          <label class="switch"><input type="checkbox" id="wrapToggle" checked><span class="track"></span></label>
+        </div>
+        <div id="orbitControlsBox" style="display:none">
+          <div class="toggle-row">
+            <span>Auto-rotate camera</span>
+            <label class="switch"><input type="checkbox" id="autoRotateToggle"><span class="track"></span></label>
+          </div>
+          <button class="btn full" id="resetCamBtn">🎥 Reset Camera</button>
+        </div>
+      </div>
+
+      <!-- VOXEL SETTINGS -->
+      <div class="card hiddenCard" id="voxelCard">
+        <h3>3D Voxel Settings</h3>
+        <div class="field">
+          <label>Grid</label>
+          <select id="voxelGridSelect" style="flex:1">
+            <option value="30">30³ (27K)</option>
+            <option value="50" selected>50³ (125K)</option>
+            <option value="70">70³ (343K)</option>
+            <option value="100">100³ (1M — slow!)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Neighbors</label>
+          <select id="nbSelect" style="flex:1">
+            <option value="moore" selected>Moore (26)</option>
+            <option value="vn">von Neumann (6)</option>
+          </select>
+        </div>
+        <div class="rule-inputs">
+          <div>
+            <span class="sub">BIRTH (0-26)</span>
+            <input type="text" id="birth3dInput" value="4">
+          </div>
+          <div>
+            <span class="sub">SURVIVAL (0-26)</span>
+            <input type="text" id="survive3dInput" value="5">
+          </div>
+        </div>
+        <button class="btn full" id="applyRule3dBtn">✓ Apply 3D Rules</button>
+        <div style="margin-top:10px">
+          <select id="rule3dSelect"></select>
+        </div>
+        <div id="rule3dName" style="font-size:.7rem;color:var(--muted);margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace">B4/S5 — Conway 3D</div>
+        <div class="field" style="margin-top:10px">
+          <label>Opacity</label>
+          <input type="range" id="voxelOpacityRange" min="10" max="100" value="100">
+          <span class="val" id="voxelOpacityVal">100%</span>
+        </div>
+        <div class="field">
+          <label>Slice axis</label>
+          <select id="sliceAxisSelect" style="flex:1">
+            <option value="x">X</option>
+            <option value="y" selected>Y</option>
+            <option value="z">Z</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Slice</label>
+          <input type="range" id="sliceRange" min="5" max="100" value="100">
+          <span class="val" id="sliceVal">100%</span>
         </div>
       </div>
 
@@ -343,6 +445,14 @@ select option{background:#14142a}
 </div>
 <div id="toast"></div>
 
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 <script>
 'use strict';
 /* ════════════════════════════════════════════════════════════════
@@ -466,6 +576,15 @@ const state = {
   bloomIntensity: 1.2,
   density: 0.15,
   ageSpan: 60.0,       // generations mapped across the palette gradient
+  wrap: true,          // toroidal edge wrapping (2D + voxel)
+  viewMode: 'planar',  // 'planar' | 'torus' | 'sphere' | 'voxel'
+  autoRotate: false,
+  voxelN: 50,
+  voxelOpacity: 1.0,
+  birth3d: [4], survive3d: [5],
+  nb3d: 'moore',       // 'moore' (26) | 'vn' (6)
+  sliceAxis: 'y',
+  slicePct: 100,
 };
 const digitsToMask = d => d.reduce((m,n) => m | (1 << n), 0);
 
@@ -486,6 +605,7 @@ uniform highp sampler2D u_state;
 uniform ivec2 u_size;
 uniform int u_birth;
 uniform int u_survive;
+uniform int u_wrap;
 out vec4 outColor;
 void main(){
   ivec2 p = ivec2(gl_FragCoord.xy);
@@ -493,7 +613,9 @@ void main(){
   for (int dy = -1; dy <= 1; dy++)
   for (int dx = -1; dx <= 1; dx++){
     if (dx == 0 && dy == 0) continue;
-    ivec2 q = (p + ivec2(dx, dy) + u_size) % u_size;   // toroidal wrap
+    ivec2 q = p + ivec2(dx, dy);
+    if (u_wrap == 1) q = (q + u_size) % u_size;        // toroidal wrap
+    else if (q.x < 0 || q.y < 0 || q.x >= u_size.x || q.y >= u_size.y) continue;
     n += int(texelFetch(u_state, q, 0).r + 0.5);
   }
   vec4 prev = texelFetch(u_state, p, 0);
@@ -704,6 +826,7 @@ class GLEngine {
     gl.uniform2i(P.uni.u_size, n, n);
     gl.uniform1i(P.uni.u_birth, digitsToMask(state.birth));
     gl.uniform1i(P.uni.u_survive, digitsToMask(state.survive));
+    gl.uniform1i(P.uni.u_wrap, state.wrap ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     this.cur = 1 - this.cur;
   }
@@ -913,14 +1036,29 @@ class CPUEngine {
   step(){
     const n = this.n, c = this.cells, nx = this.next, age = this.age, tr = this.trail;
     const bMask = digitsToMask(state.birth), sMask = digitsToMask(state.survive);
+    const wrap = state.wrap;
     let pop = 0;
     for (let y = 0; y < n; y++){
-      const yu = ((y + 1) % n) * n, yd = ((y + n - 1) % n) * n, y0 = y * n;
+      // -1 marks an out-of-bounds row/column when wrapping is off
+      const up = y + 1 < n ? y + 1 : (wrap ? 0 : -1);
+      const dn = y - 1 >= 0 ? y - 1 : (wrap ? n - 1 : -1);
+      const yu = up < 0 ? -1 : up * n, yd = dn < 0 ? -1 : dn * n, y0 = y * n;
       for (let x = 0; x < n; x++){
-        const xl = (x + n - 1) % n, xr = (x + 1) % n;
-        const cnt = c[yu+xl] + c[yu+x] + c[yu+xr]
-                  + c[y0+xl]           + c[y0+xr]
-                  + c[yd+xl] + c[yd+x] + c[yd+xr];
+        const xl = x - 1 >= 0 ? x - 1 : (wrap ? n - 1 : -1);
+        const xr = x + 1 < n ? x + 1 : (wrap ? 0 : -1);
+        let cnt = 0;
+        if (yu >= 0){
+          if (xl >= 0) cnt += c[yu+xl];
+          cnt += c[yu+x];
+          if (xr >= 0) cnt += c[yu+xr];
+        }
+        if (xl >= 0) cnt += c[y0+xl];
+        if (xr >= 0) cnt += c[y0+xr];
+        if (yd >= 0){
+          if (xl >= 0) cnt += c[yd+xl];
+          cnt += c[yd+x];
+          if (xr >= 0) cnt += c[yd+xr];
+        }
         const i = y0 + x;
         const alive = c[i] === 1;
         const nextAlive = alive ? ((sMask >> cnt) & 1) : ((bMask >> cnt) & 1);
@@ -1031,6 +1169,12 @@ try {
 function newCells(){ return new Uint8Array(state.grid * state.grid); }
 
 function randomFill(){
+  if (state.viewMode === 'voxel' && THREE3D.voxel){
+    THREE3D.voxel.randomFill(Math.min(0.45, state.density * 2));
+    THREE3D.refreshVoxels();
+    refreshStats(true);
+    return;
+  }
   const n = state.grid, cells = newCells();
   for (let i = 0; i < cells.length; i++) cells[i] = Math.random() < state.density ? 1 : 0;
   engine.uploadCells(cells);
@@ -1038,6 +1182,12 @@ function randomFill(){
   refreshStats(true);
 }
 function clearGrid(){
+  if (state.viewMode === 'voxel' && THREE3D.voxel){
+    THREE3D.voxel.clear();
+    THREE3D.refreshVoxels();
+    refreshStats(true);
+    return;
+  }
   engine.uploadCells(newCells());
   state.gen = 0;
   refreshStats(true);
@@ -1104,8 +1254,15 @@ function setRunning(run){
   $('playBtn').textContent = run ? '⏸' : '▶';
   $('playBtn').title = run ? 'Pause' : 'Play';
 }
+function doStep(){
+  if (state.viewMode === 'voxel'){
+    if (THREE3D.voxel){ THREE3D.voxel.step(); THREE3D.refreshVoxels(); refreshStats(true); }
+    return;
+  }
+  engine.step(); state.gen++; refreshStats(true);
+}
 $('playBtn').addEventListener('click', () => setRunning(!state.running));
-$('stepBtn').addEventListener('click', () => { setRunning(false); engine.step(); state.gen++; refreshStats(true); });
+$('stepBtn').addEventListener('click', () => { setRunning(false); doStep(); });
 $('randomBtn').addEventListener('click', randomFill);
 $('clearBtn').addEventListener('click', () => { setRunning(false); clearGrid(); });
 $('speedRange').addEventListener('input', e => { state.speed = +e.target.value; $('speedVal').textContent = state.speed; });
@@ -1158,6 +1315,7 @@ function setPalette(p){
   state.palette = p;
   document.querySelectorAll('.pal').forEach(el => el.classList.toggle('active', el.dataset.name === p.name));
   document.documentElement.style.setProperty('--glow', p.stops[0]);
+  if (state.viewMode === 'voxel') THREE3D.refreshVoxels();   // recolor while paused
 }
 {
   const grid = $('paletteGrid');
@@ -1190,7 +1348,9 @@ async function exportPNG(){
   btn.innerHTML = '<span class="spin"></span>Rendering…';
   await new Promise(r => setTimeout(r, 30));    // let the button repaint
   try {
-    const { data, w: W, h: H } = engine.renderToPixels(w, h);
+    const is3D = state.viewMode !== 'planar';
+    if (is3D && !THREE3D.ready) throw new Error('3D view not ready yet');
+    const { data, w: W, h: H } = is3D ? THREE3D.exportPixels(w, h) : engine.renderToPixels(w, h);
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
@@ -1263,8 +1423,415 @@ document.addEventListener('keydown', e => {
     case ' ': e.preventDefault(); setRunning(!state.running); break;
     case 'r': case 'R': randomFill(); break;
     case 'c': case 'C': setRunning(false); clearGrid(); break;
-    case 's': case 'S': setRunning(false); engine.step(); state.gen++; refreshStats(true); break;
+    case 's': case 'S': setRunning(false); doStep(); break;
   }
+});
+
+/* ── 9. SURFACES + 3D VOXEL MODE (lazy Three.js) ───────────────── */
+const PRESET_RULES_3D = [
+  { name:'Conway 3D', b:[4], s:[5] },
+  { name:'Amoeba 3D', b:[6], s:[5] },
+  { name:'4555',      b:[5], s:[4,5] },
+  { name:'Maze 3D',   b:[5], s:[5,6] },
+];
+const MOORE_OFFSETS = (() => {
+  const o = [];
+  for (let dz = -1; dz <= 1; dz++)
+  for (let dy = -1; dy <= 1; dy++)
+  for (let dx = -1; dx <= 1; dx++)
+    if (dx || dy || dz) o.push(dx, dy, dz);
+  return o;
+})();
+const VN_OFFSETS = [1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1];
+
+/* Separate volumetric CA — pure JS, independent of the 2D grid. */
+class Voxel3D {
+  constructor(n){
+    this.n = n;
+    this.cells = new Uint8Array(n * n * n);
+    this.next  = new Uint8Array(n * n * n);
+    this.age   = new Uint16Array(n * n * n);
+    this.gen = 0; this.pop = 0;
+  }
+  randomFill(density){
+    this.cells.fill(0); this.age.fill(0);
+    const n = this.n, n2 = n * n, lo = Math.floor(n * 0.3), hi = Math.ceil(n * 0.7);
+    let pop = 0;
+    for (let z = lo; z < hi; z++)
+    for (let y = lo; y < hi; y++)
+    for (let x = lo; x < hi; x++){
+      if (Math.random() < density){
+        const i = z * n2 + y * n + x;
+        this.cells[i] = 1; this.age[i] = 1; pop++;
+      }
+    }
+    this.gen = 0; this.pop = pop;
+  }
+  clear(){ this.cells.fill(0); this.age.fill(0); this.gen = 0; this.pop = 0; }
+  step(){
+    const n = this.n, n2 = n * n, c = this.cells, nx = this.next, age = this.age;
+    const bMask = digitsToMask(state.birth3d), sMask = digitsToMask(state.survive3d);
+    const offs = state.nb3d === 'vn' ? VN_OFFSETS : MOORE_OFFSETS;
+    const wrap = state.wrap;
+    let pop = 0;
+    for (let z = 0; z < n; z++)
+    for (let y = 0; y < n; y++){
+      const row = z * n2 + y * n;
+      for (let x = 0; x < n; x++){
+        let cnt = 0;
+        for (let k = 0; k < offs.length; k += 3){
+          let px = x + offs[k], py = y + offs[k+1], pz = z + offs[k+2];
+          if (wrap){
+            px = px < 0 ? n - 1 : (px >= n ? 0 : px);
+            py = py < 0 ? n - 1 : (py >= n ? 0 : py);
+            pz = pz < 0 ? n - 1 : (pz >= n ? 0 : pz);
+          } else if (px < 0 || py < 0 || pz < 0 || px >= n || py >= n || pz >= n) continue;
+          cnt += c[pz * n2 + py * n + px];
+        }
+        const i = row + x, alive = c[i];
+        const na = alive ? ((sMask >>> cnt) & 1) : ((bMask >>> cnt) & 1);
+        nx[i] = na;
+        age[i] = na ? (alive ? Math.min(age[i] + 1, 65535) : 1) : 0;
+        pop += na;
+      }
+    }
+    this.cells = nx; this.next = c;
+    this.pop = pop; this.gen++;
+  }
+}
+
+let threeCanvasEl = $('threeCanvas');
+const THREE3D = {
+  T: null, OrbitControls: null,
+  renderer: null, scene: null, camera: null, controls: null,
+  mesh: null, texture: null, voxelMesh: null, voxel: null,
+  _mat4: null, _col: null,
+  get ready(){ return !!this.renderer; },
+
+  async load(){
+    if (this.T) return true;
+    try {
+      const [three, oc] = await Promise.all([
+        import('three'),
+        import('three/addons/controls/OrbitControls.js'),
+      ]);
+      this.T = three;
+      this.OrbitControls = oc.OrbitControls;
+      return true;
+    } catch (err){
+      console.error('Three.js load failed:', err);
+      return false;
+    }
+  },
+
+  initRenderer(){
+    if (this.renderer) return true;
+    const T = this.T;
+    try {
+      this.renderer = new T.WebGLRenderer({ canvas: threeCanvasEl, antialias: true });
+    } catch (err){
+      console.error('WebGL unavailable for 3D mode:', err);
+      this.renderer = null;
+      return false;
+    }
+    this.camera = new T.PerspectiveCamera(45, 1, 0.1, 4000);
+    this.controls = new this.OrbitControls(this.camera, threeCanvasEl);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.08;
+    this.controls.autoRotate = state.autoRotate;
+    this.controls.autoRotateSpeed = 1.6;
+    return true;
+  },
+
+  /* Torus / sphere: the 2D CA keeps simulating; its rendered canvas
+     (palette + bloom included) is used as a live texture on the mesh. */
+  buildSurface(kind){
+    const T = this.T;
+    this.disposeScene();
+    this.voxel = null;
+    this.scene = new T.Scene();
+    this.scene.background = new T.Color().setRGB(...state.palette.bgRGB, T.SRGBColorSpace);
+    this.texture = new T.CanvasTexture(canvas);
+    this.texture.colorSpace = T.SRGBColorSpace;
+    this.texture.wrapS = this.texture.wrapT = T.RepeatWrapping;
+    this.texture.generateMipmaps = false;
+    this.texture.minFilter = T.LinearFilter;
+    const geo = kind === 'torus'
+      ? new T.TorusGeometry(10, 4.2, 96, 160)
+      : new T.SphereGeometry(8.5, 128, 96);      // equirectangular UVs
+    this.mesh = new T.Mesh(geo, new T.MeshBasicMaterial({ map: this.texture }));
+    this.scene.add(this.mesh);
+    this.camera.position.set(0, kind === 'torus' ? 13 : 0, kind === 'torus' ? 22 : 26);
+    this.controls.target.set(0, 0, 0);
+    this.controls.update();
+    this.controls.saveState();
+  },
+
+  buildVoxelWorld(){
+    const T = this.T;
+    this.disposeScene();
+    const n = state.voxelN;
+    this.voxel = new Voxel3D(n);
+    this.voxel.randomFill(Math.min(0.45, state.density * 2));
+    this.scene = new T.Scene();
+    this.scene.background = new T.Color().setRGB(...state.palette.bgRGB, T.SRGBColorSpace);
+    this.scene.add(new T.AmbientLight(0xffffff, 0.85));
+    const dir = new T.DirectionalLight(0xffffff, 1.6);
+    dir.position.set(1, 1.4, 0.8);
+    this.scene.add(dir);
+    const mat = new T.MeshLambertMaterial({ transparent: true, opacity: state.voxelOpacity });
+    mat.depthWrite = state.voxelOpacity >= 0.99;
+    mat.defines = { USE_UV: '' };
+    mat.onBeforeCompile = sh => {   // edge glow: brighten cube face borders
+      sh.fragmentShader = sh.fragmentShader.replace(
+        'vec4 diffuseColor = vec4( diffuse, opacity );',
+        `vec4 diffuseColor = vec4( diffuse, opacity );
+        { vec2 eguv = abs(vUv - 0.5);
+          diffuseColor.rgb *= 1.0 + smoothstep(0.34, 0.5, max(eguv.x, eguv.y)) * 1.1; }`);
+    };
+    this.voxelMesh = new T.InstancedMesh(new T.BoxGeometry(0.92, 0.92, 0.92), mat, n * n * n);
+    this.voxelMesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    this.scene.add(this.voxelMesh);
+    const frame3d = new T.LineSegments(
+      new T.EdgesGeometry(new T.BoxGeometry(n, n, n)),
+      new T.LineBasicMaterial({ color: 0x666688, transparent: true, opacity: 0.4 }));
+    this.scene.add(frame3d);
+    this.refreshVoxels();
+    this.camera.position.set(n * 1.15, n * 0.95, n * 1.5);
+    this.controls.target.set(0, 0, 0);
+    this.controls.update();
+    this.controls.saveState();
+  },
+
+  /* Rebuild instance matrices + palette-by-age colors after each step. */
+  refreshVoxels(){
+    if (!this.voxel || !this.voxelMesh) return;
+    const T = this.T, vm = this.voxelMesh, vx = this.voxel;
+    const n = vx.n, n2 = n * n, half = (n - 1) / 2;
+    const m = this._mat4 || (this._mat4 = new T.Matrix4());
+    const col = this._col || (this._col = new T.Color());
+    const stops = state.palette.stopsRGB, ns = stops.length, span = state.ageSpan;
+    const LUT = [];
+    for (let i = 0; i < 32; i++){
+      const t = i / 31 * (ns - 1);
+      const k = Math.min(Math.floor(t), ns - 2), f = t - k;
+      LUT.push([
+        stops[k][0] + (stops[k+1][0] - stops[k][0]) * f,
+        stops[k][1] + (stops[k+1][1] - stops[k][1]) * f,
+        stops[k][2] + (stops[k+1][2] - stops[k][2]) * f,
+      ]);
+    }
+    const axis = state.sliceAxis, cut = Math.ceil(n * state.slicePct / 100);
+    let idx = 0;
+    for (let z = 0; z < n; z++){
+      if (axis === 'z' && z >= cut) continue;
+      for (let y = 0; y < n; y++){
+        if (axis === 'y' && y >= cut) continue;
+        const row = z * n2 + y * n;
+        for (let x = 0; x < n; x++){
+          if (axis === 'x' && x >= cut) continue;
+          const i = row + x;
+          if (!vx.cells[i]) continue;
+          m.makeTranslation(x - half, y - half, z - half);
+          vm.setMatrixAt(idx, m);
+          const c = LUT[Math.min(31, Math.floor(Math.min(vx.age[i] / span, 1) * 31))];
+          col.setRGB(c[0], c[1], c[2], T.SRGBColorSpace);
+          vm.setColorAt(idx, col);
+          idx++;
+        }
+      }
+    }
+    vm.count = idx;
+    vm.instanceMatrix.needsUpdate = true;
+    if (vm.instanceColor) vm.instanceColor.needsUpdate = true;
+  },
+
+  renderFrame(){
+    if (!this.renderer || !this.scene) return;
+    if (this.scene.background && this.scene.background.isColor)
+      this.scene.background.setRGB(...state.palette.bgRGB, this.T.SRGBColorSpace);
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  },
+
+  /* HD export of the current 3D view via offscreen render target. */
+  exportPixels(w, h){
+    const T = this.T, r = this.renderer;
+    const maxT = r.capabilities.maxTextureSize;
+    if (w > maxT || h > maxT)
+      throw new Error(`Resolution exceeds GPU limit (${maxT}px)`);
+    const rt = new T.WebGLRenderTarget(w, h);
+    rt.texture.colorSpace = T.SRGBColorSpace;
+    const cam = this.camera, oldAspect = cam.aspect;
+    cam.aspect = w / h; cam.updateProjectionMatrix();
+    try {
+      r.setRenderTarget(rt);
+      r.render(this.scene, cam);
+      const px = new Uint8Array(w * h * 4);
+      r.readRenderTargetPixels(rt, 0, 0, w, h, px);
+      const flipped = new Uint8ClampedArray(w * h * 4);   // GL rows are bottom-up
+      const row = w * 4;
+      for (let y = 0; y < h; y++)
+        flipped.set(px.subarray(y * row, (y + 1) * row), (h - 1 - y) * row);
+      for (let i = 3; i < flipped.length; i += 4) flipped[i] = 255;
+      return { data: flipped, w, h };
+    } finally {
+      r.setRenderTarget(null);
+      rt.dispose();
+      cam.aspect = oldAspect; cam.updateProjectionMatrix();
+    }
+  },
+
+  disposeScene(){
+    if (!this.scene) return;
+    this.scene.traverse(o => {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material)
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(mt => {
+          if (mt.map) mt.map.dispose();
+          mt.dispose();
+        });
+    });
+    if (this.voxelMesh && this.voxelMesh.dispose) this.voxelMesh.dispose();
+    this.scene = null; this.mesh = null; this.texture = null; this.voxelMesh = null;
+  },
+
+  /* Full teardown when returning to planar: free every GPU resource and
+     the GL context. (The ES module itself stays cached by the browser.) */
+  teardown(){
+    this.disposeScene();
+    this.voxel = null;
+    if (this.controls){ this.controls.dispose(); this.controls = null; }
+    if (this.renderer){
+      this.renderer.dispose();
+      this.renderer.forceContextLoss();
+      this.renderer = null;
+      this.camera = null;
+      const fresh = threeCanvasEl.cloneNode(false);   // clean canvas → clean GL context next time
+      threeCanvasEl.parentNode.replaceChild(fresh, threeCanvasEl);
+      threeCanvasEl = fresh;
+    }
+  },
+};
+
+function updateModeUI(){
+  const m = state.viewMode;
+  document.querySelectorAll('#modeSeg .btn').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('voxelBtn').classList.toggle('primary', m === 'voxel');
+  $('voxelBtn').textContent = m === 'voxel' ? '▦ Exit Voxel Mode' : '🧊 3D Voxel Mode';
+  $('voxelCard').classList.toggle('hiddenCard', m !== 'voxel');
+  $('orbitControlsBox').style.display = m === 'planar' ? 'none' : 'block';
+  $('canvasWrap').classList.toggle('mode3d', m !== 'planar');
+}
+function updateModeHash(){
+  const base = location.pathname + location.search;
+  history.replaceState(null, '', state.viewMode === 'planar' ? base : base + '#mode=' + state.viewMode);
+}
+
+let switching3d = false;
+async function setViewMode(mode){
+  if (switching3d || mode === state.viewMode) return;
+  if (mode === 'planar'){
+    state.viewMode = 'planar';
+    THREE3D.teardown();
+    updateModeUI(); updateModeHash(); refreshStats(true);
+    toast('Planar mode', 'ok');
+    return;
+  }
+  switching3d = true;
+  $('loading3d').classList.add('show');
+  try {
+    if (!await THREE3D.load()){ toast('Could not load 3D engine — check connection', 'err'); return; }
+    if (!THREE3D.initRenderer()){ toast('WebGL unavailable — 3D modes need GPU support', 'err'); return; }
+    state.viewMode = mode;
+    if (mode === 'voxel') THREE3D.buildVoxelWorld();
+    else THREE3D.buildSurface(mode);
+    fitCanvas();
+    updateModeUI(); updateModeHash(); refreshStats(true);
+    toast(mode === 'voxel' ? `3D voxel mode — ${state.voxelN}³ grid` : `Surface: ${mode}`, 'ok');
+  } finally {
+    switching3d = false;
+    $('loading3d').classList.remove('show');
+  }
+}
+
+/* surface / 3D UI */
+document.querySelectorAll('#modeSeg .btn').forEach(b =>
+  b.addEventListener('click', () => setViewMode(b.dataset.mode)));
+$('voxelBtn').addEventListener('click', () =>
+  setViewMode(state.viewMode === 'voxel' ? 'planar' : 'voxel'));
+$('wrapToggle').addEventListener('change', e => {
+  state.wrap = e.target.checked;
+  toast(`Edge wrapping ${state.wrap ? 'on (toroidal)' : 'off (bounded)'}`, 'ok');
+});
+$('autoRotateToggle').addEventListener('change', e => {
+  state.autoRotate = e.target.checked;
+  if (THREE3D.controls) THREE3D.controls.autoRotate = state.autoRotate;
+});
+$('resetCamBtn').addEventListener('click', () => { if (THREE3D.controls) THREE3D.controls.reset(); });
+
+/* voxel settings UI */
+$('voxelGridSelect').addEventListener('change', e => {
+  state.voxelN = +e.target.value;
+  if (state.voxelN >= 100) toast('⚠ 100³ = 1M voxels — expect low FPS', 'err');
+  if (state.viewMode === 'voxel') THREE3D.buildVoxelWorld();
+});
+$('nbSelect').addEventListener('change', e => { state.nb3d = e.target.value; });
+
+function parse3dCounts(str){
+  const out = new Set();
+  for (const tok of String(str).split(/[^0-9]+/)){
+    if (!tok) continue;
+    const v = +tok;
+    if (v <= 26) out.add(v);
+    else for (const ch of tok) out.add(+ch);   // "56" stays {5,6} via comma; "456" → digits
+  }
+  return [...out].sort((a, b) => a - b);
+}
+function applyRules3d(bStr, sStr, fromPreset){
+  state.birth3d = parse3dCounts(bStr);
+  state.survive3d = parse3dCounts(sStr);
+  const b = state.birth3d.join(','), s = state.survive3d.join(',');
+  $('birth3dInput').value = b;
+  $('survive3dInput').value = s;
+  const match = PRESET_RULES_3D.find(r => r.b.join(',') === b && r.s.join(',') === s);
+  $('rule3dName').textContent = `B${b}/S${s}${match ? ' — ' + match.name : ' — Custom'}`;
+  $('rule3dSelect').value = match ? match.name : '';
+  if (!fromPreset) toast(`3D rules: B${b}/S${s}`, 'ok');
+}
+$('applyRule3dBtn').addEventListener('click', () => applyRules3d($('birth3dInput').value, $('survive3dInput').value));
+[$('birth3dInput'), $('survive3dInput')].forEach(inp =>
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') $('applyRule3dBtn').click(); }));
+{
+  const sel = $('rule3dSelect');
+  const empty = document.createElement('option');
+  empty.value = ''; empty.textContent = '— 3D rule presets —';
+  sel.appendChild(empty);
+  PRESET_RULES_3D.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.name;
+    o.textContent = `${r.name}  (B${r.b.join(',')}/S${r.s.join(',')})`;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => {
+    const r = PRESET_RULES_3D.find(x => x.name === sel.value);
+    if (r){ applyRules3d(r.b.join(','), r.s.join(','), true); toast(`3D rule: ${r.name}`, 'ok'); }
+  });
+}
+$('voxelOpacityRange').addEventListener('input', e => {
+  state.voxelOpacity = e.target.value / 100;
+  $('voxelOpacityVal').textContent = e.target.value + '%';
+  if (THREE3D.voxelMesh){
+    const mt = THREE3D.voxelMesh.material;
+    mt.opacity = state.voxelOpacity;
+    mt.depthWrite = state.voxelOpacity >= 0.99;
+  }
+});
+$('sliceAxisSelect').addEventListener('change', e => { state.sliceAxis = e.target.value; THREE3D.refreshVoxels(); });
+$('sliceRange').addEventListener('input', e => {
+  state.slicePct = +e.target.value;
+  $('sliceVal').textContent = state.slicePct + '%';
+  THREE3D.refreshVoxels();
 });
 
 /* ── CANVAS SIZING ─────────────────────────────────────────────── */
@@ -1276,6 +1843,8 @@ function fitCanvas(){
   const px = Math.min(Math.round(size * dpr), 1600);
   canvas.style.width = canvas.style.height = size + 'px';
   if (canvas.width !== px){ canvas.width = canvas.height = px; }
+  threeCanvasEl.style.width = threeCanvasEl.style.height = size + 'px';
+  if (THREE3D.renderer) THREE3D.renderer.setSize(px, px, false);
 }
 new ResizeObserver(fitCanvas).observe($('stage'));
 fitCanvas();
@@ -1283,6 +1852,13 @@ fitCanvas();
 /* ── STATS + MAIN LOOP ─────────────────────────────────────────── */
 let lastPopTime = 0;
 function refreshStats(forcePop){
+  if (state.viewMode === 'voxel'){
+    if (THREE3D.voxel){
+      $('stGen').textContent = THREE3D.voxel.gen;
+      $('stPop').textContent = THREE3D.voxel.pop.toLocaleString();
+    }
+    return;
+  }
   $('stGen').textContent = state.gen;
   const now = performance.now();
   if (forcePop || now - lastPopTime > 400){
@@ -1294,13 +1870,34 @@ let lastTime = performance.now(), acc = 0, frames = 0, fpsTime = performance.now
 function frame(now){
   const dt = Math.min(now - lastTime, 250);
   lastTime = now;
-  if (state.running){
-    acc += dt * state.speed / 1000;
-    let steps = Math.min(Math.floor(acc), 4);   // cap catch-up work per frame
-    acc -= Math.floor(acc);
-    while (steps-- > 0){ engine.step(); state.gen++; }
+  const mode = state.viewMode;
+  if (mode === 'voxel'){
+    if (THREE3D.ready && THREE3D.voxel){
+      if (state.running){
+        acc += dt * state.speed / 1000;
+        if (acc >= 1){                          // CPU sim: max 1 step per frame
+          acc = Math.min(acc - Math.floor(acc), 1);
+          THREE3D.voxel.step();
+          THREE3D.refreshVoxels();
+        }
+      }
+      THREE3D.renderFrame();
+    }
+  } else {
+    if (state.running){
+      acc += dt * state.speed / 1000;
+      let steps = Math.min(Math.floor(acc), 4);   // cap catch-up work per frame
+      acc -= Math.floor(acc);
+      while (steps-- > 0){ engine.step(); state.gen++; }
+    }
+    if (mode === 'planar'){
+      engine.render();
+    } else if (THREE3D.ready && THREE3D.texture){
+      engine.render();                          // hidden canvas feeds the surface texture
+      THREE3D.texture.needsUpdate = true;
+      THREE3D.renderFrame();
+    }
   }
-  engine.render();
   refreshStats(false);
   frames++;
   if (now - fpsTime > 1000){
@@ -1319,6 +1916,10 @@ engine.createGrid(state.grid);
 randomFill();
 applyRules('3', '23', true);
 requestAnimationFrame(frame);
+{
+  const m = location.hash.match(/mode=(torus|sphere|voxel)/);   // shareable view mode
+  if (m) setViewMode(m[1]);
+}
 console.log(`%c🦠 Cellular Automata Art Generator`, 'font-size:16px;color:#00d4ff;font-weight:bold');
 console.log(`Renderer: ${engine.name} · Grid: ${state.grid}² · Rule: ${ruleString()}`);
 
@@ -1361,6 +1962,16 @@ if (location.hash === '#selftest'){
                    && engine.getCell(cx, cy+1) === 1 && engine.getCell(cx+1, cy-1) === 1;
       check('seeds-rule-B2S', seedsOk);
       applyRules('3', '23', true);
+      // 3D voxel engine logic (pure JS, no Three.js needed):
+      // single seed, von Neumann B1/S∅ → seed dies, its 6 face-neighbors are born
+      const vox = new Voxel3D(8);
+      const saved3d = { b: state.birth3d, s: state.survive3d, nb: state.nb3d };
+      state.birth3d = [1]; state.survive3d = []; state.nb3d = 'vn';
+      vox.cells[4*64 + 4*8 + 4] = 1; vox.pop = 1;
+      vox.step();
+      state.birth3d = saved3d.b; state.survive3d = saved3d.s; state.nb3d = saved3d.nb;
+      check('voxel-vn-B1-births-6', vox.pop === 6 && vox.cells[4*64 + 4*8 + 4] === 0);
+      check('parse-3d-counts', parse3dCounts('4, 12,26').join(',') === '4,12,26');
     } catch (err) {
       results.push('FAIL exception: ' + err.message);
     }
