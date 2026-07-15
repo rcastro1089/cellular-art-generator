@@ -437,7 +437,14 @@ select option{background:#14142a}
             <option value="6000x4000">6000 × 4000 (Print)</option>
           </select>
         </div>
-        <label class="check-row"><input type="checkbox" id="overlayCheck"> Overlay rule &amp; generation</label>
+        <div class="field">
+          <label>Fit</label>
+          <select id="exportFitSelect" style="flex:1">
+            <option value="fill">Fill (crop to fit)</option>
+            <option value="fit" selected>Fit (letterbox — full grid)</option>
+          </select>
+        </div>
+        <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Overlay info (rule + gen + URL)</label>
         <button class="btn primary full" id="exportBtn">⬇ Export PNG</button>
       </div>
     </aside>
@@ -962,14 +969,19 @@ class GLEngine {
   }
 
   /* ── 6a. HD EXPORT (WebGL path) ── */
-  renderToPixels(w, h){
+  renderToPixels(w, h, fitMode = 'fit'){
     if (w > this.maxTex || h > this.maxTex)
       throw new Error(`Resolution exceeds GPU limit (${this.maxTex}px)`);
     const gl = this.gl;
-    // cover-crop UV so the square grid fills the frame
+    // UV mapping: 'fit' = full grid visible (letterbox), 'fill' = crop to fill
     let uvScale = [1,1], uvOffset = [0,0];
-    if (w > h){ const f = h / w; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
-    else if (h > w){ const f = w / h; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+    if (w > h){
+      if (fitMode === 'fit'){ const f = h / w; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+      else { const f = h / w; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
+    } else if (h > w){
+      if (fitMode === 'fit'){ const f = w / h; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
+      else { const f = w / h; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+    }
 
     const out = this._tex(w, h, gl.RGBA8, gl.NEAREST);
     const savedView = this.viewTex;
@@ -1139,12 +1151,29 @@ class CPUEngine {
     this._drawScaled(this.ctx, this.canvas.width, this.canvas.height);
   }
 
-  renderToPixels(w, h){
+  renderToPixels(w, h, fitMode = 'fit'){
     this._drawGridBuffer();
     const c = document.createElement('canvas');
     c.width = w; c.height = h;
-    this._drawScaled(c.getContext('2d'), w, h);
-    const img = c.getContext('2d').getImageData(0, 0, w, h);
+    const ctx = c.getContext('2d');
+    const n = this.n;
+    if (fitMode === 'fit'){
+      // letterbox: full grid visible, centered
+      const scale = Math.min(w / n, h / n);
+      const dw = n * scale, dh = n * scale;
+      ctx.fillStyle = `rgb(${state.palette.bgRGB.map(v => v * 255 | 0).join(',')})`;
+      ctx.fillRect(0, 0, w, h);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(this.off, 0, 0, n, n, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    } else {
+      // fill: cover-crop
+      let sx = 0, sy = 0, sw = n, sh = n;
+      if (w > h){ sh = n * h / w; sy = (n - sh) / 2; }
+      else if (h > w){ sw = n * w / h; sx = (n - sw) / 2; }
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, w, h);
+    }
+    const img = ctx.getImageData(0, 0, w, h);
     return { data: img.data, w, h };
   }
   dispose(){}
@@ -1350,14 +1379,14 @@ async function exportPNG(){
   try {
     const is3D = state.viewMode !== 'planar';
     if (is3D && !THREE3D.ready) throw new Error('3D view not ready yet');
-    const { data, w: W, h: H } = is3D ? THREE3D.exportPixels(w, h) : engine.renderToPixels(w, h);
+    const { data, w: W, h: H } = is3D ? THREE3D.exportPixels(w, h) : engine.renderToPixels(w, h, $('exportFitSelect').value);
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
     ctx.putImageData(new ImageData(data, W, H), 0, 0);
     if ($('overlayCheck').checked){
       const fs = Math.round(H / 60);
-      const text = `${ruleString()}  ·  Generation ${state.gen}`;
+      const text = `${ruleString()}  ·  Generation ${state.gen}  ·  cellular-art-generator.pages.dev`;
       ctx.font = `600 ${fs}px Inter, system-ui, sans-serif`;
       const tw = ctx.measureText(text).width;
       const pad = fs * 0.8, x = W - tw - pad * 2 - fs, y = H - fs * 2.6;
@@ -1579,7 +1608,7 @@ const THREE3D = {
     const dir = new T.DirectionalLight(0xffffff, 1.6);
     dir.position.set(1, 1.4, 0.8);
     this.scene.add(dir);
-    const mat = new T.MeshLambertMaterial({ transparent: true, opacity: state.voxelOpacity });
+    const mat = new T.MeshLambertMaterial({ transparent: true, opacity: state.voxelOpacity, vertexColors: true });
     mat.depthWrite = state.voxelOpacity >= 0.99;
     mat.defines = { USE_UV: '' };
     mat.onBeforeCompile = sh => {   // edge glow: brighten cube face borders
