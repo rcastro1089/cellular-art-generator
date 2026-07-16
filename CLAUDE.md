@@ -11,26 +11,30 @@ Web-based generative art tool combining Conway's Game of Life and Life-like cell
 - **Hosting:** Cloudflare Pages (static)
 - **Framework:** Vanilla JS — no build step, single HTML file core
 
-## Project Structure
+## Project Structure (actual repo contents)
 ```
-~/MEGA/proyectos/apps/cellular-art-generator/
-├── index.html              → Main app (tool + homepage)
-├── generator.html          → Full-screen tool
-├── blog/                   → Blog articles
-├── gallery/                → Pattern showcase
-├── shop.html / faq.html / about.html
-├── src/js/                 → JavaScript
-├── src/shaders/            → GLSL shaders
-├── src/css/                → Styles
+cellular-art-generator/
+├── index.html              → ENTIRE app: single file (HTML+CSS+JS+GLSL inline, no build)
+├── v0-prototype.html       → Earlier prototype (reference only)
+├── img example/            → Print-quality reference images
 ├── openspec/               → OpenSpec design docs
-│   └── changes/v1-web-engine/
 ├── research/               → Market research
-│   ├── dataforseo/
-│   ├── copywriting/
-│   ├── competitors/
-│   └── technical/
 └── CLAUDE.md               → This file
 ```
+Planned but NOT yet created: blog/, gallery/, shop.html, faq.html, about.html,
+separate src/ tree. Everything lives inline in index.html — edit there.
+
+## Engine features (index.html)
+- WebGL2 CA sim (ping-pong RGBA32F state) + Canvas2D fallback
+- Render modes: Live | Long Exposure (history accumulation → temporal gradient)
+- Themes: Dark | Paper (light, print-ready; auto-derives paper variant of any palette)
+- 27 palettes (incl. 5 light print palettes), cell shapes (square/circle/rounded/diamond, SDF+AA)
+- Timeline: auto snapshots every 8-20 gens (grids ≤1000), rewind slider
+- Export: product presets up to 7200×10800 @300dpi, fit/fill/smart-crop,
+  transparent PNG (garments), optional overlay (off by default)
+- 3D: torus/sphere (live canvas texture) + voxel CA; UnrealBloom composer,
+  auto-framed HD export
+- Selftest: open with #selftest → console + document.title verdict
 
 ## OpenSpec Status
 - [x] proposal.md — WHY

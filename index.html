@@ -218,6 +218,8 @@ select option{background:#14142a}
   border-color:transparent;color:#fff;
   box-shadow:0 4px 16px -4px rgba(0,212,255,.5);
 }
+.seg.two{grid-template-columns:repeat(2,1fr)}
+.card-note{font-size:.65rem;color:var(--muted);line-height:1.5;margin-top:6px}
 #threeCanvas{
   display:none;border-radius:8px;background:#000;cursor:grab;
   touch-action:none;max-width:100%;max-height:100%;
@@ -304,6 +306,17 @@ select option{background:#14142a}
             <option value="2000">2000 × 2000</option>
           </select>
         </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="card" id="timelineCard">
+        <h3>Timeline</h3>
+        <div class="field">
+          <label>Rewind</label>
+          <input type="range" id="histRange" min="0" max="0" value="0" disabled>
+          <span class="val" id="histVal">—</span>
+        </div>
+        <div class="card-note">Drag to rewind to a saved generation, then export or resume from there.</div>
       </div>
 
       <!-- SURFACE / 3D -->
@@ -413,6 +426,24 @@ select option{background:#14142a}
       <!-- APPEARANCE -->
       <div class="card">
         <h3>Appearance</h3>
+        <div class="seg two" id="themeSeg">
+          <button class="btn on" data-theme="dark">🌑 Dark</button>
+          <button class="btn" data-theme="light">📄 Paper</button>
+        </div>
+        <div class="seg two" id="renderSeg">
+          <button class="btn" data-render="live">Live</button>
+          <button class="btn on" data-render="history">⏱ Exposure</button>
+        </div>
+        <button class="btn full" id="resetExpBtn" style="margin-bottom:10px">↺ Reset exposure</button>
+        <div class="field">
+          <label>Cell shape</label>
+          <select id="shapeSelect" style="flex:1">
+            <option value="0" selected>■ Square</option>
+            <option value="1">● Circle</option>
+            <option value="2">▢ Rounded</option>
+            <option value="3">◆ Diamond</option>
+          </select>
+        </div>
         <div id="paletteGrid"></div>
         <div class="toggle-row" style="margin-top:12px">
           <span>✨ Bloom (neon glow)</span>
@@ -431,20 +462,24 @@ select option{background:#14142a}
         <div class="field">
           <label>Size</label>
           <select id="exportSelect" style="flex:1">
-            <option value="1920x1080">1920 × 1080 (Full HD)</option>
-            <option value="3840x2160" selected>3840 × 2160 (4K)</option>
-            <option value="4000x4000">4000 × 4000 (Square)</option>
-            <option value="6000x4000">6000 × 4000 (Print)</option>
+            <option value="1920x1080">1920 × 1080 — Full HD</option>
+            <option value="3840x2160" selected>3840 × 2160 — 4K</option>
+            <option value="3600x3600">3600 × 3600 — Square 12″ @300dpi</option>
+            <option value="4500x5400">4500 × 5400 — T-shirt DTG @300dpi</option>
+            <option value="5400x7200">5400 × 7200 — Poster 18×24″ @300dpi</option>
+            <option value="7200x10800">7200 × 10800 — Poster 24×36″ @300dpi</option>
           </select>
         </div>
         <div class="field">
           <label>Fit</label>
           <select id="exportFitSelect" style="flex:1">
-            <option value="fill">Fill (crop to fit)</option>
             <option value="fit" selected>Fit (letterbox — full grid)</option>
+            <option value="fill">Fill (center crop)</option>
+            <option value="smart">Smart crop (densest area)</option>
           </select>
         </div>
-        <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Overlay info (rule + gen + URL)</label>
+        <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)</label>
+        <label class="check-row"><input type="checkbox" id="overlayCheck"> Overlay info (rule + gen + URL)</label>
         <button class="btn primary full" id="exportBtn">⬇ Export PNG</button>
       </div>
     </aside>
@@ -494,6 +529,12 @@ const PALETTES = [
   { name:'Midnight',   bg:'#020617', stops:['#e2e8f0','#64748b','#1e3a8a'] },
   { name:'Cyberpunk',  bg:'#060014', stops:['#fcee09','#00f0ff','#ff003c'] },
   { name:'Aurora',     bg:'#02040d', stops:['#00ff9f','#00b8ff','#8b5cf6'] },
+  /* print palettes — light paper backgrounds, ink-density stops */
+  { name:'Indigo Press', bg:'#f4f1e8', stops:['#0a1e5a','#1d4ed8','#4f8df9','#b7d3ff'] },
+  { name:'India Ink',    bg:'#f7f5f0', stops:['#111111','#3d3d3d','#8a8a8a'] },
+  { name:'Vermilion',    bg:'#f6f1e7', stops:['#7f1d1d','#e03616','#f59e0b'] },
+  { name:'Botanica',     bg:'#f2f4ec', stops:['#1e3d2f','#2f7d4f','#98b380'] },
+  { name:'Riso',         bg:'#fbf8f1', stops:['#1f3ec2','#e4572e'] },
 ];
 function hex2rgb(h){
   return [parseInt(h.slice(1,3),16)/255, parseInt(h.slice(3,5),16)/255, parseInt(h.slice(5,7),16)/255];
@@ -584,6 +625,9 @@ const state = {
   density: 0.15,
   ageSpan: 60.0,       // generations mapped across the palette gradient
   wrap: true,          // toroidal edge wrapping (2D + voxel)
+  theme: 'dark',       // 'dark' | 'light' (paper — print ready)
+  renderMode: 'history', // 'live' | 'history' (long-exposure accumulation)
+  cellShape: 0,        // 0 square · 1 circle · 2 rounded · 3 diamond (WebGL only)
   viewMode: 'planar',  // 'planar' | 'torus' | 'sphere' | 'voxel'
   autoRotate: false,
   voxelN: 50,
@@ -594,6 +638,46 @@ const state = {
   slicePct: 100,
 };
 const digitsToMask = d => d.reduce((m,n) => m | (1 << n), 0);
+
+/* Theme-aware palette: 'light' derives a paper variant of dark palettes
+   (paper bg + stops darkened to print-safe luma). Cached per palette. */
+const PAPER_BG = hex2rgb('#f6f2e9');
+function activePal(){
+  const p = state.palette;
+  if (state.theme !== 'light' || p.lightBg) return p;
+  if (!p._light){
+    p._light = {
+      name: p.name + ' Paper',
+      stops: p.stops,
+      bgRGB: PAPER_BG,
+      stopsRGB: p.stopsRGB.map(c => {
+        const l = luma(c);
+        const k = l > 0.55 ? 0.55 / l : 1;
+        return c.map(v => v * k);
+      }),
+      lightBg: true,
+    };
+  }
+  return p._light;
+}
+
+/* Densest crop window: map = density samples (row-major, y-up), returns
+   uv offset in [0, 1-frac] along the chosen axis. */
+function bestWindowOffset(map, R, stride, frac, axis){
+  const sums = new Float64Array(R);
+  for (let y = 0; y < R; y++)
+    for (let x = 0; x < R; x++)
+      sums[axis === 'y' ? y : x] += map[(y * R + x) * stride];
+  const win = Math.max(1, Math.round(frac * R));
+  let cur = 0;
+  for (let i = 0; i < win && i < R; i++) cur += sums[i];
+  let best = 0, bestSum = cur;
+  for (let s = 1; s + win <= R; s++){
+    cur += sums[s + win - 1] - sums[s - 1];
+    if (cur > bestSum){ bestSum = cur; best = s; }
+  }
+  return Math.min(best / R, Math.max(0, 1 - frac));
+}
 
 /* ── 3. SHADERS (GLSL ES 3.00) ─────────────────────────────────── */
 const VS_FULLSCREEN = `#version 300 es
@@ -634,16 +718,25 @@ void main(){
   outColor = vec4(next ? 1.0 : 0.0, age, trail, 1.0);
 }`;
 
-/* State → palette colors. u_uvScale/offset implement cover-crop for export. */
+/* State → palette colors. u_uvScale/offset implement crop/letterbox for
+   export. u_mode 1 = long-exposure history (accum texture: R = gen of last
+   visit → temporal gradient across the palette, G = visit count → density).
+   u_shape draws each cell as an SDF shape with analytic antialiasing. */
 const FS_COLOR = `#version 300 es
 precision highp float;
 uniform highp sampler2D u_state;
+uniform highp sampler2D u_accum;
 uniform vec3 u_bg;
 uniform vec3 u_stops[5];
 uniform int u_numStops;
 uniform float u_ageSpan;
 uniform vec2 u_uvScale;
 uniform vec2 u_uvOffset;
+uniform float u_grid;
+uniform int u_shape;      // 0 square · 1 circle · 2 rounded · 3 diamond
+uniform int u_mode;       // 0 live · 1 long-exposure history
+uniform float u_gen;
+uniform int u_transparent;
 in vec2 v_uv;
 out vec4 outColor;
 vec3 grad(float t){
@@ -651,16 +744,54 @@ vec3 grad(float t){
   int i = int(clamp(floor(f), 0.0, float(u_numStops - 2)));
   return mix(u_stops[i], u_stops[i+1], clamp(f - float(i), 0.0, 1.0));
 }
+float shapeMask(vec2 uv){
+  if (u_shape == 0) return 1.0;
+  vec2 f = fract(uv * u_grid) - 0.5;
+  float d;
+  if (u_shape == 1) d = length(f) - 0.46;
+  else if (u_shape == 2){
+    vec2 q = abs(f) - 0.32;
+    d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 0.14;
+  } else d = abs(f.x) + abs(f.y) - 0.60;
+  float aa = max(fwidth(d), 1e-4);
+  return 1.0 - smoothstep(-aa, aa, d);
+}
 void main(){
   vec2 uv = v_uv * u_uvScale + u_uvOffset;
-  vec4 s = texture(u_state, uv);
-  vec3 col = u_bg;
-  if (s.r > 0.5) {
-    col = grad(clamp(s.g / u_ageSpan, 0.0, 1.0));
-  } else if (s.b > 0.02) {
-    col = mix(u_bg, grad(0.0), s.b * 0.30);   // fading trail
+  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0){   // letterbox
+    outColor = u_transparent == 1 ? vec4(0.0) : vec4(u_bg, 1.0);
+    return;
   }
-  outColor = vec4(col, 1.0);
+  vec4 s = texture(u_state, uv);
+  vec3 cellCol = u_bg;
+  float a = 0.0;
+  if (u_mode == 1){
+    vec4 acc = texture(u_accum, uv);
+    if (acc.g > 0.5){
+      cellCol = grad(clamp(acc.r / max(u_gen, 1.0), 0.0, 1.0));
+      a = shapeMask(uv) * clamp(acc.g / 24.0, 0.30, 1.0);   // brief visits → light trace
+    }
+    if (s.r > 0.5){ cellCol = grad(1.0); a = shapeMask(uv); }  // live front
+  } else {
+    if (s.r > 0.5){ cellCol = grad(clamp(s.g / u_ageSpan, 0.0, 1.0)); a = shapeMask(uv); }
+    else if (s.b > 0.02){ cellCol = grad(0.0); a = shapeMask(uv) * s.b * 0.30; }
+  }
+  if (u_transparent == 1) outColor = vec4(cellCol, a);
+  else outColor = vec4(mix(u_bg, cellCol, a), 1.0);
+}`;
+
+/* Long-exposure accumulator. R = generation of last visit, G = visit count. */
+const FS_ACCUM = `#version 300 es
+precision highp float;
+uniform highp sampler2D u_state;
+uniform highp sampler2D u_accum;
+uniform float u_gen;
+out vec4 outColor;
+void main(){
+  ivec2 p = ivec2(gl_FragCoord.xy);
+  float alive = texelFetch(u_state, p, 0).r;
+  vec4 prev = texelFetch(u_accum, p, 0);
+  outColor = vec4(alive > 0.5 ? u_gen : prev.r, prev.g + alive, 0.0, 1.0);
 }`;
 
 const FS_BRIGHT = `#version 300 es
@@ -740,6 +871,7 @@ class GLEngine {
     this.progs = {
       sim:       this._program(VS_FULLSCREEN, FS_SIM),
       color:     this._program(VS_FULLSCREEN, FS_COLOR),
+      accum:     this._program(VS_FULLSCREEN, FS_ACCUM),
       bright:    this._program(VS_FULLSCREEN, FS_BRIGHT),
       blur:      this._program(VS_FULLSCREEN, FS_BLUR),
       composite: this._program(VS_FULLSCREEN, FS_COMPOSITE),
@@ -748,7 +880,12 @@ class GLEngine {
     this.fbo = gl.createFramebuffer();      // scratch FBO, re-attached per pass
     this.n = 0;
     this.stateTex = [null, null];
+    this.accumTex = [null, null];
     this.cur = 0;
+    this.curA = 0;
+    this.gen = 0;
+    this._readBuf = null;
+    this._zeroBuf = null;
     this.viewTex = {};                       // scene/bloom textures for display
     this.REDUCE = 64;
     this.reduceTex = this._tex(this.REDUCE, this.REDUCE, gl.RGBA32F, gl.NEAREST);
@@ -801,12 +938,21 @@ class GLEngine {
   createGrid(n){
     const gl = this.gl;
     this.stateTex.forEach(t => t && gl.deleteTexture(t));
+    this.accumTex.forEach(t => t && gl.deleteTexture(t));
     this.n = n;
     this.stateTex = [
       this._tex(n, n, gl.RGBA32F, gl.NEAREST),
       this._tex(n, n, gl.RGBA32F, gl.NEAREST),
     ];
+    this.accumTex = [
+      this._tex(n, n, gl.RGBA32F, gl.NEAREST),
+      this._tex(n, n, gl.RGBA32F, gl.NEAREST),
+    ];
     this.cur = 0;
+    this.curA = 0;
+    this.gen = 0;
+    this._readBuf = null;
+    this._zeroBuf = null;
   }
 
   uploadCells(cells){ // Uint8Array n*n, index = y*n+x with y-up
@@ -819,6 +965,43 @@ class GLEngine {
     }
     gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, n, gl.RGBA, gl.FLOAT, buf);
+    this.resetAccum();
+  }
+
+  /* Restore a timeline snapshot: age > 0 means alive. Keeps accumulation. */
+  uploadAge(age, gen){
+    const gl = this.gl, n = this.n;
+    const buf = new Float32Array(n * n * 4);
+    for (let i = 0; i < n * n; i++){
+      const s = age[i] > 0 ? 1 : 0;
+      const j = i * 4;
+      buf[j] = s; buf[j+1] = age[i]; buf[j+2] = s; buf[j+3] = 1;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, n, gl.RGBA, gl.FLOAT, buf);
+    this.gen = gen;
+  }
+
+  /* Snapshot readback: Uint8Array of ages (0 = dead, clamped to 255). */
+  readCells(){
+    const gl = this.gl, n = this.n;
+    this._target(this.stateTex[this.cur]);
+    const buf = this._readBuf || (this._readBuf = new Float32Array(n * n * 4));
+    gl.readPixels(0, 0, n, n, gl.RGBA, gl.FLOAT, buf);
+    const age = new Uint8Array(n * n);
+    for (let i = 0; i < n * n; i++)
+      age[i] = buf[i*4] > 0.5 ? Math.max(1, Math.min(255, buf[i*4+1])) : 0;
+    return age;
+  }
+
+  resetAccum(){
+    const gl = this.gl, n = this.n;
+    const z = this._zeroBuf || (this._zeroBuf = new Float32Array(n * n * 4));
+    this.accumTex.forEach(t => {
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, n, gl.RGBA, gl.FLOAT, z);
+    });
+    this.gen = 0;
   }
 
   step(){
@@ -836,6 +1019,22 @@ class GLEngine {
     gl.uniform1i(P.uni.u_wrap, state.wrap ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     this.cur = 1 - this.cur;
+    this.gen++;
+    // long-exposure accumulation pass
+    const A = this.progs.accum;
+    this._target(this.accumTex[1 - this.curA]);
+    gl.viewport(0, 0, n, n);
+    gl.useProgram(A.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
+    gl.uniform1i(A.uni.u_state, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.accumTex[this.curA]);
+    gl.uniform1i(A.uni.u_accum, 1);
+    gl.uniform1f(A.uni.u_gen, this.gen);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.activeTexture(gl.TEXTURE0);
+    this.curA = 1 - this.curA;
   }
 
   paint(x, y, alive, radius){
@@ -860,7 +1059,7 @@ class GLEngine {
     return px[0] > 0.5 ? 1 : 0;
   }
 
-  population(){
+  _reduce(){   // 64×64 block density map into reduceBuf
     const gl = this.gl, P = this.progs.reduce, R = this.REDUCE;
     const block = Math.ceil(this.n / R);
     this._target(this.reduceTex);
@@ -873,8 +1072,13 @@ class GLEngine {
     gl.uniform1i(P.uni.u_block, block);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.readPixels(0, 0, R, R, gl.RGBA, gl.FLOAT, this.reduceBuf);
+    return this.reduceBuf;
+  }
+
+  population(){
+    const buf = this._reduce(), R = this.REDUCE;
     let sum = 0;
-    for (let i = 0; i < R * R; i++) sum += this.reduceBuf[i * 4];
+    for (let i = 0; i < R * R; i++) sum += buf[i * 4];
     return Math.round(sum);
   }
 
@@ -890,22 +1094,31 @@ class GLEngine {
     V.hw = hw; V.hh = hh;
   }
 
-  _colorPass(target, w, h, uvScale, uvOffset){
-    const gl = this.gl, P = this.progs.color, pal = state.palette;
+  _colorPass(target, w, h, uvScale, uvOffset, transparent){
+    const gl = this.gl, P = this.progs.color, p = activePal();
     this._target(target);
     gl.viewport(0, 0, w, h);
     gl.useProgram(P.p);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.stateTex[this.cur]);
     gl.uniform1i(P.uni.u_state, 0);
-    gl.uniform3fv(P.uni.u_bg, pal.bgRGB);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.accumTex[this.curA]);
+    gl.uniform1i(P.uni.u_accum, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniform3fv(P.uni.u_bg, p.bgRGB);
     const stops = new Float32Array(15);
-    pal.stopsRGB.forEach((c, i) => stops.set(c, i * 3));
+    p.stopsRGB.forEach((c, i) => stops.set(c, i * 3));
     gl.uniform3fv(P.uni.u_stops, stops);
-    gl.uniform1i(P.uni.u_numStops, pal.stopsRGB.length);
+    gl.uniform1i(P.uni.u_numStops, p.stopsRGB.length);
     gl.uniform1f(P.uni.u_ageSpan, state.ageSpan);
     gl.uniform2fv(P.uni.u_uvScale, uvScale);
     gl.uniform2fv(P.uni.u_uvOffset, uvOffset);
+    gl.uniform1f(P.uni.u_grid, this.n);
+    gl.uniform1i(P.uni.u_shape, state.cellShape);
+    gl.uniform1i(P.uni.u_mode, state.renderMode === 'history' ? 1 : 0);
+    gl.uniform1f(P.uni.u_gen, this.gen);
+    gl.uniform1i(P.uni.u_transparent, transparent ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -921,10 +1134,10 @@ class GLEngine {
   }
 
   /* Full pipeline: color → (bright → blur×4 → composite) → target */
-  _renderPipeline(target, w, h, uvScale, uvOffset, blurScale){
+  _renderPipeline(target, w, h, uvScale, uvOffset, blurScale, transparent){
     const gl = this.gl;
-    if (!state.bloom || state.palette.lightBg){
-      this._colorPass(target, w, h, uvScale, uvOffset);
+    if (transparent || !state.bloom || activePal().lightBg){
+      this._colorPass(target, w, h, uvScale, uvOffset, transparent);
       return;
     }
     this._ensureViewTargets(w, h);
@@ -969,25 +1182,33 @@ class GLEngine {
   }
 
   /* ── 6a. HD EXPORT (WebGL path) ── */
-  renderToPixels(w, h, fitMode = 'fit'){
+  renderToPixels(w, h, fitMode = 'fit', transparent = false){
     if (w > this.maxTex || h > this.maxTex)
       throw new Error(`Resolution exceeds GPU limit (${this.maxTex}px)`);
     const gl = this.gl;
-    // UV mapping: 'fit' = full grid visible (letterbox), 'fill' = crop to fill
+    // UV mapping: 'fit' letterboxes the full grid (uv beyond [0,1] → bg in
+    // shader); 'fill' center-crops; 'smart' crops to the densest window.
     let uvScale = [1,1], uvOffset = [0,0];
-    if (w > h){
-      if (fitMode === 'fit'){ const f = h / w; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
-      else { const f = h / w; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
+    if (fitMode === 'fit'){
+      if (w > h){ const f = w / h; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+      else if (h > w){ const f = h / w; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
+    } else if (w > h){
+      const f = h / w;
+      uvScale = [1, f];
+      uvOffset = [0, fitMode === 'smart'
+        ? bestWindowOffset(this._reduce(), this.REDUCE, 4, f, 'y') : (1 - f) / 2];
     } else if (h > w){
-      if (fitMode === 'fit'){ const f = w / h; uvScale = [1, f]; uvOffset = [0, (1 - f) / 2]; }
-      else { const f = w / h; uvScale = [f, 1]; uvOffset = [(1 - f) / 2, 0]; }
+      const f = w / h;
+      uvScale = [f, 1];
+      uvOffset = [fitMode === 'smart'
+        ? bestWindowOffset(this._reduce(), this.REDUCE, 4, f, 'x') : (1 - f) / 2, 0];
     }
 
     const out = this._tex(w, h, gl.RGBA8, gl.NEAREST);
     const savedView = this.viewTex;
     this.viewTex = {};                        // temporary bloom chain at export res
     try {
-      this._renderPipeline(out, w, h, uvScale, uvOffset, Math.max(1, h / 900));
+      this._renderPipeline(out, w, h, uvScale, uvOffset, Math.max(1, h / 900), transparent);
       this._target(out);
       const pixels = new Uint8Array(w * h * 4);
       gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
@@ -1008,6 +1229,7 @@ class GLEngine {
   dispose(){
     const gl = this.gl;
     this.stateTex.forEach(t => t && gl.deleteTexture(t));
+    this.accumTex.forEach(t => t && gl.deleteTexture(t));
     const V = this.viewTex;
     ['scene','pingA','pingB'].forEach(k => V[k] && gl.deleteTexture(V[k]));
     gl.deleteTexture(this.reduceTex);
@@ -1032,6 +1254,9 @@ class CPUEngine {
     this.next  = new Uint8Array(n * n);
     this.age   = new Float32Array(n * n);
     this.trail = new Float32Array(n * n);
+    this.accumGen = new Float32Array(n * n);   // long-exposure: gen of last visit
+    this.accumCnt = new Uint16Array(n * n);    // long-exposure: visit count
+    this.gen = 0;
     this.off.width = n; this.off.height = n;
     this.img = this.offCtx.createImageData(n, n);
     this._pop = 0;
@@ -1044,11 +1269,34 @@ class CPUEngine {
       if (cells[i]){ this.age[i] = 1; this.trail[i] = 1; pop++; }
     }
     this._pop = pop;
+    this.resetAccum();
+  }
+  uploadAge(age, gen){
+    let pop = 0;
+    for (let i = 0; i < age.length; i++){
+      this.cells[i] = age[i] > 0 ? 1 : 0;
+      this.age[i] = age[i];
+      if (age[i]){ this.trail[i] = 1; pop++; }
+    }
+    this._pop = pop;
+    this.gen = gen;
+  }
+  readCells(){
+    const n = this.n, age = new Uint8Array(n * n);
+    for (let i = 0; i < n * n; i++)
+      age[i] = this.cells[i] ? Math.max(1, Math.min(255, this.age[i])) : 0;
+    return age;
+  }
+  resetAccum(){
+    this.accumGen.fill(0);
+    this.accumCnt.fill(0);
+    this.gen = 0;
   }
   step(){
     const n = this.n, c = this.cells, nx = this.next, age = this.age, tr = this.trail;
     const bMask = digitsToMask(state.birth), sMask = digitsToMask(state.survive);
     const wrap = state.wrap;
+    this.gen++;
     let pop = 0;
     for (let y = 0; y < n; y++){
       // -1 marks an out-of-bounds row/column when wrapping is off
@@ -1075,7 +1323,11 @@ class CPUEngine {
         const alive = c[i] === 1;
         const nextAlive = alive ? ((sMask >> cnt) & 1) : ((bMask >> cnt) & 1);
         nx[i] = nextAlive;
-        if (nextAlive){ age[i] = alive ? age[i] + 1 : 1; tr[i] = 1; pop++; }
+        if (nextAlive){
+          age[i] = alive ? age[i] + 1 : 1; tr[i] = 1; pop++;
+          this.accumGen[i] = this.gen;
+          if (this.accumCnt[i] < 65535) this.accumCnt[i]++;
+        }
         else { age[i] = 0; tr[i] *= 0.90; }
       }
     }
@@ -1099,30 +1351,45 @@ class CPUEngine {
   getCell(x, y){ return this.cells[y * this.n + x]; }
   population(){ return this._pop; }
 
-  _drawGridBuffer(){
-    const n = this.n, d = this.img.data, pal = state.palette;
-    const bg = pal.bgRGB.map(v => v * 255);
-    const stops = pal.stopsRGB.map(c => c.map(v => v * 255));
+  _drawGridBuffer(transparent){
+    const n = this.n, d = this.img.data, p = activePal();
+    const bg = p.bgRGB.map(v => v * 255);
+    const stops = p.stopsRGB.map(c => c.map(v => v * 255));
     const ns = stops.length, span = state.ageSpan;
-    const g0 = stops[0];
+    const history = state.renderMode === 'history';
+    const genN = Math.max(this.gen, 1);
+    const pick = t => {
+      const f = Math.min(Math.max(t, 0), 1) * (ns - 1);
+      const k = Math.min(Math.floor(f), ns - 2), fr = f - k;
+      return [stops[k][0] + (stops[k+1][0] - stops[k][0]) * fr,
+              stops[k][1] + (stops[k+1][1] - stops[k][1]) * fr,
+              stops[k][2] + (stops[k+1][2] - stops[k][2]) * fr];
+    };
     for (let y = 0; y < n; y++){
       const rowTop = (n - 1 - y) * n;                 // flip: engine y-up → image top-down
       for (let x = 0; x < n; x++){
         const i = y * n + x, j = (rowTop + x) * 4;
-        let r = bg[0], g = bg[1], b = bg[2];
-        if (this.cells[i]){
-          const t = Math.min(this.age[i] / span, 1) * (ns - 1);
-          const k = Math.min(Math.floor(t), ns - 2), f = t - k;
-          r = stops[k][0] + (stops[k+1][0] - stops[k][0]) * f;
-          g = stops[k][1] + (stops[k+1][1] - stops[k][1]) * f;
-          b = stops[k][2] + (stops[k+1][2] - stops[k][2]) * f;
+        let col = null, a = 0;
+        if (history){
+          if (this.accumCnt[i]){
+            col = pick(this.accumGen[i] / genN);
+            a = Math.min(1, Math.max(0.3, this.accumCnt[i] / 24));
+          }
+          if (this.cells[i]){ col = pick(1); a = 1; }
+        } else if (this.cells[i]){
+          col = pick(this.age[i] / span); a = 1;
         } else if (this.trail[i] > 0.02){
-          const f = this.trail[i] * 0.30;
-          r = bg[0] + (g0[0] - bg[0]) * f;
-          g = bg[1] + (g0[1] - bg[1]) * f;
-          b = bg[2] + (g0[2] - bg[2]) * f;
+          col = stops[0]; a = this.trail[i] * 0.30;
         }
-        d[j] = r; d[j+1] = g; d[j+2] = b; d[j+3] = 255;
+        if (transparent){
+          d[j] = col ? col[0] : 0; d[j+1] = col ? col[1] : 0; d[j+2] = col ? col[2] : 0;
+          d[j+3] = a * 255;
+        } else {
+          d[j]   = col ? bg[0] + (col[0] - bg[0]) * a : bg[0];
+          d[j+1] = col ? bg[1] + (col[1] - bg[1]) * a : bg[1];
+          d[j+2] = col ? bg[2] + (col[2] - bg[2]) * a : bg[2];
+          d[j+3] = 255;
+        }
       }
     }
     this.offCtx.putImageData(this.img, 0, 0);
@@ -1136,7 +1403,7 @@ class CPUEngine {
     else if (H > W){ sw = n * W / H; sx = (n - sw) / 2; }
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, W, H);
-    if (state.bloom && !state.palette.lightBg && 'filter' in ctx){
+    if (state.bloom && !activePal().lightBg && 'filter' in ctx){
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.filter = `blur(${Math.max(4, H / 90)}px)`;
@@ -1151,8 +1418,8 @@ class CPUEngine {
     this._drawScaled(this.ctx, this.canvas.width, this.canvas.height);
   }
 
-  renderToPixels(w, h, fitMode = 'fit'){
-    this._drawGridBuffer();
+  renderToPixels(w, h, fitMode = 'fit', transparent = false){
+    this._drawGridBuffer(transparent);
     const c = document.createElement('canvas');
     c.width = w; c.height = h;
     const ctx = c.getContext('2d');
@@ -1161,19 +1428,30 @@ class CPUEngine {
       // letterbox: full grid visible, centered
       const scale = Math.min(w / n, h / n);
       const dw = n * scale, dh = n * scale;
-      ctx.fillStyle = `rgb(${state.palette.bgRGB.map(v => v * 255 | 0).join(',')})`;
-      ctx.fillRect(0, 0, w, h);
+      if (!transparent){
+        ctx.fillStyle = `rgb(${activePal().bgRGB.map(v => v * 255 | 0).join(',')})`;
+        ctx.fillRect(0, 0, w, h);
+      }
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(this.off, 0, 0, n, n, (w - dw) / 2, (h - dh) / 2, dw, dh);
     } else {
-      // fill: cover-crop
+      // fill: cover-crop (smart = densest window; engine y-up → image flip)
       let sx = 0, sy = 0, sw = n, sh = n;
-      if (w > h){ sh = n * h / w; sy = (n - sh) / 2; }
-      else if (h > w){ sw = n * w / h; sx = (n - sw) / 2; }
+      if (w > h){
+        sh = n * h / w;
+        const f = sh / n;
+        const o = fitMode === 'smart' ? bestWindowOffset(this.cells, n, 1, f, 'y') : (1 - f) / 2;
+        sy = (1 - o - f) * n;
+      } else if (h > w){
+        sw = n * w / h;
+        const f = sw / n;
+        sx = (fitMode === 'smart' ? bestWindowOffset(this.cells, n, 1, f, 'x') : (1 - f) / 2) * n;
+      }
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, w, h);
     }
     const img = ctx.getImageData(0, 0, w, h);
+    if (transparent) this._drawGridBuffer(false);   // restore opaque buffer for display
     return { data: img.data, w, h };
   }
   dispose(){}
@@ -1208,6 +1486,7 @@ function randomFill(){
   for (let i = 0; i < cells.length; i++) cells[i] = Math.random() < state.density ? 1 : 0;
   engine.uploadCells(cells);
   state.gen = 0;
+  resetSnapshots();
   refreshStats(true);
 }
 function clearGrid(){
@@ -1219,6 +1498,7 @@ function clearGrid(){
   }
   engine.uploadCells(newCells());
   state.gen = 0;
+  resetSnapshots();
   refreshStats(true);
 }
 function loadPattern(name){
@@ -1234,6 +1514,7 @@ function loadPattern(name){
   });
   engine.uploadCells(cells);
   state.gen = 0;
+  resetSnapshots();
   refreshStats(true);
   toast(`Pattern loaded: ${name}`, 'ok');
 }
@@ -1279,6 +1560,11 @@ function applyRules(bStr, sStr, fromPreset){
 
 /* playback */
 function setRunning(run){
+  if (run && SNAP.scrub !== null){
+    SNAP.list.length = SNAP.scrub + 1;      // resuming from a rewind forks history
+    SNAP.scrub = null;
+    updateHistoryUI();
+  }
   state.running = run;
   $('playBtn').textContent = run ? '⏸' : '▶';
   $('playBtn').title = run ? 'Pause' : 'Play';
@@ -1288,7 +1574,7 @@ function doStep(){
     if (THREE3D.voxel){ THREE3D.voxel.step(); THREE3D.refreshVoxels(); refreshStats(true); }
     return;
   }
-  engine.step(); state.gen++; refreshStats(true);
+  engine.step(); state.gen++; maybeSnapshot(); refreshStats(true);
 }
 $('playBtn').addEventListener('click', () => setRunning(!state.running));
 $('stepBtn').addEventListener('click', () => { setRunning(false); doStep(); });
@@ -1367,6 +1653,64 @@ $('bloomRange').addEventListener('input', e => {
   $('bloomVal').textContent = state.bloomIntensity.toFixed(1);
 });
 
+/* theme + render mode + cell shape */
+document.querySelectorAll('#themeSeg .btn').forEach(b =>
+  b.addEventListener('click', () => {
+    state.theme = b.dataset.theme;
+    document.querySelectorAll('#themeSeg .btn').forEach(x => x.classList.toggle('on', x === b));
+    if (state.viewMode === 'voxel') THREE3D.refreshVoxels();
+    toast(state.theme === 'light' ? '📄 Paper theme — print ready' : '🌑 Dark theme', 'ok');
+  }));
+document.querySelectorAll('#renderSeg .btn').forEach(b =>
+  b.addEventListener('click', () => {
+    state.renderMode = b.dataset.render;
+    document.querySelectorAll('#renderSeg .btn').forEach(x => x.classList.toggle('on', x === b));
+    $('resetExpBtn').style.display = state.renderMode === 'history' ? '' : 'none';
+    toast(state.renderMode === 'history' ? '⏱ Long exposure — history accumulates' : 'Live mode', 'ok');
+  }));
+$('resetExpBtn').addEventListener('click', () => {
+  engine.resetAccum();
+  state.gen = 0;
+  resetSnapshots();
+  refreshStats(true);
+  toast('Exposure reset — accumulation starts fresh', 'ok');
+});
+$('shapeSelect').addEventListener('change', e => { state.cellShape = +e.target.value; });
+
+/* ── TIMELINE SNAPSHOTS (2D modes) ─────────────────────────────── */
+const SNAP = { list: [], scrub: null, max: 120 };
+function snapEvery(){ return state.grid <= 500 ? 8 : (state.grid <= 1000 ? 20 : 0); }
+function resetSnapshots(){ SNAP.list = []; SNAP.scrub = null; updateHistoryUI(); }
+function maybeSnapshot(){
+  const ev = snapEvery();
+  if (!ev || state.gen === 0 || state.gen % ev) return;
+  const last = SNAP.list[SNAP.list.length - 1];
+  if (last && last.gen === state.gen) return;
+  SNAP.list.push({ gen: state.gen, age: engine.readCells() });
+  if (SNAP.list.length > SNAP.max) SNAP.list.shift();
+  updateHistoryUI();
+}
+function updateHistoryUI(){
+  const r = $('histRange'), n = SNAP.list.length;
+  r.max = Math.max(0, n - 1);
+  r.disabled = n < 2;
+  if (SNAP.scrub === null){
+    r.value = r.max;
+    $('histVal').textContent = n ? 'g' + SNAP.list[n - 1].gen : '—';
+  }
+}
+function restoreSnapshot(i){
+  const s = SNAP.list[i];
+  if (!s) return;
+  setRunning(false);
+  SNAP.scrub = i;
+  engine.uploadAge(s.age, s.gen);
+  state.gen = s.gen;
+  $('histVal').textContent = 'g' + s.gen;
+  refreshStats(true);
+}
+$('histRange').addEventListener('input', e => restoreSnapshot(+e.target.value));
+
 /* ── 6b. EXPORT UI ── */
 async function exportPNG(){
   const btn = $('exportBtn');
@@ -1379,7 +1723,10 @@ async function exportPNG(){
   try {
     const is3D = state.viewMode !== 'planar';
     if (is3D && !THREE3D.ready) throw new Error('3D view not ready yet');
-    const { data, w: W, h: H } = is3D ? THREE3D.exportPixels(w, h) : engine.renderToPixels(w, h, $('exportFitSelect').value);
+    const transparent = $('transparentCheck').checked && !is3D;
+    const { data, w: W, h: H } = is3D
+      ? THREE3D.exportPixels(w, h)
+      : engine.renderToPixels(w, h, $('exportFitSelect').value, transparent);
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
@@ -1532,7 +1879,9 @@ class Voxel3D {
 let threeCanvasEl = $('threeCanvas');
 const THREE3D = {
   T: null, OrbitControls: null,
+  EffectComposer: null, RenderPass: null, UnrealBloomPass: null, OutputPass: null,
   renderer: null, scene: null, camera: null, controls: null,
+  composer: null, bloomPass: null, _sceneRadius: 18,
   mesh: null, texture: null, voxelMesh: null, voxel: null,
   _mat4: null, _col: null,
   get ready(){ return !!this.renderer; },
@@ -1540,17 +1889,37 @@ const THREE3D = {
   async load(){
     if (this.T) return true;
     try {
-      const [three, oc] = await Promise.all([
+      const [three, oc, ec, rp, bp, op] = await Promise.all([
         import('three'),
         import('three/addons/controls/OrbitControls.js'),
+        import('three/addons/postprocessing/EffectComposer.js'),
+        import('three/addons/postprocessing/RenderPass.js'),
+        import('three/addons/postprocessing/UnrealBloomPass.js'),
+        import('three/addons/postprocessing/OutputPass.js'),
       ]);
       this.T = three;
       this.OrbitControls = oc.OrbitControls;
+      this.EffectComposer = ec.EffectComposer;
+      this.RenderPass = rp.RenderPass;
+      this.UnrealBloomPass = bp.UnrealBloomPass;
+      this.OutputPass = op.OutputPass;
       return true;
     } catch (err){
       console.error('Three.js load failed:', err);
       return false;
     }
+  },
+
+  /* Post-processing chain (neon bloom for dark themes). Rebuilt per scene. */
+  setupComposer(){
+    if (this.composer){ this.composer.dispose(); this.composer = null; this.bloomPass = null; }
+    if (!this.EffectComposer || !this.renderer || !this.scene) return;
+    this.composer = new this.EffectComposer(this.renderer);
+    this.composer.addPass(new this.RenderPass(this.scene, this.camera));
+    this.bloomPass = new this.UnrealBloomPass(
+      new this.T.Vector2(threeCanvasEl.width, threeCanvasEl.height), 0.35, 0.3, 0.6);
+    this.composer.addPass(this.bloomPass);
+    this.composer.addPass(new this.OutputPass());
   },
 
   initRenderer(){
@@ -1579,7 +1948,7 @@ const THREE3D = {
     this.disposeScene();
     this.voxel = null;
     this.scene = new T.Scene();
-    this.scene.background = new T.Color().setRGB(...state.palette.bgRGB, T.SRGBColorSpace);
+    this.scene.background = new T.Color().setRGB(...activePal().bgRGB, T.SRGBColorSpace);
     this.texture = new T.CanvasTexture(canvas);
     this.texture.colorSpace = T.SRGBColorSpace;
     this.texture.wrapS = this.texture.wrapT = T.RepeatWrapping;
@@ -1590,10 +1959,12 @@ const THREE3D = {
       : new T.SphereGeometry(8.5, 128, 96);      // equirectangular UVs
     this.mesh = new T.Mesh(geo, new T.MeshBasicMaterial({ map: this.texture }));
     this.scene.add(this.mesh);
+    this._sceneRadius = kind === 'torus' ? 14.6 : 8.8;
     this.camera.position.set(0, kind === 'torus' ? 13 : 0, kind === 'torus' ? 22 : 26);
     this.controls.target.set(0, 0, 0);
     this.controls.update();
     this.controls.saveState();
+    this.setupComposer();
   },
 
   buildVoxelWorld(){
@@ -1603,12 +1974,13 @@ const THREE3D = {
     this.voxel = new Voxel3D(n);
     this.voxel.randomFill(Math.min(0.45, state.density * 2));
     this.scene = new T.Scene();
-    this.scene.background = new T.Color().setRGB(...state.palette.bgRGB, T.SRGBColorSpace);
+    this.scene.background = new T.Color().setRGB(...activePal().bgRGB, T.SRGBColorSpace);
     this.scene.add(new T.AmbientLight(0xffffff, 0.85));
+    this.scene.add(new T.HemisphereLight(0xbbccff, 0x220a33, 0.55));
     const dir = new T.DirectionalLight(0xffffff, 1.6);
     dir.position.set(1, 1.4, 0.8);
     this.scene.add(dir);
-    const mat = new T.MeshLambertMaterial({ transparent: true, opacity: state.voxelOpacity, vertexColors: true });
+    const mat = new T.MeshLambertMaterial({ transparent: true, opacity: state.voxelOpacity });
     mat.depthWrite = state.voxelOpacity >= 0.99;
     mat.defines = { USE_UV: '' };
     mat.onBeforeCompile = sh => {   // edge glow: brighten cube face borders
@@ -1626,10 +1998,12 @@ const THREE3D = {
       new T.LineBasicMaterial({ color: 0x666688, transparent: true, opacity: 0.4 }));
     this.scene.add(frame3d);
     this.refreshVoxels();
+    this._sceneRadius = n * 0.9;
     this.camera.position.set(n * 1.15, n * 0.95, n * 1.5);
     this.controls.target.set(0, 0, 0);
     this.controls.update();
     this.controls.saveState();
+    this.setupComposer();
   },
 
   /* Rebuild instance matrices + palette-by-age colors after each step. */
@@ -1639,7 +2013,7 @@ const THREE3D = {
     const n = vx.n, n2 = n * n, half = (n - 1) / 2;
     const m = this._mat4 || (this._mat4 = new T.Matrix4());
     const col = this._col || (this._col = new T.Color());
-    const stops = state.palette.stopsRGB, ns = stops.length, span = state.ageSpan;
+    const stops = activePal().stopsRGB, ns = stops.length, span = state.ageSpan;
     const LUT = [];
     for (let i = 0; i < 32; i++){
       const t = i / 31 * (ns - 1);
@@ -1677,27 +2051,53 @@ const THREE3D = {
 
   renderFrame(){
     if (!this.renderer || !this.scene) return;
+    const p = activePal();
     if (this.scene.background && this.scene.background.isColor)
-      this.scene.background.setRGB(...state.palette.bgRGB, this.T.SRGBColorSpace);
+      this.scene.background.setRGB(...p.bgRGB, this.T.SRGBColorSpace);
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    if (state.bloom && !p.lightBg && this.composer){
+      this.bloomPass.strength = 0.1 + state.bloomIntensity * 0.25;
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
   },
 
-  /* HD export of the current 3D view via offscreen render target. */
+  /* HD export of the current 3D view. Renders (with bloom) at export size
+     into the drawing buffer and reads it back; the camera is dollied so the
+     object fills the frame regardless of the on-screen zoom. */
   exportPixels(w, h){
     const T = this.T, r = this.renderer;
     const maxT = r.capabilities.maxTextureSize;
     if (w > maxT || h > maxT)
       throw new Error(`Resolution exceeds GPU limit (${maxT}px)`);
-    const rt = new T.WebGLRenderTarget(w, h);
-    rt.texture.colorSpace = T.SRGBColorSpace;
-    const cam = this.camera, oldAspect = cam.aspect;
-    cam.aspect = w / h; cam.updateProjectionMatrix();
+    const cam = this.camera;
+    const oldAspect = cam.aspect, oldPos = cam.position.clone(), oldPR = r.getPixelRatio();
+    const oldSize = new T.Vector2();
+    r.getSize(oldSize);
+    cam.aspect = w / h;
+    // frame the object: dolly along the current view direction
+    const target = this.controls.target;
+    const dir = cam.position.clone().sub(target).normalize();
+    const vFov = cam.fov * Math.PI / 180;
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * cam.aspect);
+    const dist = this._sceneRadius * 1.08 / Math.sin(Math.min(vFov, hFov) / 2);
+    cam.position.copy(target).addScaledVector(dir, dist);
+    cam.updateProjectionMatrix();
+    const useBloom = state.bloom && !activePal().lightBg && this.composer;
     try {
-      r.setRenderTarget(rt);
-      r.render(this.scene, cam);
+      r.setPixelRatio(1);
+      r.setSize(w, h, false);
+      if (useBloom){
+        this.composer.setSize(w, h);
+        this.bloomPass.strength = 0.1 + state.bloomIntensity * 0.25;
+        this.composer.render();
+      } else {
+        r.render(this.scene, cam);
+      }
+      const gl = r.getContext();
       const px = new Uint8Array(w * h * 4);
-      r.readRenderTargetPixels(rt, 0, 0, w, h, px);
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
       const flipped = new Uint8ClampedArray(w * h * 4);   // GL rows are bottom-up
       const row = w * 4;
       for (let y = 0; y < h; y++)
@@ -1705,9 +2105,12 @@ const THREE3D = {
       for (let i = 3; i < flipped.length; i += 4) flipped[i] = 255;
       return { data: flipped, w, h };
     } finally {
-      r.setRenderTarget(null);
-      rt.dispose();
-      cam.aspect = oldAspect; cam.updateProjectionMatrix();
+      r.setPixelRatio(oldPR);
+      r.setSize(oldSize.x, oldSize.y, false);
+      if (this.composer) this.composer.setSize(oldSize.x, oldSize.y);
+      cam.aspect = oldAspect;
+      cam.position.copy(oldPos);
+      cam.updateProjectionMatrix();
     }
   },
 
@@ -1730,6 +2133,7 @@ const THREE3D = {
   teardown(){
     this.disposeScene();
     this.voxel = null;
+    if (this.composer){ this.composer.dispose(); this.composer = null; this.bloomPass = null; }
     if (this.controls){ this.controls.dispose(); this.controls = null; }
     if (this.renderer){
       this.renderer.dispose();
@@ -1749,6 +2153,7 @@ function updateModeUI(){
   $('voxelBtn').classList.toggle('primary', m === 'voxel');
   $('voxelBtn').textContent = m === 'voxel' ? '▦ Exit Voxel Mode' : '🧊 3D Voxel Mode';
   $('voxelCard').classList.toggle('hiddenCard', m !== 'voxel');
+  $('timelineCard').classList.toggle('hiddenCard', m === 'voxel');
   $('orbitControlsBox').style.display = m === 'planar' ? 'none' : 'block';
   $('canvasWrap').classList.toggle('mode3d', m !== 'planar');
 }
@@ -1874,6 +2279,7 @@ function fitCanvas(){
   if (canvas.width !== px){ canvas.width = canvas.height = px; }
   threeCanvasEl.style.width = threeCanvasEl.style.height = size + 'px';
   if (THREE3D.renderer) THREE3D.renderer.setSize(px, px, false);
+  if (THREE3D.composer) THREE3D.composer.setSize(px, px);
 }
 new ResizeObserver(fitCanvas).observe($('stage'));
 fitCanvas();
@@ -1917,7 +2323,10 @@ function frame(now){
       acc += dt * state.speed / 1000;
       let steps = Math.min(Math.floor(acc), 4);   // cap catch-up work per frame
       acc -= Math.floor(acc);
-      while (steps-- > 0){ engine.step(); state.gen++; }
+      if (steps > 0){
+        while (steps-- > 0){ engine.step(); state.gen++; }
+        maybeSnapshot();
+      }
     }
     if (mode === 'planar'){
       engine.render();
@@ -1974,8 +2383,8 @@ if (location.hash === '#selftest'){
       check('conway-blinker-period-2', horizontal);
       check('population-count', engine.population() === 3);
       // export pipeline: bg must differ from cell pixels
-      const { data, w, h } = engine.renderToPixels(320, 180);
-      const bg = state.palette.bgRGB.map(v => Math.round(v * 255));
+      const { data, w, h } = engine.renderToPixels(512, 512);
+      const bg = activePal().bgRGB.map(v => Math.round(v * 255));
       let litPixels = 0;
       for (let i = 0; i < w * h; i++){
         const j = i * 4;
