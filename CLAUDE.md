@@ -34,6 +34,14 @@ separate src/ tree. Everything lives inline in index.html — edit there.
   transparent PNG (garments), optional overlay (off by default)
 - 3D: torus/sphere (live canvas texture) + voxel CA; UnrealBloom composer,
   auto-framed HD export
+- Voxel: long-exposure ghosts (born/lastVisit/visitCnt mirror of 2D accum),
+  cube-size slider (default 25% pitch), 8 rule presets (some set neighborhood)
+- Viewport toolbar (#viewBar): zoom/rotate/pan/fit/fullscreen; 2D pan+zoom via
+  uv window (VIEW2D → viewUV(), planar only), wheel zoom, ✋ drag-pan mode;
+  3D wired to OrbitControls camera. Exports ignore the view (full artwork)
+- Video export: 3/5/10s WebM (VP9→VP8→MP4 Safari) of the live viewport (2D or
+  3D), explicit requestFrame pump @30fps, 12 Mbps. FEATURES.videoExport =
+  premium gating hook (sprint 3 Gumroad)
 - Selftest: open with #selftest → console + document.title verdict
 
 ## OpenSpec Status
