@@ -32,8 +32,19 @@ separate src/ tree. Everything lives inline in index.html — edit there.
 - Timeline: auto snapshots every 8-20 gens (grids ≤1000), rewind slider
 - Export: product presets up to 7200×10800 @300dpi, fit/fill/smart-crop,
   transparent PNG (garments), optional overlay (off by default)
-- 3D: torus/sphere (live canvas texture) + voxel CA; UnrealBloom composer,
-  auto-framed HD export
+- 3D: torus/sphere/knot/Möbius (live canvas texture) + voxel CA; UnrealBloom
+  composer, auto-framed HD export
+- Black hole: accretion-disk-only scene + gravitational-lens ShaderPass
+  (point-mass deflection r−rE²/r in screen space → Interstellar arcs, shadow,
+  photon ring; lens forces the composer even with bloom off)
+- Terrain (⛰): exposure heightmap — engine.readAccum() (GL readPixels /
+  CPU arrays), box-averaged + [1,2,1]-blurred onto ≤176² PlaneGeometry,
+  height=log1p(visitCnt) via terrainHeight(), color=palette by lastVisit gen,
+  relief slider, throttled every 4 gens
+- Ambience (🔊): color noise generator — white/pink/brown/blue/violet/grey,
+  AudioWorklet (blob) with ScriptProcessor fallback (file:// blocks blob
+  worklets), grey = white + EQ shelves, sleep timer, localStorage persist,
+  FEATURES.noiseGenerator premium hook
 - Voxel: long-exposure ghosts (born/lastVisit/visitCnt mirror of 2D accum),
   cube-size slider (default 25% pitch), 8 rule presets (some set neighborhood)
 - Viewport toolbar (#viewBar): zoom/rotate/pan/fit/fullscreen; 2D pan+zoom via

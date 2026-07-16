@@ -362,6 +362,7 @@ select option{background:#14142a}
           <button class="btn" data-mode="knot">🪢 Knot</button>
           <button class="btn" data-mode="mobius">➿ Möbius</button>
           <button class="btn" data-mode="blackhole">🕳 Black Hole</button>
+          <button class="btn" data-mode="terrain">⛰ Terrain</button>
         </div>
         <button class="btn full" id="voxelBtn" style="margin-bottom:10px">🧊 3D Voxel Mode</button>
         <div class="toggle-row">
@@ -374,6 +375,14 @@ select option{background:#14142a}
             <label class="switch"><input type="checkbox" id="autoRotateToggle"><span class="track"></span></label>
           </div>
           <button class="btn full" id="resetCamBtn">🎥 Reset Camera</button>
+        </div>
+        <div id="terrainBox" style="display:none">
+          <div class="field" style="margin-top:10px">
+            <label>Relief</label>
+            <input type="range" id="terrainReliefRange" min="50" max="250" value="100">
+            <span class="val" id="terrainReliefVal">1.0×</span>
+          </div>
+          <div class="card-note">The landscape grows from the long-exposure history — ridges rise where the CA lived longest, valleys stay untouched. ↺ Reset exposure flattens it.</div>
         </div>
       </div>
 
@@ -533,6 +542,38 @@ select option{background:#14142a}
         <button class="btn full" id="videoBtn">🎬 Export Video</button>
         <div class="card-note">Video captures the live viewport (incl. 3D camera motion) as WebM.</div>
       </div>
+
+      <!-- AMBIENCE (color noise generator) -->
+      <div class="card">
+        <h3>Ambience</h3>
+        <div class="field">
+          <label>Noise</label>
+          <select id="noiseTypeSelect" style="flex:1">
+            <option value="white">⚪ White — full spectrum</option>
+            <option value="pink">🌸 Pink — natural, rain-like</option>
+            <option value="brown" selected>🟤 Brown — deep, ocean-like</option>
+            <option value="blue">🔵 Blue — airy hiss</option>
+            <option value="violet">🟣 Violet — bright sizzle</option>
+            <option value="grey">⬜ Grey — perceptually flat</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Volume</label>
+          <input type="range" id="noiseVolRange" min="0" max="100" value="40">
+          <span class="val" id="noiseVolVal">40%</span>
+        </div>
+        <div class="field">
+          <label>Timer</label>
+          <select id="noiseTimerSelect" style="flex:1">
+            <option value="0" selected>Off</option>
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+            <option value="60">60 min</option>
+          </select>
+        </div>
+        <button class="btn full" id="noiseBtn">▶ Play noise</button>
+        <div class="card-note">Color noise for focus or sleep — pair it with the visuals. Timer fades out automatically.</div>
+      </div>
     </aside>
   </main>
 </div>
@@ -688,7 +729,15 @@ const state = {
   nb3d: 'moore',       // 'moore' (26) | 'vn' (6)
   sliceAxis: 'y',
   slicePct: 100,
+  terrainRelief: 1.0,  // height multiplier for the exposure-terrain mode
 };
+
+/* Exposure terrain height: log-scaled visit count so early exposure doesn't
+   saturate. Pure function (selftested). Returns 0..1. */
+function terrainHeight(cnt, maxCnt){
+  if (!cnt || cnt <= 0) return 0;
+  return Math.log1p(cnt) / Math.log1p(Math.max(maxCnt, 1));
+}
 const digitsToMask = d => d.reduce((m,n) => m | (1 << n), 0);
 
 /* 2D viewport pan/zoom (screen only — exports always render the full artwork).
@@ -1023,6 +1072,7 @@ class GLEngine {
     this.gen = 0;
     this._readBuf = null;
     this._zeroBuf = null;
+    this._accBuf = null; this._accGen = null; this._accCnt = null;
   }
 
   uploadCells(cells){ // Uint8Array n*n, index = y*n+x with y-up
@@ -1062,6 +1112,19 @@ class GLEngine {
     for (let i = 0; i < n * n; i++)
       age[i] = buf[i*4] > 0.5 ? Math.max(1, Math.min(255, buf[i*4+1])) : 0;
     return age;
+  }
+
+  /* Long-exposure readback for the terrain mode (R = gen of last visit,
+     G = visit count). Reuses cached buffers; caller throttles frequency. */
+  readAccum(){
+    const gl = this.gl, n = this.n;
+    this._target(this.accumTex[this.curA]);
+    const buf = this._accBuf || (this._accBuf = new Float32Array(n * n * 4));
+    gl.readPixels(0, 0, n, n, gl.RGBA, gl.FLOAT, buf);
+    const g = this._accGen || (this._accGen = new Float32Array(n * n));
+    const c = this._accCnt || (this._accCnt = new Float32Array(n * n));
+    for (let i = 0; i < n * n; i++){ g[i] = buf[i*4]; c[i] = buf[i*4+1]; }
+    return { gen: g, cnt: c };
   }
 
   resetAccum(){
@@ -1363,6 +1426,7 @@ class CPUEngine {
     this.accumCnt.fill(0);
     this.gen = 0;
   }
+  readAccum(){ return { gen: this.accumGen, cnt: this.accumCnt }; }
   step(){
     const n = this.n, c = this.cells, nx = this.next, age = this.age, tr = this.trail;
     const bMask = digitsToMask(state.birth), sMask = digitsToMask(state.survive);
@@ -1759,6 +1823,7 @@ $('resetExpBtn').addEventListener('click', () => {
     state.gen = 0;
     resetSnapshots();
   }
+  if (THREE3D.terrain) THREE3D.refreshTerrain(true);   // flatten the landscape
   refreshStats(true);
   toast('Exposure reset — accumulation starts fresh', 'ok');
 });
@@ -1853,7 +1918,7 @@ $('exportBtn').addEventListener('click', exportPNG);
 /* ── 6c. VIDEO EXPORT — records the live viewport via captureStream.
    WebM (VP9/VP8) everywhere modern; Safari 17+ falls back to native MP4.
    FEATURES.videoExport is the gating hook for the future premium tier. */
-const FEATURES = { videoExport: 'free' };   // 'free' | 'premium' (Gumroad gate, sprint 3)
+const FEATURES = { videoExport: 'free', noiseGenerator: 'free' };   // 'free' | 'premium' (Gumroad gate, sprint 3)
 function videoMime(){
   if (!window.MediaRecorder) return null;
   return ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']
@@ -1928,6 +1993,182 @@ async function exportVideo(){
   }
 }
 $('videoBtn').addEventListener('click', exportVideo);
+
+/* ── 6d. AMBIENCE — color noise generator (white/pink/brown/blue/violet/
+   grey) via Web Audio. AudioWorklet-first (the kernel source is shared with
+   the worklet via toString, so the selftest can run the same DSP inline);
+   ScriptProcessor fallback for old Safari. Grey = white + inverse-loudness
+   EQ shelves applied outside the worklet. FEATURES.noiseGenerator is the
+   premium gating hook (sprint 3 Gumroad). */
+function makeNoiseKernel(type){
+  let b0 = 0, b1 = 0, b2 = 0, brown = 0, lastP = 0, lastW = 0;
+  return function(){
+    const w = Math.random() * 2 - 1;
+    switch (type){
+      default:                                   // white + grey (grey is EQ'd outside)
+        return w * 0.30;
+      case 'pink': case 'blue': {                // Paul Kellet 3-pole pink filter
+        b0 = 0.99765 * b0 + w * 0.0990460;
+        b1 = 0.96300 * b1 + w * 0.2965164;
+        b2 = 0.57000 * b2 + w * 1.0526913;
+        const p = (b0 + b1 + b2 + w * 0.1848) * 0.10;
+        const out = type === 'pink' ? p : (p - lastP) * 3.2;   // blue = differentiated pink
+        lastP = p;
+        return out;
+      }
+      case 'brown':                              // leaky integrator of white
+        brown += 0.02 * (w - brown);
+        return brown * 3.2;
+      case 'violet': {                           // differentiated white
+        const out = (w - lastW) * 0.22;
+        lastW = w;
+        return out;
+      }
+    }
+  };
+}
+
+const AMBIENCE = {
+  ctx: null, node: null, gain: null, chain: [], playing: false, timer: null,
+  workletURL: null, workletReady: false,
+
+  async _ensureCtx(){
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended'){
+      // don't block on autoplay policy: try now, else retry on the next real gesture
+      await Promise.race([this.ctx.resume(), new Promise(r => setTimeout(r, 250))]);
+      if (this.ctx.state === 'suspended')
+        document.addEventListener('pointerdown', () => this.ctx.resume(), { once: true });
+    }
+    if (this.ctx.audioWorklet && !this.workletReady && !this._workletFailed){
+      this.workletURL = URL.createObjectURL(new Blob([
+        makeNoiseKernel.toString() + `
+        class CANoise extends AudioWorkletProcessor{
+          constructor(o){ super();
+            const t = o.processorOptions.type;
+            this.kL = makeNoiseKernel(t); this.kR = makeNoiseKernel(t); }
+          process(_, outputs){
+            const out = outputs[0], L = out[0], R = out[1];
+            for (let i = 0; i < L.length; i++){
+              L[i] = this.kL();
+              if (R) R[i] = this.kR();          // decorrelated stereo
+            }
+            return true;
+          }
+        }
+        registerProcessor('ca-noise', CANoise);`,
+      ], { type: 'application/javascript' }));
+      try {
+        await this.ctx.audioWorklet.addModule(this.workletURL);
+        this.workletReady = true;
+      } catch (err){                             // e.g. blob worklets blocked on file:// origins
+        console.warn('AudioWorklet unavailable, using ScriptProcessor fallback:', err.message);
+        this._workletFailed = true;
+      }
+    }
+  },
+
+  _buildGraph(type){
+    const ctx = this.ctx;
+    if (this.workletReady){
+      this.node = new AudioWorkletNode(ctx, 'ca-noise', {
+        outputChannelCount: [2],
+        processorOptions: { type: type === 'grey' ? 'white' : type },
+      });
+    } else {                                     // ScriptProcessor fallback
+      const sp = ctx.createScriptProcessor(2048, 1, 2);
+      const kL = makeNoiseKernel(type === 'grey' ? 'white' : type);
+      const kR = makeNoiseKernel(type === 'grey' ? 'white' : type);
+      sp.onaudioprocess = e => {
+        const L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
+        for (let i = 0; i < L.length; i++){ L[i] = kL(); R[i] = kR(); }
+      };
+      this.node = sp;
+    }
+    this.chain = [this.node];
+    if (type === 'grey'){                        // approx inverse equal-loudness contour
+      const lo = ctx.createBiquadFilter();
+      lo.type = 'lowshelf'; lo.frequency.value = 150; lo.gain.value = 8;
+      const hi = ctx.createBiquadFilter();
+      hi.type = 'highshelf'; hi.frequency.value = 6000; hi.gain.value = 6;
+      this.node.connect(lo); lo.connect(hi);
+      this.chain.push(lo, hi);
+    }
+    this.gain = ctx.createGain();
+    this.gain.gain.value = 0.0001;
+    this.chain.at(-1).connect(this.gain);
+    this.gain.connect(ctx.destination);
+  },
+
+  async start(){
+    if (FEATURES.noiseGenerator === 'premium'){
+      toast('🔒 Ambience is a premium feature — unlock via Gumroad', 'err');
+      return;
+    }
+    this.stopGraph();
+    await this._ensureCtx();
+    this._buildGraph($('noiseTypeSelect').value);
+    const vol = $('noiseVolRange').value / 100;
+    this.gain.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0001), this.ctx.currentTime + 0.4);
+    this.playing = true;
+    this._armTimer();
+    localStorage.setItem('ca_noise', JSON.stringify({
+      type: $('noiseTypeSelect').value, vol: $('noiseVolRange').value }));
+    $('noiseBtn').textContent = '⏹ Stop noise';
+    $('noiseBtn').classList.add('primary');
+  },
+
+  stop(fade = 0.5){
+    if (!this.playing) return;
+    this.playing = false;
+    if (this.timer){ clearTimeout(this.timer); this.timer = null; }
+    if (this.gain && this.ctx){
+      this.gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + fade);
+      const old = this.chain.slice();
+      const g = this.gain;
+      setTimeout(() => { old.forEach(nd => { try { nd.disconnect(); } catch {} }); try { g.disconnect(); } catch {} },
+        fade * 1000 + 100);
+    }
+    this.node = null; this.gain = null; this.chain = [];
+    $('noiseBtn').textContent = '▶ Play noise';
+    $('noiseBtn').classList.remove('primary');
+  },
+
+  stopGraph(){ if (this.playing) this.stop(0.05); },
+
+  setVolume(v){
+    if (this.playing && this.gain)
+      this.gain.gain.exponentialRampToValueAtTime(Math.max(v, 0.0001), this.ctx.currentTime + 0.08);
+  },
+
+  _armTimer(){
+    if (this.timer){ clearTimeout(this.timer); this.timer = null; }
+    const min = +$('noiseTimerSelect').value;
+    if (min > 0 && this.playing)
+      this.timer = setTimeout(() => { this.stop(3); toast('🔊 Noise timer done — faded out', 'ok'); },
+        min * 60000);
+  },
+};
+
+$('noiseBtn').addEventListener('click', () => AMBIENCE.playing
+  ? AMBIENCE.stop()
+  : AMBIENCE.start().catch(err => { console.error(err); toast('Audio failed: ' + err.message, 'err'); }));
+$('noiseTypeSelect').addEventListener('change', () => {
+  if (AMBIENCE.playing) AMBIENCE.start().catch(err => toast('Audio failed: ' + err.message, 'err'));
+});
+$('noiseVolRange').addEventListener('input', e => {
+  $('noiseVolVal').textContent = e.target.value + '%';
+  AMBIENCE.setVolume(e.target.value / 100);
+});
+$('noiseTimerSelect').addEventListener('change', () => AMBIENCE._armTimer());
+try {
+  const saved = JSON.parse(localStorage.getItem('ca_noise') || 'null');
+  if (saved){
+    $('noiseTypeSelect').value = saved.type;
+    $('noiseVolRange').value = saved.vol;
+    $('noiseVolVal').textContent = saved.vol + '%';
+  }
+} catch {}
 
 /* ── INTERACTION (pointer events: mouse + touch) ───────────────── */
 let painting = false, paintValue = 1;
@@ -2104,22 +2345,25 @@ let threeCanvasEl = $('threeCanvas');
 const THREE3D = {
   T: null, OrbitControls: null,
   EffectComposer: null, RenderPass: null, UnrealBloomPass: null, OutputPass: null,
+  ShaderPass: null,
   renderer: null, scene: null, camera: null, controls: null,
-  composer: null, bloomPass: null, _sceneRadius: 18,
+  composer: null, bloomPass: null, lensPass: null, _sceneRadius: 18,
   mesh: null, texture: null, voxelMesh: null, ghostMesh: null, voxel: null,
-  bhRing: null, _mat4: null, _col: null,
+  terrain: null, _terrainS: 0, _terrainMax: 1, _terrainGen: -1,
+  _bhRadius: 0, _mat4: null, _col: null,
   get ready(){ return !!this.renderer; },
 
   async load(){
     if (this.T) return true;
     try {
-      const [three, oc, ec, rp, bp, op] = await Promise.all([
+      const [three, oc, ec, rp, bp, op, sp] = await Promise.all([
         import('three'),
         import('three/addons/controls/OrbitControls.js'),
         import('three/addons/postprocessing/EffectComposer.js'),
         import('three/addons/postprocessing/RenderPass.js'),
         import('three/addons/postprocessing/UnrealBloomPass.js'),
         import('three/addons/postprocessing/OutputPass.js'),
+        import('three/addons/postprocessing/ShaderPass.js'),
       ]);
       this.T = three;
       this.OrbitControls = oc.OrbitControls;
@@ -2127,6 +2371,7 @@ const THREE3D = {
       this.RenderPass = rp.RenderPass;
       this.UnrealBloomPass = bp.UnrealBloomPass;
       this.OutputPass = op.OutputPass;
+      this.ShaderPass = sp.ShaderPass;
       return true;
     } catch (err){
       console.error('Three.js load failed:', err);
@@ -2134,16 +2379,74 @@ const THREE3D = {
     }
   },
 
-  /* Post-processing chain (neon bloom for dark themes). Rebuilt per scene. */
+  /* Post-processing chain (neon bloom for dark themes). Rebuilt per scene.
+     Black-hole scenes insert a gravitational-lens pass before bloom: a
+     point-mass lens in screen space (source angle β = θ − θE²/θ) bends the
+     accretion disk behind the hole into the Interstellar arcs, draws the
+     event-horizon shadow and an additive photon ring. */
   setupComposer(){
-    if (this.composer){ this.composer.dispose(); this.composer = null; this.bloomPass = null; }
+    if (this.composer){ this.composer.dispose(); this.composer = null; this.bloomPass = null; this.lensPass = null; }
     if (!this.EffectComposer || !this.renderer || !this.scene) return;
     this.composer = new this.EffectComposer(this.renderer);
     this.composer.addPass(new this.RenderPass(this.scene, this.camera));
+    if (this._bhRadius > 0 && this.ShaderPass){
+      this.lensPass = new this.ShaderPass({
+        uniforms: {
+          tDiffuse: { value: null },
+          uCenter:  { value: new this.T.Vector2(0.5, 0.5) },
+          uRs:      { value: 0.12 },   // shadow radius, uv units (y-based)
+          uAspect:  { value: 1 },
+          uBg:      { value: new this.T.Vector3(0, 0, 0) },
+          uGlow:    { value: new this.T.Vector3(1, 0.85, 0.6) },
+        },
+        vertexShader: /* glsl */`
+          varying vec2 vUv;
+          void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: /* glsl */`
+          uniform sampler2D tDiffuse;
+          uniform vec2 uCenter; uniform float uRs, uAspect;
+          uniform vec3 uBg, uGlow;
+          varying vec2 vUv;
+          void main(){
+            if (uRs < 1e-4){ gl_FragColor = texture2D(tDiffuse, vUv); return; }
+            vec2 d = vUv - uCenter;
+            d.x *= uAspect;
+            float r = max(length(d), 1e-5);
+            vec2 dir = d / r;
+            float rE = uRs * 1.32;                       // Einstein radius just outside the shadow
+            float rSrc = r - (rE * rE) / r;              // point-mass deflection (negative → secondary image)
+            vec2 suv = uCenter + dir * rSrc / vec2(uAspect, 1.0);
+            vec3 col = (suv.x < 0.0 || suv.x > 1.0 || suv.y < 0.0 || suv.y > 1.0)
+              ? uBg : texture2D(tDiffuse, suv).rgb;
+            col *= smoothstep(uRs * 0.92, uRs, r);       // event-horizon shadow, soft edge
+            float ring = exp(-pow((r - uRs * 1.03) / (uRs * 0.04), 2.0));
+            col += uGlow * ring * 0.85;                  // photon ring
+            gl_FragColor = vec4(col, 1.0);
+          }`,
+      });
+      this.composer.addPass(this.lensPass);
+    }
     this.bloomPass = new this.UnrealBloomPass(
       new this.T.Vector2(threeCanvasEl.width, threeCanvasEl.height), 0.35, 0.3, 0.6);
     this.composer.addPass(this.bloomPass);
     this.composer.addPass(new this.OutputPass());
+  },
+
+  /* Per-frame lens uniforms: project the hole (world origin) to screen uv
+     and derive its apparent shadow radius from camera distance + fov. */
+  _updateLens(){
+    if (!this.lensPass || !this.camera) return;
+    const T = this.T, cam = this.camera, u = this.lensPass.uniforms;
+    const v = new T.Vector3(0, 0, 0).project(cam);
+    u.uCenter.value.set((v.x + 1) / 2, (v.y + 1) / 2);
+    const dist = cam.position.length();
+    const halfTan = Math.tan(cam.fov * Math.PI / 360);
+    u.uRs.value = (v.z > 1 || dist <= this._bhRadius * 1.05)
+      ? 0 : 0.5 * (this._bhRadius / Math.sqrt(Math.max(dist * dist - this._bhRadius * this._bhRadius, 1e-4))) / halfTan;
+    u.uAspect.value = cam.aspect;
+    const p = activePal(), glow = p.stopsRGB.at(-1);
+    u.uBg.value.set(...p.bgRGB);
+    u.uGlow.value.set(glow[0], glow[1], glow[2]);
   },
 
   initRenderer(){
@@ -2234,49 +2537,161 @@ const THREE3D = {
     this.setupComposer();
   },
 
-  /* Stylized Gargantua: black event horizon + polar-mapped accretion disk
-     (the CA is the plasma) + vertical lensed halo + camera-facing photon
-     ring. No GR ray tracing — composition + bloom sell the look. */
+  /* Gargantua: the scene holds ONLY the accretion disk (the CA is the
+     plasma, polar UVs, Doppler-brightened approaching side). The shadow,
+     photon ring and the lensed arcs over/under the hole all come from the
+     gravitational-lens post pass — the disk behind the hole is rendered
+     (nothing occludes it) and the lens bends its image around the shadow,
+     so the curves stay physical from any camera angle. */
   buildBlackHole(){
+    const T = this.T;
+    this.disposeScene();
+    this.voxel = null;
+    this._bhRadius = 3.4;
+    this.scene = new T.Scene();
+    this.scene.background = new T.Color().setRGB(...activePal().bgRGB, T.SRGBColorSpace);
+    this.texture = this._makeCanvasTexture();
+    const IN = 4.0, OUT = 13.5;
+    const disk = new T.RingGeometry(IN, OUT, 200, 24);
+    {
+      const p = disk.attributes.position, u = disk.attributes.uv;
+      const vc = new Float32Array(p.count * 3);
+      for (let i = 0; i < p.count; i++){                  // planar → polar UVs
+        const x = p.getX(i), y = p.getY(i);
+        const ang = Math.atan2(y, x), rad = (Math.hypot(x, y) - IN) / (OUT - IN);
+        u.setXY(i, (ang / (Math.PI * 2) + 0.5) * 2, rad);
+        // Doppler beaming (approaching side brighter) + hotter inner edge
+        const b = (0.55 + 0.5 * Math.cos(ang)) * (1.35 - 0.55 * rad);
+        vc[i*3] = vc[i*3+1] = vc[i*3+2] = b;
+      }
+      disk.setAttribute('color', new T.BufferAttribute(vc, 3));
+    }
+    const diskMesh = new T.Mesh(disk, new T.MeshBasicMaterial({
+      map: this.texture, vertexColors: true, side: T.DoubleSide }));
+    diskMesh.rotation.x = -Math.PI / 2;
+    this.scene.add(diskMesh);
+    this._sceneRadius = 13.5;
+    this.camera.position.set(0, 2.3, 26);                 // grazing view → lensed arcs
+    this.controls.target.set(0, 0, 0);
+    this.controls.update();
+    this.controls.saveState();
+    this.setupComposer();
+  },
+
+  /* Exposure terrain: the long-exposure history extruded into a landscape.
+     Vertex height = log-scaled visit count (ridges where the CA lived
+     longest), vertex color = palette by generation of last visit — the same
+     semantics as the 2D long-exposure shader, so the terrain IS the artwork.
+     Geometry streams from engine.readAccum(), throttled to every few gens. */
+  buildTerrain(){
     const T = this.T;
     this.disposeScene();
     this.voxel = null;
     this.scene = new T.Scene();
     this.scene.background = new T.Color().setRGB(...activePal().bgRGB, T.SRGBColorSpace);
-    this.texture = this._makeCanvasTexture();
-    this.scene.add(new T.Mesh(
-      new T.SphereGeometry(3.6, 64, 48), new T.MeshBasicMaterial({ color: 0x000000 })));
-    const IN = 4.6, OUT = 12.5;
-    const disk = new T.RingGeometry(IN, OUT, 180, 24);
-    {
-      const p = disk.attributes.position, u = disk.attributes.uv;
-      for (let i = 0; i < p.count; i++){                  // planar → polar UVs
-        const x = p.getX(i), y = p.getY(i);
-        u.setXY(i, (Math.atan2(y, x) / (Math.PI * 2) + 0.5) * 2,
-                   (Math.hypot(x, y) - IN) / (OUT - IN));
-      }
-    }
-    const diskMesh = new T.Mesh(disk,
-      new T.MeshBasicMaterial({ map: this.texture, side: T.DoubleSide }));
-    diskMesh.rotation.x = -Math.PI / 2;
-    this.scene.add(diskMesh);
-    this.scene.add(new T.Mesh(                             // lensed halo (vertical)
-      new T.TorusGeometry(4.9, 0.55, 32, 160),
-      new T.MeshBasicMaterial({ map: this.texture })));
-    const glow = activePal().stopsRGB.at(-1);
-    this.bhRing = new T.Mesh(                              // photon ring
-      new T.RingGeometry(3.7, 3.95, 96),
-      new T.MeshBasicMaterial({
-        color: new T.Color().setRGB(glow[0], glow[1], glow[2], T.SRGBColorSpace),
-        transparent: true, opacity: 0.85, side: T.DoubleSide,
-      }));
-    this.scene.add(this.bhRing);
-    this._sceneRadius = 13;
-    this.camera.position.set(0, 5, 24);
+    const S = this._terrainS = Math.min(state.grid, 176);   // vertex grid (decimates big CA grids)
+    const geo = new T.PlaneGeometry(24, 24, S, S);
+    geo.rotateX(-Math.PI / 2);                              // heights along +Y
+    geo.setAttribute('color', new T.BufferAttribute(new Float32Array((S+1)*(S+1)*3), 3));
+    this.terrain = new T.Mesh(geo, new T.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.85, metalness: 0 }));
+    this.scene.add(this.terrain);
+    const paper = state.theme === 'light' || activePal().lightBg;   // hillshade-on-white for print
+    this.scene.add(new T.AmbientLight(0xffffff, paper ? 1.15 : 0.55));
+    this.scene.add(new T.HemisphereLight(0xbbccff, 0x221133, paper ? 0.25 : 0.5));
+    const dir = new T.DirectionalLight(0xffffff, paper ? 0.85 : 1.5);
+    dir.position.set(1.2, 1.6, 0.9);
+    this.scene.add(dir);
+    this._terrainMax = 1;
+    this._terrainGen = -1;
+    this._sceneRadius = 15;
+    this.camera.position.set(0, 17, 23);
     this.controls.target.set(0, 0, 0);
     this.controls.update();
     this.controls.saveState();
     this.setupComposer();
+    this.refreshTerrain(true);
+  },
+
+  refreshTerrain(force){
+    if (!this.terrain || !engine.readAccum) return;
+    if (!force && engine.gen - this._terrainGen < 4) return;   // throttle GPU readback
+    this._terrainGen = engine.gen;
+    const acc = engine.readAccum();
+    const n = engine.n, S = this._terrainS;
+    const geo = this.terrain.geometry;
+    const pos = geo.attributes.position, col = geo.attributes.color;
+    const pal = activePal(), stops = pal.stopsRGB, ns = stops.length, bg = pal.bgRGB;
+    const LUT = [];
+    for (let i = 0; i < 32; i++){
+      const t = i / 31 * (ns - 1);
+      const k = Math.min(Math.floor(t), ns - 2), f = t - k;
+      LUT.push([
+        stops[k][0] + (stops[k+1][0] - stops[k][0]) * f,
+        stops[k][1] + (stops[k+1][1] - stops[k][1]) * f,
+        stops[k][2] + (stops[k+1][2] - stops[k][2]) * f,
+      ]);
+    }
+    const gen = Math.max(engine.gen, 1);
+    /* Box-average each vertex over its patch of cells: smooth ridges instead
+       of a nearest-neighbor spike field on decimated grids. */
+    const edge = new Int32Array(S + 2);                        // cell boundaries per vertex row/col
+    for (let i = 0; i <= S + 1; i++) edge[i] = Math.min(Math.round((i - 0.5) / S * n), n);
+    const V = (S + 1) * (S + 1);
+    const hCnt = this._hCnt && this._hCnt.length === V ? this._hCnt : (this._hCnt = new Float32Array(V));
+    const hGen = this._hGen && this._hGen.length === V ? this._hGen : (this._hGen = new Float32Array(V));
+    let mx = 1, k = 0;
+    for (let i = 0; i <= S; i++){
+      // plane rows go far→near; engine rows are y-up → row i samples rows (S−i)
+      const y0 = Math.max(edge[S - i], 0), y1 = Math.max(edge[S - i + 1], y0 + 1);
+      for (let j = 0; j <= S; j++, k++){
+        const x0 = Math.max(edge[j], 0), x1 = Math.max(edge[j + 1], x0 + 1);
+        let sc = 0, sg = 0, nv = 0;
+        for (let y = y0; y < y1; y++){
+          const row = y * n;
+          for (let x = x0; x < x1; x++){
+            const c = acc.cnt[row + x];
+            if (c){ sc += c; sg += acc.gen[row + x]; nv++; }
+          }
+        }
+        const area = (y1 - y0) * (x1 - x0);
+        hCnt[k] = sc / area;                                   // unvisited cells pull ridges down
+        hGen[k] = nv ? sg / nv : 0;
+        if (hCnt[k] > mx) mx = hCnt[k];
+      }
+    }
+    /* Separable [1,2,1] blur ×2 on the heightfield: chaotic soups read as
+       rolling hills instead of a spike field; real ridges survive. */
+    const tmp = this._hTmp && this._hTmp.length === V ? this._hTmp : (this._hTmp = new Float32Array(V));
+    const W = S + 1;
+    for (let pass = 0; pass < 2; pass++){
+      for (let i = 0; i < W; i++){
+        const r = i * W;
+        for (let j = 0; j < W; j++){
+          const l = j > 0 ? hCnt[r+j-1] : hCnt[r+j], rr = j < S ? hCnt[r+j+1] : hCnt[r+j];
+          tmp[r+j] = (l + 2 * hCnt[r+j] + rr) * 0.25;
+        }
+      }
+      for (let j = 0; j < W; j++){
+        for (let i = 0; i < W; i++){
+          const u = i > 0 ? tmp[(i-1)*W+j] : tmp[i*W+j], d = i < S ? tmp[(i+1)*W+j] : tmp[i*W+j];
+          hCnt[i*W+j] = (u + 2 * tmp[i*W+j] + d) * 0.25;
+        }
+      }
+    }
+    mx = 1;
+    for (k = 0; k < V; k++) if (hCnt[k] > mx) mx = hCnt[k];
+    this._terrainMax = mx;
+    const H = 5.2 * state.terrainRelief;
+    for (k = 0; k < V; k++){
+      pos.setY(k, H * terrainHeight(hCnt[k], mx));
+      if (hCnt[k] > 0){
+        const c = LUT[Math.min(31, Math.floor(Math.min(hGen[k] / gen, 1) * 31))];
+        col.setXYZ(k, c[0], c[1], c[2]);
+      } else col.setXYZ(k, bg[0], bg[1], bg[2]);
+    }
+    pos.needsUpdate = col.needsUpdate = true;
+    geo.computeVertexNormals();
   },
 
   buildVoxelWorld(){
@@ -2400,10 +2815,12 @@ const THREE3D = {
     const p = activePal();
     if (this.scene.background && this.scene.background.isColor)
       this.scene.background.setRGB(...p.bgRGB, this.T.SRGBColorSpace);
-    if (this.bhRing) this.bhRing.lookAt(this.camera.position);   // photon ring faces camera
     this.controls.update();
-    if (state.bloom && !p.lightBg && this.composer){
+    const wantBloom = state.bloom && !p.lightBg;
+    if (this.composer && (wantBloom || this.lensPass)){   // lens needs the composer even with bloom off
+      this.bloomPass.enabled = wantBloom;
       this.bloomPass.strength = 0.1 + state.bloomIntensity * 0.25;
+      this._updateLens();
       this.composer.render();
     } else {
       this.renderer.render(this.scene, this.camera);
@@ -2431,13 +2848,16 @@ const THREE3D = {
     const dist = this._sceneRadius * 1.08 / Math.sin(Math.min(vFov, hFov) / 2);
     cam.position.copy(target).addScaledVector(dir, dist);
     cam.updateProjectionMatrix();
-    const useBloom = state.bloom && !activePal().lightBg && this.composer;
+    const wantBloom = state.bloom && !activePal().lightBg;
+    const useComposer = this.composer && (wantBloom || this.lensPass);
     try {
       r.setPixelRatio(1);
       r.setSize(w, h, false);
-      if (useBloom){
+      if (useComposer){
         this.composer.setSize(w, h);
+        this.bloomPass.enabled = wantBloom;
         this.bloomPass.strength = 0.1 + state.bloomIntensity * 0.25;
+        this._updateLens();
         this.composer.render();
       } else {
         r.render(this.scene, cam);
@@ -2474,7 +2894,8 @@ const THREE3D = {
     if (this.voxelMesh && this.voxelMesh.dispose) this.voxelMesh.dispose();
     if (this.ghostMesh && this.ghostMesh.dispose) this.ghostMesh.dispose();
     this.scene = null; this.mesh = null; this.texture = null;
-    this.voxelMesh = null; this.ghostMesh = null; this.bhRing = null;
+    this.voxelMesh = null; this.ghostMesh = null;
+    this.terrain = null; this._bhRadius = 0; this._terrainGen = -1; this._terrainMax = 1;
   },
 
   /* Full teardown when returning to planar: free every GPU resource and
@@ -2504,6 +2925,7 @@ function updateModeUI(){
   $('voxelCard').classList.toggle('hiddenCard', m !== 'voxel');
   $('timelineCard').classList.toggle('hiddenCard', m === 'voxel');
   $('orbitControlsBox').style.display = m === 'planar' ? 'none' : 'block';
+  $('terrainBox').style.display = m === 'terrain' ? 'block' : 'none';
   $('canvasWrap').classList.toggle('mode3d', m !== 'planar');
   $('viewBar').classList.toggle('planar', m === 'planar');
   if (m !== 'planar') $('vbZoomLbl').textContent = '';
@@ -2533,11 +2955,13 @@ async function setViewMode(mode){
     state.viewMode = mode;
     if (mode === 'voxel') THREE3D.buildVoxelWorld();
     else if (mode === 'blackhole') THREE3D.buildBlackHole();
+    else if (mode === 'terrain') THREE3D.buildTerrain();
     else THREE3D.buildSurface(mode);
     fitCanvas();
     updateModeUI(); updateModeHash(); refreshStats(true);
     const modeNames = { torus:'torus', sphere:'sphere', knot:'torus knot',
-      mobius:'Möbius strip', blackhole:'black hole — the CA is the accretion disk' };
+      mobius:'Möbius strip', blackhole:'black hole — the CA is the accretion disk',
+      terrain:'exposure terrain — history becomes the landscape' };
     toast(mode === 'voxel' ? `3D voxel mode — ${state.voxelN}³ grid` : `Surface: ${modeNames[mode]}`, 'ok');
   } finally {
     switching3d = false;
@@ -2559,6 +2983,11 @@ $('autoRotateToggle').addEventListener('change', e => {
   if (THREE3D.controls) THREE3D.controls.autoRotate = state.autoRotate;
 });
 $('resetCamBtn').addEventListener('click', () => { if (THREE3D.controls) THREE3D.controls.reset(); });
+$('terrainReliefRange').addEventListener('input', e => {
+  state.terrainRelief = e.target.value / 100;
+  $('terrainReliefVal').textContent = state.terrainRelief.toFixed(1) + '×';
+  if (THREE3D.terrain) THREE3D.refreshTerrain(true);
+});
 
 /* ── VIEWPORT TOOLBAR (zoom / rotate / pan / fit / fullscreen) ─── */
 let panMode = false;
@@ -2764,6 +3193,9 @@ function frame(now){
       engine.render();                          // hidden canvas feeds the surface texture
       THREE3D.texture.needsUpdate = true;
       THREE3D.renderFrame();
+    } else if (THREE3D.ready && THREE3D.terrain){
+      if (state.running) THREE3D.refreshTerrain();   // throttled accum readback
+      THREE3D.renderFrame();
     }
   }
   refreshStats(false);
@@ -2785,7 +3217,7 @@ randomFill();
 applyRules('3', '23', true);
 requestAnimationFrame(frame);
 {
-  const m = location.hash.match(/mode=(torus|sphere|voxel|knot|mobius|blackhole)/);   // shareable view mode
+  const m = location.hash.match(/mode=(torus|sphere|voxel|knot|mobius|blackhole|terrain)/);   // shareable view mode
   if (m) setViewMode(m[1]);
 }
 console.log(`%c🦠 Cellular Automata Art Generator`, 'font-size:16px;color:#00d4ff;font-weight:bold');
@@ -2850,6 +3282,27 @@ if (location.hash === '#selftest'){
       check('view2d-zoom-mapping',
         !!zc && zc.x === Math.floor(0.75 * n) && zc.y === Math.floor(0.75 * n));
       VIEW2D.z = 1; VIEW2D.cx = VIEW2D.cy = 0.5; clampView();
+      // exposure terrain: accum readback + pure height mapping
+      const bl = new Uint8Array(n * n);   // 2×2 block (still life under B3/S23)
+      bl[cy*n + cx] = bl[cy*n + cx + 1] = bl[(cy+1)*n + cx] = bl[(cy+1)*n + cx + 1] = 1;
+      engine.uploadCells(bl);
+      engine.step(); engine.step();
+      const acc = engine.readAccum();
+      check('terrain-accum-readback', acc.cnt[cy*n + cx] >= 2 && acc.gen[cy*n + cx] === 2);
+      check('terrain-height-map',
+        terrainHeight(0, 100) === 0
+        && terrainHeight(10, 100) < terrainHeight(50, 100)
+        && Math.abs(terrainHeight(100, 100) - 1) < 1e-9);
+      // noise kernels: brown (integrated) is far smoother than white; bounded
+      const kb = makeNoiseKernel('brown'), kw = makeNoiseKernel('white');
+      let db = 0, dw = 0, pb = 0, pw = 0, bounded = true;
+      for (let i = 0; i < 8192; i++){
+        const b = kb(), w = kw();
+        if (Math.abs(b) > 1 || Math.abs(w) > 1) bounded = false;
+        db += (b - pb) * (b - pb); dw += (w - pw) * (w - pw);
+        pb = b; pw = w;
+      }
+      check('noise-brown-smoother-than-white', bounded && db < dw * 0.05);
     } catch (err) {
       results.push('FAIL exception: ' + err.message);
     }
