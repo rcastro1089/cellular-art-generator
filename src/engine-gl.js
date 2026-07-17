@@ -1,6 +1,6 @@
 /* ── WEBGL2 ENGINE ─────────────────────────────────────────────── */
 import { VS_FULLSCREEN, FS_SIM, FS_COLOR, FS_ACCUM, FS_BRIGHT, FS_BLUR, FS_COMPOSITE, FS_REDUCE } from './shaders.js';
-import { state, digitsToMask, viewUV } from './state.js';
+import { state, digitsToMask, coverUV } from './state.js';
 import { activePal } from './palettes.js';
 import { bestWindowOffset } from './util.js';
 
@@ -341,8 +341,8 @@ export class GLEngine {
 
   render(){
     const w = this.canvas.width, h = this.canvas.height;
-    const v = viewUV();
-    this._renderPipeline(null, w, h, [v.s, v.s], [v.ox, v.oy], 1.0);
+    const c = coverUV(w, h);   // non-square canvases (focus mode) cover-crop
+    this._renderPipeline(null, w, h, [c.sx, c.sy], [c.ox, c.oy], 1.0);
   }
 
   /* ── 6a. HD EXPORT (WebGL path) ── */

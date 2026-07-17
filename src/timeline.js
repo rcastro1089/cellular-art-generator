@@ -18,6 +18,8 @@ export function maybeSnapshot(){
 }
 export function updateHistoryUI(){
   const r = $('histRange'), n = SNAP.list.length;
+  // the card only appears once there is a history to scrub (and never in voxel)
+  $('timelineCard').classList.toggle('hiddenCard', state.viewMode === 'voxel' || n < 2);
   r.max = Math.max(0, n - 1);
   r.disabled = n < 2;
   if (SNAP.scrub === null){

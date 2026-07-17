@@ -1,6 +1,9 @@
 /* ── SMALL SHARED HELPERS (DOM + pure) ─────────────────────────── */
 export const $ = id => document.getElementById(id);
 
+/* Inline SVG icon from the sprite in index.html. */
+export const icon = n => `<svg class="ic"><use href="#i-${n}"/></svg>`;
+
 let toastTimer;
 export function toast(msg, cls){
   const t = $('toast');

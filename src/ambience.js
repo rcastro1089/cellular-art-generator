@@ -4,7 +4,7 @@
    ScriptProcessor fallback for old Safari / blob-blocked origins. Grey =
    white + inverse-loudness EQ shelves applied outside the worklet.
    FEATURES.noiseGenerator is the premium gating hook (sprint 3 Gumroad). */
-import { $, toast } from './util.js';
+import { $, toast, icon } from './util.js';
 import { FEATURES } from './state.js';
 
 export function makeNoiseKernel(type){
@@ -35,8 +35,17 @@ export function makeNoiseKernel(type){
   };
 }
 
+/* Envelope times (s): slow, deliberate — this is a focus/sleep tool. */
+const FADE_IN = 1.8, FADE_OUT = 1.2, XFADE = 0.6;
+
+/* Per-type loudness calibration so switching sounds keeps perceived volume
+   constant (the raw kernels have very different RMS). */
+export const NOISE_CAL = {
+  ocean: 1.15, brown: 1.0, pink: 1.15, white: 0.85, grey: 0.8, blue: 1.05, violet: 1.5,
+};
+
 export const AMBIENCE = {
-  ctx: null, node: null, gain: null, chain: [], playing: false, timer: null,
+  ctx: null, master: null, current: null, playing: false, timer: null,
   workletURL: null, workletReady: false,
 
   async _ensureCtx(){
@@ -75,84 +84,145 @@ export const AMBIENCE = {
     }
   },
 
-  _buildGraph(type){
+  /* Master output: gentle compressor as a safety limiter — brown/violet at
+     full volume stay clean. Created once per AudioContext. */
+  _ensureMaster(){
+    if (this.master) return;
+    const c = this.ctx.createDynamicsCompressor();
+    c.threshold.value = -9; c.knee.value = 6; c.ratio.value = 8;
+    c.attack.value = 0.004; c.release.value = 0.25;
+    c.connect(this.ctx.destination);
+    this.master = c;
+  },
+
+  /* Build one playable graph for a sound type. Returns { gain, nodes,
+     timers, type } — multiple graphs can coexist during a crossfade. */
+  _spawn(type){
     const ctx = this.ctx;
+    const kernel = type === 'grey' || type === 'ocean'
+      ? (type === 'ocean' ? 'brown' : 'white') : type;
+    let node;
     if (this.workletReady){
-      this.node = new AudioWorkletNode(ctx, 'ca-noise', {
+      node = new AudioWorkletNode(ctx, 'ca-noise', {
         outputChannelCount: [2],
-        processorOptions: { type: type === 'grey' ? 'white' : type },
+        processorOptions: { type: kernel },
       });
     } else {                                     // ScriptProcessor fallback
       const sp = ctx.createScriptProcessor(2048, 1, 2);
-      const kL = makeNoiseKernel(type === 'grey' ? 'white' : type);
-      const kR = makeNoiseKernel(type === 'grey' ? 'white' : type);
+      const kL = makeNoiseKernel(kernel), kR = makeNoiseKernel(kernel);
       sp.onaudioprocess = e => {
         const L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
         for (let i = 0; i < L.length; i++){ L[i] = kL(); R[i] = kR(); }
       };
-      this.node = sp;
+      node = sp;
     }
-    this.chain = [this.node];
+    const g = { type, nodes: [node], timers: [], gain: ctx.createGain() };
+    g.gain.gain.value = 0.0001;
+    let tail = node;
     if (type === 'grey'){                        // approx inverse equal-loudness contour
       const lo = ctx.createBiquadFilter();
       lo.type = 'lowshelf'; lo.frequency.value = 150; lo.gain.value = 8;
       const hi = ctx.createBiquadFilter();
       hi.type = 'highshelf'; hi.frequency.value = 6000; hi.gain.value = 6;
-      this.node.connect(lo); lo.connect(hi);
-      this.chain.push(lo, hi);
+      tail.connect(lo); lo.connect(hi);
+      g.nodes.push(lo, hi);
+      tail = hi;
     }
-    this.gain = ctx.createGain();
-    this.gain.gain.value = 0.0001;
-    this.chain.at(-1).connect(this.gain);
-    this.gain.connect(ctx.destination);
+    if (type === 'ocean'){
+      /* Surf: brown noise riding a slow swell — a randomized LFO cycle
+         raises the level and opens the lowpass (the wave builds and breaks
+         brighter), then washes back down. Plus a slow stereo drift. */
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 460; lp.Q.value = 0.4;
+      const swell = ctx.createGain();
+      swell.gain.value = 0.5;
+      const pan = ctx.createStereoPanner();
+      tail.connect(lp); lp.connect(swell); swell.connect(pan);
+      g.nodes.push(lp, swell, pan);
+      tail = pan;
+      const cycle = () => {
+        const t = ctx.currentTime;
+        const period = 8 + Math.random() * 6;            // one wave every 8–14s
+        const rise = period * 0.42, fall = period * 0.58;
+        const peak = 0.8 + Math.random() * 0.25;
+        const trough = 0.26 + Math.random() * 0.12;
+        swell.gain.setTargetAtTime(peak, t, rise / 3);
+        swell.gain.setTargetAtTime(trough, t + rise, fall / 3);
+        lp.frequency.setTargetAtTime(380 + peak * 620, t, rise / 3);
+        lp.frequency.setTargetAtTime(330, t + rise, fall / 3);
+        pan.pan.setTargetAtTime(Math.random() * 0.5 - 0.25, t, period / 2);
+        g.timers.push(setTimeout(cycle, period * 1000));
+      };
+      cycle();
+    }
+    tail.connect(g.gain);
+    g.gain.connect(this.master);
+    return g;
+  },
+
+  _target(){
+    const type = this.current ? this.current.type : $('noiseTypeSelect').value;
+    return Math.max(($('noiseVolRange').value / 100) * (NOISE_CAL[type] || 1), 0.0001);
+  },
+
+  _kill(g, fade){
+    if (!g) return;
+    const t = this.ctx.currentTime;
+    g.gain.gain.cancelScheduledValues(t);
+    g.gain.gain.setValueAtTime(Math.max(g.gain.gain.value, 0.0001), t);
+    g.gain.gain.exponentialRampToValueAtTime(0.0001, t + fade);
+    g.timers.forEach(clearTimeout);
+    const gg = g.gain, nodes = g.nodes;
+    setTimeout(() => {
+      nodes.forEach(nd => { try { nd.disconnect(); } catch {} });
+      try { gg.disconnect(); } catch {}
+    }, fade * 1000 + 120);
   },
 
   async start(){
     if (FEATURES.noiseGenerator === 'premium'){
-      toast('🔒 Ambience is a premium feature — unlock via Gumroad', 'err');
+      toast('Ambience is a premium feature — unlock via Gumroad', 'err');
       return;
     }
-    this.stopGraph();
     await this._ensureCtx();
-    this._buildGraph($('noiseTypeSelect').value);
-    const vol = $('noiseVolRange').value / 100;
-    this.gain.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0001), this.ctx.currentTime + 0.4);
+    this._ensureMaster();
+    const type = $('noiseTypeSelect').value;
+    const old = this.current;
+    const g = this._spawn(type);
+    this.current = g;
+    const t = this.ctx.currentTime;
+    const dur = old ? XFADE : FADE_IN;           // first play breathes in; switches crossfade
+    g.gain.gain.setValueAtTime(0.0001, t);
+    g.gain.gain.exponentialRampToValueAtTime(this._target(), t + dur);
+    if (old) this._kill(old, XFADE);
     this.playing = true;
     this._armTimer();
     localStorage.setItem('ca_noise', JSON.stringify({
-      type: $('noiseTypeSelect').value, vol: $('noiseVolRange').value }));
-    $('noiseBtn').textContent = '⏹ Stop noise';
+      type, vol: $('noiseVolRange').value }));
+    $('noiseBtn').innerHTML = icon('x') + 'Stop sound';
     $('noiseBtn').classList.add('primary');
   },
 
-  stop(fade = 0.5){
+  stop(fade = FADE_OUT){
     if (!this.playing) return;
     this.playing = false;
     if (this.timer){ clearTimeout(this.timer); this.timer = null; }
-    if (this.gain && this.ctx){
-      this.gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + fade);
-      const old = this.chain.slice();
-      const g = this.gain;
-      setTimeout(() => { old.forEach(nd => { try { nd.disconnect(); } catch {} }); try { g.disconnect(); } catch {} },
-        fade * 1000 + 100);
-    }
-    this.node = null; this.gain = null; this.chain = [];
-    $('noiseBtn').textContent = '▶ Play noise';
+    this._kill(this.current, fade);
+    this.current = null;
+    $('noiseBtn').innerHTML = icon('volume') + 'Play sound';
     $('noiseBtn').classList.remove('primary');
   },
 
-  stopGraph(){ if (this.playing) this.stop(0.05); },
-
-  setVolume(v){
-    if (this.playing && this.gain)
-      this.gain.gain.exponentialRampToValueAtTime(Math.max(v, 0.0001), this.ctx.currentTime + 0.08);
+  setVolume(){
+    if (this.playing && this.current)
+      this.current.gain.gain.exponentialRampToValueAtTime(this._target(), this.ctx.currentTime + 0.1);
   },
 
   _armTimer(){
     if (this.timer){ clearTimeout(this.timer); this.timer = null; }
     const min = +$('noiseTimerSelect').value;
     if (min > 0 && this.playing)
-      this.timer = setTimeout(() => { this.stop(3); toast('🔊 Noise timer done — faded out', 'ok'); },
+      this.timer = setTimeout(() => { this.stop(3); toast('Sound timer done — faded out', 'ok'); },
         min * 60000);
   },
 };
@@ -166,7 +236,7 @@ $('noiseTypeSelect').addEventListener('change', () => {
 });
 $('noiseVolRange').addEventListener('input', e => {
   $('noiseVolVal').textContent = e.target.value + '%';
-  AMBIENCE.setVolume(e.target.value / 100);
+  AMBIENCE.setVolume();
 });
 $('noiseTimerSelect').addEventListener('change', () => AMBIENCE._armTimer());
 try {

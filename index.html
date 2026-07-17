@@ -3,18 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cellular Automata Art Generator — Free Generative Art Tool</title>
-<meta name="description" content="Create stunning generative wall art with Conway's Game of Life and 30+ cellular automata rules. GPU-accelerated, 20+ neon color palettes, 4K PNG export. Free online tool.">
-<meta property="og:title" content="Cellular Automata Art Generator">
-<meta property="og:description" content="Turn mathematics into wall art. Life-like cellular automata with neon bloom, 20+ palettes and 4K export.">
+<title>Cellscape — Cellular Automata Art Generator</title>
+<meta name="description" content="Create stunning generative wall art with Conway's Game of Life and 30+ cellular automata rules. GPU-accelerated, 27 color palettes, 4K PNG export. Free online tool.">
+<meta property="og:title" content="Cellscape — Cellular Automata Art">
+<meta property="og:description" content="Grown, not drawn. Life-like cellular automata with neon bloom, 27 palettes, 3D surfaces and print-quality export.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦠</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
+
+<!-- ── SVG ICON SPRITE (Lucide-style, 24px grid, stroke = currentColor) ── -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" fill="currentColor" stroke="none"/>
+      <rect x="13" y="3.5" width="7.5" height="7.5" rx="2"/>
+      <rect x="3.5" y="13" width="7.5" height="7.5" rx="2"/>
+      <rect x="13" y="13" width="7.5" height="7.5" rx="2" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13a.6.6 0 0 0 .9.5l10.4-6.5a.6.6 0 0 0 0-1L8.9 5a.6.6 0 0 0-.9.5z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14.1" y="5" width="3.4" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="M6 5.5v13a.6.6 0 0 0 .9.5l9.1-6.5a.6.6 0 0 0 0-1L6.9 5a.6.6 0 0 0-.9.5z" fill="currentColor" stroke="none"/><path d="M18.5 5v14"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.15" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.15" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.15" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-torus" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8.5" ry="5.6"/><ellipse cx="12" cy="11.2" rx="3.4" ry="1.7"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.8" ry="8.5"/><path d="M3.5 12h17"/></symbol>
+    <symbol id="i-knot" viewBox="0 0 24 24"><path d="M8.5 6.5a4.8 4.8 0 1 0 4.2 7.1"/><path d="M15.5 17.5a4.8 4.8 0 1 0-4.2-7.1"/></symbol>
+    <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/></symbol>
+    <symbol id="i-blackhole" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><ellipse cx="12" cy="12" rx="9.5" ry="3.4"/></symbol>
+    <symbol id="i-mountain" viewBox="0 0 24 24"><path d="M3.5 18.5 9.5 8l3.4 5.4 2.6-3.4 5 8.5z"/></symbol>
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 13.2A8.2 8.2 0 0 1 10.8 4a8 8 0 1 0 9.2 9.2z"/></symbol>
+    <symbol id="i-paper" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 1.9"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><circle cx="12" cy="13.5" r="3.6"/><path d="M9 7l1.3-2.5h3.4L15 7"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5"/><path d="M4.5 20h15"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6.5" width="12.5" height="11" rx="2"/><path d="m15.5 13 5.5 3.5v-9L15.5 11z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5v5h3.4l4.6 4V5.5l-4.6 4z" fill="currentColor" stroke="none"/><path d="M15 9.2a4.3 4.3 0 0 1 0 5.6"/><path d="M17.6 6.6a8 8 0 0 1 0 10.8"/></symbol>
+    <symbol id="i-waves" viewBox="0 0 24 24"><path d="M3 8.5c2.2 0 2.6-1.6 4.5-1.6S9.8 8.5 12 8.5s2.6-1.6 4.5-1.6 2.3 1.6 4.5 1.6"/><path d="M3 13.5c2.2 0 2.6-1.6 4.5-1.6s2.3 1.6 4.5 1.6 2.6-1.6 4.5-1.6 2.3 1.6 4.5 1.6"/><path d="M3 18.5c2.2 0 2.6-1.6 4.5-1.6s2.3 1.6 4.5 1.6 2.6-1.6 4.5-1.6 2.3 1.6 4.5 1.6"/></symbol>
+    <symbol id="i-max" viewBox="0 0 24 24"><path d="M8.5 3.5H5.5a2 2 0 0 0-2 2v3M15.5 3.5h3a2 2 0 0 1 2 2v3M8.5 20.5H5.5a2 2 0 0 1-2-2v-3M15.5 20.5h3a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-fit" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5"/><rect x="9.3" y="9.3" width="5.4" height="5.4" rx="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5.5 12h13"/></symbol>
+    <symbol id="i-rotl" viewBox="0 0 24 24"><path d="M4.5 9.5a8.3 8.3 0 1 1-.5 5"/><path d="M4 4.5v5h5"/></symbol>
+    <symbol id="i-rotr" viewBox="0 0 24 24"><path d="M19.5 9.5a8.3 8.3 0 1 0 .5 5"/><path d="M20 4.5v5h-5"/></symbol>
+    <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3.5v17M3.5 12h17"/><path d="m8.8 6.2 3.2-3.2 3.2 3.2M8.8 17.8l3.2 3.2 3.2-3.2M6.2 8.8 3 12l3.2 3.2M17.8 8.8 21 12l-3.2 3.2"/></symbol>
+  </defs>
+</svg>
+
 <div id="app">
   <header>
-    <h1>🦠 Cellular Automata Art</h1>
+    <h1><svg class="ic logo"><use href="#i-logo"/></svg>Cellscape</h1>
+    <span class="subtitle">cellular automata art</span>
     <span class="badge" id="rendererBadge">…</span>
     <div id="headStats">
       <span>RULE <b id="stRule">B3/S23</b></span>
@@ -32,15 +75,16 @@
         <div id="loading3d"><span class="spin"></span>Loading 3D engine…</div>
       </div>
       <div id="viewBar" class="planar">
-        <button id="vbFull" title="Fullscreen">⛶</button>
-        <button id="vbFit" title="Fit view — reset zoom &amp; camera">⊡</button>
-        <button id="vbZoomIn" title="Zoom in (hold)">+</button>
-        <button id="vbZoomOut" title="Zoom out (hold)">−</button>
-        <button id="vbRotL" class="only3d" title="Rotate left (hold)">⟲</button>
-        <button id="vbRotR" class="only3d" title="Rotate right (hold)">⟳</button>
-        <button id="vbPan" title="Pan — drag moves the view">✋</button>
+        <button id="vbFull" title="Focus mode — fullscreen ambient view"><svg class="ic"><use href="#i-max"/></svg></button>
+        <button id="vbFit" title="Fit view — reset zoom &amp; camera"><svg class="ic"><use href="#i-fit"/></svg></button>
+        <button id="vbZoomIn" title="Zoom in (hold)"><svg class="ic"><use href="#i-plus"/></svg></button>
+        <button id="vbZoomOut" title="Zoom out (hold)"><svg class="ic"><use href="#i-minus"/></svg></button>
+        <button id="vbRotL" class="only3d" title="Rotate left (hold)"><svg class="ic"><use href="#i-rotl"/></svg></button>
+        <button id="vbRotR" class="only3d" title="Rotate right (hold)"><svg class="ic"><use href="#i-rotr"/></svg></button>
+        <button id="vbPan" title="Pan — drag moves the view"><svg class="ic"><use href="#i-move"/></svg></button>
         <span id="vbZoomLbl"></span>
       </div>
+      <div id="fsWatermark"><svg class="ic"><use href="#i-logo"/></svg><span>Cellscape</span></div>
       <div id="hint">
         Click / drag = paint &nbsp;·&nbsp; Shift+click or right-click = erase<br>
         <kbd>Space</kbd> play/pause &nbsp; <kbd>S</kbd> step &nbsp; <kbd>R</kbd> random &nbsp; <kbd>C</kbd> clear
@@ -48,14 +92,14 @@
     </div>
 
     <aside id="sidebar">
-      <!-- PLAYBACK -->
+      <!-- CREATE -->
       <div class="card">
-        <h3>Playback</h3>
+        <h3>Create</h3>
         <div class="btn-row">
-          <button class="btn primary" id="playBtn">⏸</button>
-          <button class="btn" id="stepBtn" title="Step one generation">⏭</button>
-          <button class="btn" id="randomBtn" title="Random fill">🎲</button>
-          <button class="btn danger" id="clearBtn" title="Clear grid">✕</button>
+          <button class="btn primary" id="playBtn" title="Pause"><svg class="ic"><use href="#i-pause"/></svg></button>
+          <button class="btn" id="stepBtn" title="Step one generation"><svg class="ic"><use href="#i-step"/></svg></button>
+          <button class="btn" id="randomBtn" title="Random fill"><svg class="ic"><use href="#i-dice"/></svg></button>
+          <button class="btn danger" id="clearBtn" title="Clear grid"><svg class="ic"><use href="#i-x"/></svg></button>
         </div>
         <div class="field">
           <label>Speed</label>
@@ -63,24 +107,53 @@
           <span class="val" id="speedVal">30</span>
         </div>
         <div class="field">
-          <label>Density</label>
-          <input type="range" id="densityRange" min="1" max="99" value="15">
-          <span class="val" id="densityVal">15%</span>
+          <label>Rule</label>
+          <select id="ruleSelect" style="flex:1"></select>
         </div>
         <div class="field">
-          <label>Grid</label>
-          <select id="gridSelect" style="flex:1">
-            <option value="100">100 × 100</option>
-            <option value="250">250 × 250</option>
-            <option value="500" selected>500 × 500</option>
-            <option value="1000">1000 × 1000</option>
-            <option value="2000">2000 × 2000</option>
+          <label>Pattern</label>
+          <select id="patternSelect" style="flex:1">
+            <option value="">— Load a pattern —</option>
           </select>
         </div>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="rule-inputs" style="margin-top:8px">
+            <div>
+              <span class="sub">BIRTH (B)</span>
+              <input type="text" id="birthInput" value="3" maxlength="9" inputmode="numeric">
+            </div>
+            <div>
+              <span class="sub">SURVIVAL (S)</span>
+              <input type="text" id="surviveInput" value="23" maxlength="9" inputmode="numeric">
+            </div>
+          </div>
+          <button class="btn full" id="applyRuleBtn">Apply custom rule</button>
+          <div id="ruleName">B3/S23 — Conway's Life</div>
+          <div class="field" style="margin-top:10px">
+            <label>Density</label>
+            <input type="range" id="densityRange" min="1" max="99" value="15">
+            <span class="val" id="densityVal">15%</span>
+          </div>
+          <div class="field">
+            <label>Grid</label>
+            <select id="gridSelect" style="flex:1">
+              <option value="100">100 × 100</option>
+              <option value="250">250 × 250</option>
+              <option value="500" selected>500 × 500</option>
+              <option value="1000">1000 × 1000</option>
+              <option value="2000">2000 × 2000</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <span>Edge wrapping (toroidal)</span>
+            <label class="switch"><input type="checkbox" id="wrapToggle" checked><span class="track"></span></label>
+          </div>
+        </details>
       </div>
 
-      <!-- TIMELINE -->
-      <div class="card" id="timelineCard">
+      <!-- TIMELINE (appears once history exists) -->
+      <div class="card hiddenCard" id="timelineCard">
         <h3>Timeline</h3>
         <div class="field">
           <label>Rewind</label>
@@ -90,29 +163,61 @@
         <div class="card-note">Drag to rewind to a saved generation, then export or resume from there.</div>
       </div>
 
+      <!-- LOOK -->
+      <div class="card">
+        <h3>Look</h3>
+        <div id="paletteGrid"></div>
+        <div class="seg two" id="themeSeg" style="margin-top:12px">
+          <button class="btn on" data-theme="dark"><svg class="ic"><use href="#i-moon"/></svg>Dark</button>
+          <button class="btn" data-theme="light"><svg class="ic"><use href="#i-paper"/></svg>Paper</button>
+        </div>
+        <div class="seg two" id="renderSeg">
+          <button class="btn" data-render="live">Live</button>
+          <button class="btn on" data-render="history"><svg class="ic"><use href="#i-clock"/></svg>Exposure</button>
+        </div>
+        <button class="btn full" id="resetExpBtn"><svg class="ic"><use href="#i-reset"/></svg>Reset exposure</button>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="field" style="margin-top:8px">
+            <label>Cell shape</label>
+            <select id="shapeSelect" style="flex:1">
+              <option value="0" selected>Square</option>
+              <option value="1">Circle</option>
+              <option value="2">Rounded</option>
+              <option value="3">Diamond</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <span>Bloom (neon glow)</span>
+            <label class="switch"><input type="checkbox" id="bloomToggle" checked><span class="track"></span></label>
+          </div>
+          <div class="field">
+            <label>Intensity</label>
+            <input type="range" id="bloomRange" min="0" max="30" value="12">
+            <span class="val" id="bloomVal">1.2</span>
+          </div>
+        </details>
+      </div>
+
       <!-- SURFACE / 3D -->
       <div class="card">
-        <h3>Surface / 3D</h3>
+        <h3>Surface</h3>
         <div class="seg" id="modeSeg">
-          <button class="btn on" data-mode="planar">▦ Planar</button>
-          <button class="btn" data-mode="torus">🍩 Torus</button>
-          <button class="btn" data-mode="sphere">🌐 Sphere</button>
-          <button class="btn" data-mode="knot">🪢 Knot</button>
-          <button class="btn" data-mode="mobius">➿ Möbius</button>
-          <button class="btn" data-mode="blackhole">🕳 Black Hole</button>
-          <button class="btn" data-mode="terrain">⛰ Terrain</button>
+          <button class="btn on" data-mode="planar"><svg class="ic"><use href="#i-grid"/></svg>Planar</button>
+          <button class="btn" data-mode="torus"><svg class="ic"><use href="#i-torus"/></svg>Torus</button>
+          <button class="btn" data-mode="sphere"><svg class="ic"><use href="#i-globe"/></svg>Sphere</button>
+          <button class="btn" data-mode="knot"><svg class="ic"><use href="#i-knot"/></svg>Knot</button>
+          <button class="btn" data-mode="mobius"><svg class="ic"><use href="#i-infinity"/></svg>Möbius</button>
+          <button class="btn" data-mode="blackhole"><svg class="ic"><use href="#i-blackhole"/></svg>Black Hole</button>
+          <button class="btn" data-mode="terrain"><svg class="ic"><use href="#i-mountain"/></svg>Terrain</button>
         </div>
-        <button class="btn full" id="voxelBtn" style="margin-bottom:10px">🧊 3D Voxel Mode</button>
-        <div class="toggle-row">
-          <span>Edge wrapping (toroidal)</span>
-          <label class="switch"><input type="checkbox" id="wrapToggle" checked><span class="track"></span></label>
-        </div>
+        <button class="btn full" id="voxelBtn"><svg class="ic"><use href="#i-cube"/></svg>3D Voxel Mode</button>
         <div id="orbitControlsBox" style="display:none">
-          <div class="toggle-row">
+          <div class="toggle-row" style="margin-top:10px">
             <span>Auto-rotate camera</span>
             <label class="switch"><input type="checkbox" id="autoRotateToggle"><span class="track"></span></label>
           </div>
-          <button class="btn full" id="resetCamBtn">🎥 Reset Camera</button>
+          <button class="btn full" id="resetCamBtn"><svg class="ic"><use href="#i-camera"/></svg>Reset camera</button>
         </div>
         <div id="terrainBox" style="display:none">
           <div class="field" style="margin-top:10px">
@@ -120,133 +225,111 @@
             <input type="range" id="terrainReliefRange" min="50" max="250" value="100">
             <span class="val" id="terrainReliefVal">1.0×</span>
           </div>
-          <div class="card-note">The landscape grows from the long-exposure history — ridges rise where the CA lived longest, valleys stay untouched. ↺ Reset exposure flattens it.</div>
+          <div class="card-note">The landscape grows from the long-exposure history — ridges rise where the CA lived longest. Reset exposure flattens it.</div>
         </div>
       </div>
 
       <!-- VOXEL SETTINGS -->
       <div class="card hiddenCard" id="voxelCard">
-        <h3>3D Voxel Settings</h3>
+        <h3>Voxel settings</h3>
         <div class="field">
           <label>Grid</label>
           <select id="voxelGridSelect" style="flex:1">
             <option value="30">30³ (27K)</option>
             <option value="50" selected>50³ (125K)</option>
             <option value="70">70³ (343K)</option>
-            <option value="100">100³ (1M — slow!)</option>
+            <option value="100">100³ (1M — slow)</option>
           </select>
         </div>
-        <div class="field">
-          <label>Neighbors</label>
-          <select id="nbSelect" style="flex:1">
-            <option value="moore" selected>Moore (26)</option>
-            <option value="vn">von Neumann (6)</option>
-          </select>
-        </div>
-        <div class="rule-inputs">
-          <div>
-            <span class="sub">BIRTH (0-26)</span>
-            <input type="text" id="birth3dInput" value="4">
-          </div>
-          <div>
-            <span class="sub">SURVIVAL (0-26)</span>
-            <input type="text" id="survive3dInput" value="5">
-          </div>
-        </div>
-        <button class="btn full" id="applyRule3dBtn">✓ Apply 3D Rules</button>
-        <div style="margin-top:10px">
+        <div style="margin-top:4px">
           <select id="rule3dSelect"></select>
         </div>
-        <div id="rule3dName" style="font-size:.7rem;color:var(--muted);margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace">B4/S5 — Conway 3D</div>
         <div class="field" style="margin-top:10px">
           <label>Cube size</label>
           <input type="range" id="voxelSizeRange" min="10" max="100" value="25">
           <span class="val" id="voxelSizeVal">25%</span>
         </div>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="field" style="margin-top:8px">
+            <label>Neighbors</label>
+            <select id="nbSelect" style="flex:1">
+              <option value="moore" selected>Moore (26)</option>
+              <option value="vn">von Neumann (6)</option>
+            </select>
+          </div>
+          <div class="rule-inputs">
+            <div>
+              <span class="sub">BIRTH (0-26)</span>
+              <input type="text" id="birth3dInput" value="4">
+            </div>
+            <div>
+              <span class="sub">SURVIVAL (0-26)</span>
+              <input type="text" id="survive3dInput" value="5">
+            </div>
+          </div>
+          <button class="btn full" id="applyRule3dBtn">Apply 3D rules</button>
+          <div id="rule3dName" style="font-size:.7rem;color:var(--muted);margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace">B4/S5 — Conway 3D</div>
+          <div class="field" style="margin-top:10px">
+            <label>Opacity</label>
+            <input type="range" id="voxelOpacityRange" min="10" max="100" value="100">
+            <span class="val" id="voxelOpacityVal">100%</span>
+          </div>
+          <div class="field">
+            <label>Slice axis</label>
+            <select id="sliceAxisSelect" style="flex:1">
+              <option value="x">X</option>
+              <option value="y" selected>Y</option>
+              <option value="z">Z</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Slice</label>
+            <input type="range" id="sliceRange" min="5" max="100" value="100">
+            <span class="val" id="sliceVal">100%</span>
+          </div>
+        </details>
+      </div>
+
+      <!-- AMBIENCE -->
+      <div class="card">
+        <h3>Ambience</h3>
         <div class="field">
-          <label>Opacity</label>
-          <input type="range" id="voxelOpacityRange" min="10" max="100" value="100">
-          <span class="val" id="voxelOpacityVal">100%</span>
-        </div>
-        <div class="field">
-          <label>Slice axis</label>
-          <select id="sliceAxisSelect" style="flex:1">
-            <option value="x">X</option>
-            <option value="y" selected>Y</option>
-            <option value="z">Z</option>
+          <label>Sound</label>
+          <select id="noiseTypeSelect" style="flex:1">
+            <option value="ocean" selected>Ocean — waves breaking</option>
+            <option value="brown">Brown — deep rumble</option>
+            <option value="pink">Pink — steady rain</option>
+            <option value="white">White — full spectrum</option>
+            <option value="grey">Grey — perceptually flat</option>
+            <option value="blue">Blue — airy hiss</option>
+            <option value="violet">Violet — bright sizzle</option>
           </select>
         </div>
         <div class="field">
-          <label>Slice</label>
-          <input type="range" id="sliceRange" min="5" max="100" value="100">
-          <span class="val" id="sliceVal">100%</span>
+          <label>Volume</label>
+          <input type="range" id="noiseVolRange" min="0" max="100" value="40">
+          <span class="val" id="noiseVolVal">40%</span>
         </div>
-      </div>
-
-      <!-- RULES -->
-      <div class="card">
-        <h3>Rules (Life-like B/S)</h3>
-        <div class="rule-inputs">
-          <div>
-            <span class="sub">BIRTH (B)</span>
-            <input type="text" id="birthInput" value="3" maxlength="9" inputmode="numeric">
+        <button class="btn full" id="noiseBtn"><svg class="ic"><use href="#i-volume"/></svg>Play sound</button>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="field" style="margin-top:8px">
+            <label>Timer</label>
+            <select id="noiseTimerSelect" style="flex:1">
+              <option value="0" selected>Off</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="60">60 min</option>
+            </select>
           </div>
-          <div>
-            <span class="sub">SURVIVAL (S)</span>
-            <input type="text" id="surviveInput" value="23" maxlength="9" inputmode="numeric">
-          </div>
-        </div>
-        <button class="btn full" id="applyRuleBtn">✓ Apply Rules</button>
-        <div style="margin-top:10px">
-          <select id="ruleSelect"></select>
-        </div>
-        <div id="ruleName">B3/S23 — Conway's Life</div>
-      </div>
-
-      <!-- PATTERNS -->
-      <div class="card">
-        <h3>Patterns</h3>
-        <select id="patternSelect">
-          <option value="">— Load a pattern —</option>
-        </select>
-      </div>
-
-      <!-- APPEARANCE -->
-      <div class="card">
-        <h3>Appearance</h3>
-        <div class="seg two" id="themeSeg">
-          <button class="btn on" data-theme="dark">🌑 Dark</button>
-          <button class="btn" data-theme="light">📄 Paper</button>
-        </div>
-        <div class="seg two" id="renderSeg">
-          <button class="btn" data-render="live">Live</button>
-          <button class="btn on" data-render="history">⏱ Exposure</button>
-        </div>
-        <button class="btn full" id="resetExpBtn" style="margin-bottom:10px">↺ Reset exposure</button>
-        <div class="field">
-          <label>Cell shape</label>
-          <select id="shapeSelect" style="flex:1">
-            <option value="0" selected>■ Square</option>
-            <option value="1">● Circle</option>
-            <option value="2">▢ Rounded</option>
-            <option value="3">◆ Diamond</option>
-          </select>
-        </div>
-        <div id="paletteGrid"></div>
-        <div class="toggle-row" style="margin-top:12px">
-          <span>✨ Bloom (neon glow)</span>
-          <label class="switch"><input type="checkbox" id="bloomToggle" checked><span class="track"></span></label>
-        </div>
-        <div class="field">
-          <label>Intensity</label>
-          <input type="range" id="bloomRange" min="0" max="30" value="12">
-          <span class="val" id="bloomVal">1.2</span>
-        </div>
+          <div class="card-note">Timer fades the sound out automatically — made for studying and sleep.</div>
+        </details>
       </div>
 
       <!-- EXPORT -->
       <div class="card">
-        <h3>Export HD</h3>
+        <h3>Export</h3>
         <div class="field">
           <label>Size</label>
           <select id="exportSelect" style="flex:1">
@@ -258,17 +341,7 @@
             <option value="7200x10800">7200 × 10800 — Poster 24×36″ @300dpi</option>
           </select>
         </div>
-        <div class="field">
-          <label>Fit</label>
-          <select id="exportFitSelect" style="flex:1">
-            <option value="fit" selected>Fit (letterbox — full grid)</option>
-            <option value="fill">Fill (center crop)</option>
-            <option value="smart">Smart crop (densest area)</option>
-          </select>
-        </div>
-        <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)</label>
-        <label class="check-row"><input type="checkbox" id="overlayCheck"> Overlay info (rule + gen + URL)</label>
-        <button class="btn primary full" id="exportBtn">⬇ Export PNG</button>
+        <button class="btn primary full" id="exportBtn"><svg class="ic"><use href="#i-download"/></svg>Export PNG</button>
         <div class="field" style="margin-top:10px">
           <label>Video</label>
           <select id="videoDurSelect" style="flex:1">
@@ -277,40 +350,21 @@
             <option value="10">10 seconds</option>
           </select>
         </div>
-        <button class="btn full" id="videoBtn">🎬 Export Video</button>
-        <div class="card-note">Video captures the live viewport (incl. 3D camera motion) as WebM.</div>
-      </div>
-
-      <!-- AMBIENCE (color noise generator) -->
-      <div class="card">
-        <h3>Ambience</h3>
-        <div class="field">
-          <label>Noise</label>
-          <select id="noiseTypeSelect" style="flex:1">
-            <option value="white">⚪ White — full spectrum</option>
-            <option value="pink">🌸 Pink — natural, rain-like</option>
-            <option value="brown" selected>🟤 Brown — deep, ocean-like</option>
-            <option value="blue">🔵 Blue — airy hiss</option>
-            <option value="violet">🟣 Violet — bright sizzle</option>
-            <option value="grey">⬜ Grey — perceptually flat</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Volume</label>
-          <input type="range" id="noiseVolRange" min="0" max="100" value="40">
-          <span class="val" id="noiseVolVal">40%</span>
-        </div>
-        <div class="field">
-          <label>Timer</label>
-          <select id="noiseTimerSelect" style="flex:1">
-            <option value="0" selected>Off</option>
-            <option value="15">15 min</option>
-            <option value="30">30 min</option>
-            <option value="60">60 min</option>
-          </select>
-        </div>
-        <button class="btn full" id="noiseBtn">▶ Play noise</button>
-        <div class="card-note">Color noise for focus or sleep — pair it with the visuals. Timer fades out automatically.</div>
+        <button class="btn full" id="videoBtn"><svg class="ic"><use href="#i-video"/></svg>Export video</button>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="field" style="margin-top:8px">
+            <label>Fit</label>
+            <select id="exportFitSelect" style="flex:1">
+              <option value="fit" selected>Fit (letterbox — full grid)</option>
+              <option value="fill">Fill (center crop)</option>
+              <option value="smart">Smart crop (densest area)</option>
+            </select>
+          </div>
+          <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)</label>
+          <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Signature label on export</label>
+          <div class="card-note">Video captures the live viewport (incl. 3D camera motion) as WebM.</div>
+        </details>
       </div>
     </aside>
   </main>

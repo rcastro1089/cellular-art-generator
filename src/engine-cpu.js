@@ -1,5 +1,5 @@
 /* ── CANVAS 2D FALLBACK ENGINE ─────────────────────────────────── */
-import { state, digitsToMask, viewUV } from './state.js';
+import { state, digitsToMask, coverUV } from './state.js';
 import { activePal } from './palettes.js';
 import { bestWindowOffset } from './util.js';
 
@@ -161,13 +161,15 @@ export class CPUEngine {
     this.offCtx.putImageData(this.img, 0, 0);
   }
 
-  _drawScaled(ctx, W, H){
-    const n = this.n;
-    // cover-crop from square grid
-    let sx = 0, sy = 0, sw = n, sh = n;
-    if (W > H){ sh = n * H / W; sy = (n - sh) / 2; }
-    else if (H > W){ sw = n * W / H; sx = (n - sw) / 2; }
+  render(){
+    this._drawGridBuffer();
+    const W = this.canvas.width, H = this.canvas.height, ctx = this.ctx, n = this.n;
+    // pan/zoom + cover-crop window in off-buffer coords (row 0 = grid y max)
+    const c = coverUV(W, H);
+    const sx = c.ox * n, sy = (1 - c.oy - c.sy) * n, sw = c.sx * n, sh = c.sy * n;
     ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = `rgb(${activePal().bgRGB.map(v => v * 255 | 0).join(',')})`;
+    ctx.fillRect(0, 0, W, H);
     ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, W, H);
     if (state.bloom && !activePal().lightBg && 'filter' in ctx){
       ctx.save();
@@ -177,21 +179,6 @@ export class CPUEngine {
       ctx.drawImage(this.off, sx, sy, sw, sh, 0, 0, W, H);
       ctx.restore();
     }
-  }
-
-  render(){
-    this._drawGridBuffer();
-    const { s, ox, oy } = viewUV(), n = this.n;
-    if (s === 1){
-      this._drawScaled(this.ctx, this.canvas.width, this.canvas.height);
-      return;
-    }
-    // zoomed view: source window in off-buffer coords (row 0 = grid y max)
-    const W = this.canvas.width, H = this.canvas.height, ctx = this.ctx;
-    ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = `rgb(${activePal().bgRGB.map(v => v * 255 | 0).join(',')})`;
-    ctx.fillRect(0, 0, W, H);
-    ctx.drawImage(this.off, ox * n, (1 - oy - s) * n, s * n, s * n, 0, 0, W, H);
   }
 
   renderToPixels(w, h, fitMode = 'fit', transparent = false){

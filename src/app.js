@@ -1,8 +1,8 @@
 /* ── APP — UI bindings, mode orchestration, main loop, init ──────
    All $()/addEventListener glue lives here (or in the self-contained
    feature modules exports.js / ambience.js / timeline.js). */
-import { $, toast } from './util.js';
-import { state, VIEW2D, viewUV, clampView } from './state.js';
+import { $, toast, icon } from './util.js';
+import { state, VIEW2D, viewUV, coverUV, clampView } from './state.js';
 import { PALETTES, activePal } from './palettes.js';
 import { PRESET_RULES, PATTERNS, PRESET_RULES_3D, parseDigits, parse3dCounts, ruleString } from './rules.js';
 import { engine, canvas } from './engine.js';
@@ -86,7 +86,7 @@ export function setRunning(run){
     updateHistoryUI();
   }
   state.running = run;
-  $('playBtn').textContent = run ? '⏸' : '▶';
+  $('playBtn').innerHTML = icon(run ? 'pause' : 'play');
   $('playBtn').title = run ? 'Pause' : 'Play';
 }
 function doStep(){
@@ -105,7 +105,7 @@ $('densityRange').addEventListener('input', e => { state.density = e.target.valu
 $('gridSelect').addEventListener('change', e => {
   const n = +e.target.value;
   if (engine.name === 'Canvas2D' && n > 1000){
-    toast('⚠ Large grids are slow without WebGL2', 'err');
+    toast('Large grids are slow without WebGL2', 'err');
   }
   setGridSize(n);
   toast(`Grid: ${n} × ${n}`, 'ok');
@@ -117,6 +117,9 @@ $('applyRuleBtn').addEventListener('click', () => applyRules($('birthInput').val
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') $('applyRuleBtn').click(); }));
 {
   const sel = $('ruleSelect');
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = '— Rule presets —';
+  sel.appendChild(ph);
   PRESET_RULES.forEach(r => {
     const o = document.createElement('option');
     o.value = r.name;
@@ -179,7 +182,7 @@ document.querySelectorAll('#themeSeg .btn').forEach(b =>
     state.theme = b.dataset.theme;
     document.querySelectorAll('#themeSeg .btn').forEach(x => x.classList.toggle('on', x === b));
     if (state.viewMode === 'voxel') THREE3D.refreshVoxels();
-    toast(state.theme === 'light' ? '📄 Paper theme — print ready' : '🌑 Dark theme', 'ok');
+    toast(state.theme === 'light' ? 'Paper theme — print ready' : 'Dark theme', 'ok');
   }));
 document.querySelectorAll('#renderSeg .btn').forEach(b =>
   b.addEventListener('click', () => {
@@ -187,7 +190,7 @@ document.querySelectorAll('#renderSeg .btn').forEach(b =>
     document.querySelectorAll('#renderSeg .btn').forEach(x => x.classList.toggle('on', x === b));
     $('resetExpBtn').style.display = state.renderMode === 'history' ? '' : 'none';
     if (state.viewMode === 'voxel') THREE3D.refreshVoxels();   // show/hide ghosts
-    toast(state.renderMode === 'history' ? '⏱ Long exposure — history accumulates' : 'Live mode', 'ok');
+    toast(state.renderMode === 'history' ? 'Long exposure — history accumulates' : 'Live mode', 'ok');
   }));
 $('resetExpBtn').addEventListener('click', () => {
   if (state.viewMode === 'voxel' && THREE3D.voxel){
@@ -211,8 +214,8 @@ export function eventToCell(e){
   const xN = (e.clientX - rect.left) / rect.width;
   const yN = (e.clientY - rect.top) / rect.height;
   if (xN < 0 || yN < 0 || xN >= 1 || yN >= 1) return null;
-  const v = viewUV();                       // map through the pan/zoom window
-  const ux = xN * v.s + v.ox, uy = (1 - yN) * v.s + v.oy;
+  const c = coverUV(canvas.width, canvas.height);   // pan/zoom + cover-crop window
+  const ux = xN * c.sx + c.ox, uy = (1 - yN) * c.sy + c.oy;
   if (ux < 0 || uy < 0 || ux >= 1 || uy >= 1) return null;
   const n = state.grid;
   return { x: Math.floor(ux * n), y: Math.floor(uy * n) };   // engine y-up
@@ -277,9 +280,9 @@ function updateModeUI(){
   const m = state.viewMode;
   document.querySelectorAll('#modeSeg .btn').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
   $('voxelBtn').classList.toggle('primary', m === 'voxel');
-  $('voxelBtn').textContent = m === 'voxel' ? '▦ Exit Voxel Mode' : '🧊 3D Voxel Mode';
+  $('voxelBtn').innerHTML = m === 'voxel' ? icon('grid') + 'Exit Voxel Mode' : icon('cube') + '3D Voxel Mode';
   $('voxelCard').classList.toggle('hiddenCard', m !== 'voxel');
-  $('timelineCard').classList.toggle('hiddenCard', m === 'voxel');
+  updateHistoryUI();   // timeline card visibility (voxel-aware)
   $('orbitControlsBox').style.display = m === 'planar' ? 'none' : 'block';
   $('terrainBox').style.display = m === 'terrain' ? 'block' : 'none';
   $('canvasWrap').classList.toggle('mode3d', m !== 'planar');
@@ -398,7 +401,7 @@ holdable($('vbRotR'), () => orbit3d(-0.07));
 $('vbPan').addEventListener('click', () => {
   panMode = !panMode;
   applyPanMode();
-  toast(panMode ? '✋ Pan — drag moves the view' : 'Pan off — drag paints again', 'ok');
+  toast(panMode ? 'Pan — drag moves the view' : 'Pan off — drag paints again', 'ok');
 });
 $('vbFit').addEventListener('click', () => {
   if (is3dView() && THREE3D.controls) THREE3D.controls.reset();
@@ -413,7 +416,7 @@ $('vbFull').addEventListener('click', () => {
 /* voxel settings UI */
 $('voxelGridSelect').addEventListener('change', e => {
   state.voxelN = +e.target.value;
-  if (state.voxelN >= 100) toast('⚠ 100³ = 1M voxels — expect low FPS', 'err');
+  if (state.voxelN >= 100) toast('100³ = one million voxels — expect low FPS', 'err');
   if (state.viewMode === 'voxel') THREE3D.buildVoxelWorld();
 });
 $('nbSelect').addEventListener('change', e => { state.nb3d = e.target.value; });
@@ -473,21 +476,52 @@ $('sliceRange').addEventListener('input', e => {
   THREE3D.refreshVoxels();
 });
 
-/* ── CANVAS SIZING ─────────────────────────────────────────────── */
+/* ── CANVAS SIZING ─────────────────────────────────────────────────
+   Windowed: square viewport (grid aspect). Focus mode (fullscreen):
+   the canvas covers the whole screen — engines cover-crop via coverUV,
+   3D cameras get the real aspect. */
 function fitCanvas(){
   const stage = $('stage');
-  const pad = 60;
-  const size = Math.max(220, Math.min(stage.clientWidth - pad, stage.clientHeight - pad));
+  const fs = document.fullscreenElement === stage;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const px = Math.min(Math.round(size * dpr), 1600);
-  canvas.style.width = canvas.style.height = size + 'px';
-  if (canvas.width !== px){ canvas.width = canvas.height = px; }
-  THREE3D.canvasEl.style.width = THREE3D.canvasEl.style.height = size + 'px';
-  if (THREE3D.renderer) THREE3D.renderer.setSize(px, px, false);
-  if (THREE3D.composer) THREE3D.composer.setSize(px, px);
+  let cssW, cssH;
+  if (fs){
+    cssW = stage.clientWidth; cssH = stage.clientHeight;
+  } else {
+    const pad = 60;
+    cssW = cssH = Math.max(220, Math.min(stage.clientWidth - pad, stage.clientHeight - pad));
+  }
+  const cap = fs ? 1920 : 1600;                     // render-size budget
+  const scale = Math.min(dpr, cap / Math.max(cssW, cssH));
+  const pxW = Math.max(1, Math.round(cssW * scale));
+  const pxH = Math.max(1, Math.round(cssH * scale));
+  canvas.style.width = cssW + 'px'; canvas.style.height = cssH + 'px';
+  if (canvas.width !== pxW || canvas.height !== pxH){ canvas.width = pxW; canvas.height = pxH; }
+  const tc = THREE3D.canvasEl;
+  tc.style.width = cssW + 'px'; tc.style.height = cssH + 'px';
+  if (THREE3D.renderer){
+    THREE3D.renderer.setSize(pxW, pxH, false);
+    if (THREE3D.camera){
+      THREE3D.camera.aspect = pxW / pxH;
+      THREE3D.camera.updateProjectionMatrix();
+    }
+  }
+  if (THREE3D.composer) THREE3D.composer.setSize(pxW, pxH);
 }
 new ResizeObserver(fitCanvas).observe($('stage'));
 fitCanvas();
+
+/* Focus mode chrome: after 3s idle in fullscreen, hide toolbar + cursor. */
+let idleTimer = null;
+function armIdle(){
+  const st = $('stage');
+  st.classList.remove('idle');
+  clearTimeout(idleTimer);
+  if (document.fullscreenElement === st)
+    idleTimer = setTimeout(() => st.classList.add('idle'), 3000);
+}
+document.addEventListener('fullscreenchange', () => { fitCanvas(); armIdle(); });
+$('stage').addEventListener('pointermove', armIdle);
 
 /* ── STATS + MAIN LOOP ─────────────────────────────────────────── */
 let lastPopTime = 0;
@@ -566,5 +600,6 @@ requestAnimationFrame(frame);
   const m = location.hash.match(/mode=(torus|sphere|voxel|knot|mobius|blackhole|terrain)/);   // shareable view mode
   if (m) setViewMode(m[1]);
 }
-console.log(`%c🦠 Cellular Automata Art Generator`, 'font-size:16px;color:#00d4ff;font-weight:bold');
+console.log(`%cCellscape %c— grown, not drawn`,
+  'font-size:16px;color:#00d4ff;font-weight:bold', 'font-size:12px;color:#8a8aa3');
 console.log(`Renderer: ${engine.name} · Grid: ${state.grid}² · Rule: ${ruleString()}`);

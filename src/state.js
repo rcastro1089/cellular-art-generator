@@ -50,6 +50,17 @@ export function viewUV(){
   const s = 1 / VIEW2D.z;
   return { s, ox: VIEW2D.cx - s / 2, oy: VIEW2D.cy - s / 2 };
 }
+/* Cover-crop uv window for a (possibly non-square) canvas: keeps cells
+   square by cropping the grid to the canvas aspect (focus-mode fullscreen).
+   Identity for square canvases — matches the old behavior exactly. */
+export function coverUV(w, h){
+  const v = viewUV();
+  let sx = v.s, sy = v.s, ox = v.ox, oy = v.oy;
+  if (w > h){ sy = v.s * h / w; oy += (v.s - sy) / 2; }
+  else if (h > w){ sx = v.s * w / h; ox += (v.s - sx) / 2; }
+  return { sx, sy, ox, oy };
+}
+
 export function clampView(){
   VIEW2D.z = Math.min(Math.max(VIEW2D.z, 1), 32);
   const h = 0.5 / VIEW2D.z;

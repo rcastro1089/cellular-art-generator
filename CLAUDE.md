@@ -1,7 +1,14 @@
-# Cellular Automata Art Generator
+# Cellscape — Cellular Automata Art Generator
 
 ## Project Overview
 Web-based generative art tool combining Conway's Game of Life and Life-like cellular automata with print-on-demand integration. Users create art by configuring rules, playing the simulation, and exporting/ordering physical prints.
+
+## Branding (decided 2026-07-17)
+- **Brand:** Cellscape (long descriptive name stays as SEO subtitle)
+- **Tagline / print legend:** "Grown, not drawn — Cellscape · B3/S23 · gen N"
+- Export signature overlay ON by default (drawSignature in features/exports.js);
+  filenames `cellscape-*`. UI is emoji-free: inline SVG sprite in index.html
+  (`#i-*` symbols) + `icon()` helper in util.js.
 
 ## Stack
 - **Simulation:** WebGL2 fragment shaders (primary) + Canvas 2D (fallback)
@@ -67,9 +74,16 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
   FEATURES.noiseGenerator premium hook
 - Voxel: long-exposure ghosts (born/lastVisit/visitCnt mirror of 2D accum),
   cube-size slider (default 25% pitch), 8 rule presets (some set neighborhood)
-- Viewport toolbar (#viewBar): zoom/rotate/pan/fit/fullscreen; 2D pan+zoom via
-  uv window (VIEW2D → viewUV(), planar only), wheel zoom, ✋ drag-pan mode;
+- Viewport toolbar (#viewBar): zoom/rotate/pan/fit/focus; 2D pan+zoom via
+  uv window (VIEW2D → viewUV()/coverUV(), planar only), wheel zoom, drag-pan;
   3D wired to OrbitControls camera. Exports ignore the view (full artwork)
+- Focus mode: fullscreen renders cover-viewport (coverUV aspect crop in both
+  engines + camera.aspect in 3D), UI chrome/cursor auto-hide after 3s idle,
+  Cellscape watermark. Sidebar uses progressive disclosure (details.adv);
+  timeline card auto-appears once ≥2 snapshots
+- Ambience v2: 6 noise colors + Ocean (brown noise + randomized swell LFO on
+  lowpass/gain/pan), fade-in 1.8s / fade-out 1.2s / type crossfade 0.6s,
+  per-type loudness calibration (NOISE_CAL), DynamicsCompressor limiter
 - Video export: 3/5/10s WebM (VP9→VP8→MP4 Safari) of the live viewport (2D or
   3D), explicit requestFrame pump @30fps, 12 Mbps. FEATURES.videoExport =
   premium gating hook (sprint 3 Gumroad)

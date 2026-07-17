@@ -259,3 +259,58 @@ select option{background:#14142a}
   #headStats{display:none}
   #hint{display:none}
 }
+
+/* ── Icons (inline SVG sprite) ──────── */
+.ic{
+  width:1.05em;height:1.05em;flex:0 0 auto;
+  stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  vertical-align:-0.15em;
+}
+h1 .ic.logo{width:1.25em;height:1.25em;color:var(--accent);vertical-align:-0.22em;margin-right:8px}
+.btn .ic{margin-right:6px}
+.btn-row .btn .ic, #viewBar .ic{margin-right:0}
+.btn{display:inline-flex;align-items:center;justify-content:center}
+header .subtitle{
+  font-size:.66rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;
+  margin-left:-4px;white-space:nowrap;
+}
+.seg .btn .ic{width:.95em;height:.95em;margin-right:5px}
+
+/* ── Advanced disclosure ────────────── */
+details.adv{margin-top:10px}
+details.adv summary{
+  cursor:pointer;list-style:none;user-select:none;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:4px 0;display:flex;align-items:center;gap:6px;
+  transition:color .15s;
+}
+details.adv summary:hover{color:var(--text)}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{
+  content:'';width:7px;height:7px;flex:0 0 auto;
+  border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(-45deg);transition:transform .18s;margin-top:-2px;
+}
+details.adv[open] summary::before{transform:rotate(45deg);margin-top:-4px}
+details.adv > *:not(summary){animation:advIn .18s ease}
+@keyframes advIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+
+/* ── Focus mode (fullscreen ambient view) ── */
+#fsWatermark{
+  position:absolute;right:22px;bottom:18px;z-index:6;display:none;
+  align-items:center;gap:8px;font-size:.8rem;font-weight:600;letter-spacing:.06em;
+  color:rgba(255,255,255,.5);pointer-events:none;
+}
+#fsWatermark .ic{width:1.1em;height:1.1em}
+#stage:fullscreen{padding:0}
+#stage:fullscreen #fsWatermark{display:flex}
+#stage:fullscreen #hint{display:none}
+#stage:fullscreen #canvasWrap{
+  padding:0;border:none;border-radius:0;box-shadow:none;background:none;
+  width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;
+}
+#stage:fullscreen canvas{border-radius:0;max-width:none;max-height:none}
+#stage.idle{cursor:none}
+#stage.idle #viewBar, #stage.idle #fsWatermark{opacity:0;transition:opacity .6s}
+#viewBar, #fsWatermark{transition:opacity .4s}
