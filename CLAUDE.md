@@ -77,10 +77,20 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 - Viewport toolbar (#viewBar): zoom/rotate/pan/fit/focus; 2D pan+zoom via
   uv window (VIEW2D → viewUV()/coverUV(), planar only), wheel zoom, drag-pan;
   3D wired to OrbitControls camera. Exports ignore the view (full artwork)
+- Canvas fills the full width/height of its frame by default (windowed too):
+  fitCanvas measures #canvasWrap; engines cover-crop the grid via coverUV so
+  cells stay square. Export presets still offer square (3600²) + wide/poster
 - Focus mode: fullscreen renders cover-viewport (coverUV aspect crop in both
   engines + camera.aspect in 3D), UI chrome/cursor auto-hide after 3s idle,
-  Cellscape watermark. Sidebar uses progressive disclosure (details.adv);
+  Cellscape watermark. keepAlive() (planar+fullscreen+running only) sprinkles
+  random sparks when population stalls, so an ambient background never freezes
+  once the CA settles. Sidebar uses progressive disclosure (details.adv);
   timeline card auto-appears once ≥2 snapshots
+- Landing state: paused with the artwork seeded + pulsing play button
+  (.pulse) inviting first play; first play also unlocks/starts the ambience
+  sound (userPlayToggle, the click is the autoplay gesture)
+- Layout: sidebar = Create (playback + rule/pattern + compact sound play/volume)
+  → Surface → Look → Ambience (sound picker + timer) → Export
 - Ambience v2: 6 noise colors + Ocean (brown noise + randomized swell LFO on
   lowpass/gain/pan), fade-in 1.8s / fade-out 1.2s / type crossfade 0.6s,
   per-type loudness calibration (NOISE_CAL), DynamicsCompressor limiter

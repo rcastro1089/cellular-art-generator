@@ -116,6 +116,15 @@
             <option value="">— Load a pattern —</option>
           </select>
         </div>
+        <hr class="card-divider">
+        <div class="quick-sound">
+          <button class="btn full" id="noiseBtn"><svg class="ic"><use href="#i-volume"/></svg>Play sound</button>
+          <div class="field">
+            <label>Volume</label>
+            <input type="range" id="noiseVolRange" min="0" max="100" value="40">
+            <span class="val" id="noiseVolVal">40%</span>
+          </div>
+        </div>
         <details class="adv">
           <summary>Advanced</summary>
           <div class="rule-inputs" style="margin-top:8px">
@@ -148,53 +157,6 @@
           <div class="toggle-row">
             <span>Edge wrapping (toroidal)</span>
             <label class="switch"><input type="checkbox" id="wrapToggle" checked><span class="track"></span></label>
-          </div>
-        </details>
-      </div>
-
-      <!-- TIMELINE (appears once history exists) -->
-      <div class="card hiddenCard" id="timelineCard">
-        <h3>Timeline</h3>
-        <div class="field">
-          <label>Rewind</label>
-          <input type="range" id="histRange" min="0" max="0" value="0" disabled>
-          <span class="val" id="histVal">—</span>
-        </div>
-        <div class="card-note">Drag to rewind to a saved generation, then export or resume from there.</div>
-      </div>
-
-      <!-- LOOK -->
-      <div class="card">
-        <h3>Look</h3>
-        <div id="paletteGrid"></div>
-        <div class="seg two" id="themeSeg" style="margin-top:12px">
-          <button class="btn on" data-theme="dark"><svg class="ic"><use href="#i-moon"/></svg>Dark</button>
-          <button class="btn" data-theme="light"><svg class="ic"><use href="#i-paper"/></svg>Paper</button>
-        </div>
-        <div class="seg two" id="renderSeg">
-          <button class="btn" data-render="live">Live</button>
-          <button class="btn on" data-render="history"><svg class="ic"><use href="#i-clock"/></svg>Exposure</button>
-        </div>
-        <button class="btn full" id="resetExpBtn"><svg class="ic"><use href="#i-reset"/></svg>Reset exposure</button>
-        <details class="adv">
-          <summary>Advanced</summary>
-          <div class="field" style="margin-top:8px">
-            <label>Cell shape</label>
-            <select id="shapeSelect" style="flex:1">
-              <option value="0" selected>Square</option>
-              <option value="1">Circle</option>
-              <option value="2">Rounded</option>
-              <option value="3">Diamond</option>
-            </select>
-          </div>
-          <div class="toggle-row">
-            <span>Bloom (neon glow)</span>
-            <label class="switch"><input type="checkbox" id="bloomToggle" checked><span class="track"></span></label>
-          </div>
-          <div class="field">
-            <label>Intensity</label>
-            <input type="range" id="bloomRange" min="0" max="30" value="12">
-            <span class="val" id="bloomVal">1.2</span>
           </div>
         </details>
       </div>
@@ -291,7 +253,54 @@
         </details>
       </div>
 
-      <!-- AMBIENCE -->
+      <!-- TIMELINE (appears once history exists) -->
+      <div class="card hiddenCard" id="timelineCard">
+        <h3>Timeline</h3>
+        <div class="field">
+          <label>Rewind</label>
+          <input type="range" id="histRange" min="0" max="0" value="0" disabled>
+          <span class="val" id="histVal">—</span>
+        </div>
+        <div class="card-note">Drag to rewind to a saved generation, then export or resume from there.</div>
+      </div>
+
+      <!-- LOOK -->
+      <div class="card">
+        <h3>Look</h3>
+        <div id="paletteGrid"></div>
+        <div class="seg two" id="themeSeg" style="margin-top:12px">
+          <button class="btn on" data-theme="dark"><svg class="ic"><use href="#i-moon"/></svg>Dark</button>
+          <button class="btn" data-theme="light"><svg class="ic"><use href="#i-paper"/></svg>Paper</button>
+        </div>
+        <div class="seg two" id="renderSeg">
+          <button class="btn" data-render="live">Live</button>
+          <button class="btn on" data-render="history"><svg class="ic"><use href="#i-clock"/></svg>Exposure</button>
+        </div>
+        <button class="btn full" id="resetExpBtn"><svg class="ic"><use href="#i-reset"/></svg>Reset exposure</button>
+        <details class="adv">
+          <summary>Advanced</summary>
+          <div class="field" style="margin-top:8px">
+            <label>Cell shape</label>
+            <select id="shapeSelect" style="flex:1">
+              <option value="0" selected>Square</option>
+              <option value="1">Circle</option>
+              <option value="2">Rounded</option>
+              <option value="3">Diamond</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <span>Bloom (neon glow)</span>
+            <label class="switch"><input type="checkbox" id="bloomToggle" checked><span class="track"></span></label>
+          </div>
+          <div class="field">
+            <label>Intensity</label>
+            <input type="range" id="bloomRange" min="0" max="30" value="12">
+            <span class="val" id="bloomVal">1.2</span>
+          </div>
+        </details>
+      </div>
+
+      <!-- AMBIENCE (sound picker + timer; play/volume live in Create) -->
       <div class="card">
         <h3>Ambience</h3>
         <div class="field">
@@ -307,24 +316,15 @@
           </select>
         </div>
         <div class="field">
-          <label>Volume</label>
-          <input type="range" id="noiseVolRange" min="0" max="100" value="40">
-          <span class="val" id="noiseVolVal">40%</span>
+          <label>Timer</label>
+          <select id="noiseTimerSelect" style="flex:1">
+            <option value="0" selected>Off</option>
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+            <option value="60">60 min</option>
+          </select>
         </div>
-        <button class="btn full" id="noiseBtn"><svg class="ic"><use href="#i-volume"/></svg>Play sound</button>
-        <details class="adv">
-          <summary>Advanced</summary>
-          <div class="field" style="margin-top:8px">
-            <label>Timer</label>
-            <select id="noiseTimerSelect" style="flex:1">
-              <option value="0" selected>Off</option>
-              <option value="15">15 min</option>
-              <option value="30">30 min</option>
-              <option value="60">60 min</option>
-            </select>
-          </div>
-          <div class="card-note">Timer fades the sound out automatically — made for studying and sleep.</div>
-        </details>
+        <div class="card-note">Play &amp; volume live in Create. The timer fades sound out on its own — made for studying and sleep.</div>
       </div>
 
       <!-- EXPORT -->
@@ -363,7 +363,7 @@
           </div>
           <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)</label>
           <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Signature label on export</label>
-          <div class="card-note">Video captures the live viewport (incl. 3D camera motion) as WebM.</div>
+          <div class="card-note">Square (3600²) and wide formats above both export the full artwork. Video captures the live viewport as WebM.</div>
         </details>
       </div>
     </aside>

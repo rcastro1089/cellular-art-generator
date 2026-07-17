@@ -8,6 +8,7 @@ import { PRESET_RULES, PATTERNS, PRESET_RULES_3D, parseDigits, parse3dCounts, ru
 import { engine, canvas } from './engine.js';
 import { THREE3D } from './three3d.js';
 import { SNAP, resetSnapshots, maybeSnapshot, updateHistoryUI } from './timeline.js';
+import { AMBIENCE } from './ambience.js';
 
 /* ── GRID OPERATIONS (engine-agnostic; y-up convention) ────────── */
 function newCells(){ return new Uint8Array(state.grid * state.grid); }
@@ -86,8 +87,23 @@ export function setRunning(run){
     updateHistoryUI();
   }
   state.running = run;
+  if (run) $('playBtn').classList.remove('pulse');   // invitation served
   $('playBtn').innerHTML = icon(run ? 'pause' : 'play');
   $('playBtn').title = run ? 'Pause' : 'Play';
+}
+
+/* First user-initiated play also starts the selected ambience sound (the
+   click is the autoplay gesture). Only once per session — after that, sim
+   playback and sound are independent (stopping the sound stays stopped). */
+let inviting = true;
+function userPlayToggle(){
+  const run = !state.running;
+  setRunning(run);
+  if (run && inviting){
+    inviting = false;
+    if (!AMBIENCE.playing)
+      AMBIENCE.start().catch(err => console.warn('Ambience autostart failed:', err.message));
+  }
 }
 function doStep(){
   if (state.viewMode === 'voxel'){
@@ -96,7 +112,7 @@ function doStep(){
   }
   engine.step(); state.gen++; maybeSnapshot(); refreshStats(true);
 }
-$('playBtn').addEventListener('click', () => setRunning(!state.running));
+$('playBtn').addEventListener('click', userPlayToggle);
 $('stepBtn').addEventListener('click', () => { setRunning(false); doStep(); });
 $('randomBtn').addEventListener('click', randomFill);
 $('clearBtn').addEventListener('click', () => { setRunning(false); clearGrid(); });
@@ -268,7 +284,7 @@ canvas.addEventListener('wheel', e => {
 document.addEventListener('keydown', e => {
   if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
   switch (e.key){
-    case ' ': e.preventDefault(); setRunning(!state.running); break;
+    case ' ': e.preventDefault(); userPlayToggle(); break;
     case 'r': case 'R': randomFill(); break;
     case 'c': case 'C': setRunning(false); clearGrid(); break;
     case 's': case 'S': setRunning(false); doStep(); break;
@@ -488,8 +504,14 @@ function fitCanvas(){
   if (fs){
     cssW = stage.clientWidth; cssH = stage.clientHeight;
   } else {
-    const pad = 60;
-    cssW = cssH = Math.max(220, Math.min(stage.clientWidth - pad, stage.clientHeight - pad));
+    // fill the full width/height of the canvas frame (wrap is flex-sized,
+    // independent of the canvas, so measuring it can't feed back)
+    const wrap = $('canvasWrap');
+    const cs = getComputedStyle(wrap);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    cssW = Math.max(160, wrap.clientWidth - padX);
+    cssH = Math.max(160, wrap.clientHeight - padY);
   }
   const cap = fs ? 1920 : 1600;                     // render-size budget
   const scale = Math.min(dpr, cap / Math.max(cssW, cssH));
@@ -540,6 +562,28 @@ export function refreshStats(forcePop){
     try { $('stPop').textContent = engine.population().toLocaleString(); } catch(_){}
   }
 }
+/* Ambient keep-alive: many rules (Conway included) settle into still lifes
+   after a while, so a focus-mode background eventually stops moving. Only
+   while fullscreen + running, sample population every ~90 gens and, if it has
+   barely changed (stasis), sprinkle a few random sparks to reignite motion.
+   Scoped to fullscreen so it never disturbs someone composing an artwork. */
+let kaPrevPop = -1;
+function keepAlive(){
+  if (document.fullscreenElement !== $('stage') || !state.running) { kaPrevPop = -1; return; }
+  if (state.gen === 0 || state.gen % 90) return;
+  let pop = 0;
+  try { pop = engine.population(); } catch (_) { return; }
+  if (kaPrevPop >= 0 && Math.abs(pop - kaPrevPop) < Math.max(6, state.grid * 0.0006)){
+    const n = state.grid;
+    for (let k = 0; k < 10; k++){                 // ten small gliders/clusters
+      const x = 2 + Math.floor(Math.random() * (n - 4));
+      const y = 2 + Math.floor(Math.random() * (n - 4));
+      for (let i = 0; i < 5; i++)
+        engine.paint(x + (Math.random()*3|0), y + (Math.random()*3|0), 1, 0);
+    }
+  }
+  kaPrevPop = pop;
+}
 let lastTime = performance.now(), acc = 0, frames = 0, fpsTime = performance.now();
 function frame(now){
   const dt = Math.min(now - lastTime, 250);
@@ -568,6 +612,7 @@ function frame(now){
       }
     }
     if (mode === 'planar'){
+      keepAlive();
       engine.render();
     } else if (THREE3D.ready && THREE3D.texture){
       engine.render();                          // hidden canvas feeds the surface texture
@@ -595,6 +640,10 @@ canvas.addEventListener('webglcontextlost', e => {
 engine.createGrid(state.grid);
 randomFill();
 applyRules('3', '23', true);
+/* Land paused with the artwork seeded — the pulsing play button invites the
+   first interaction (which also unlocks the ambience sound). */
+setRunning(false);
+$('playBtn').classList.add('pulse');
 requestAnimationFrame(frame);
 {
   const m = location.hash.match(/mode=(torus|sphere|voxel|knot|mobius|blackhole|terrain)/);   // shareable view mode
