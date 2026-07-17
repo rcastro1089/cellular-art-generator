@@ -5,24 +5,44 @@ Web-based generative art tool combining Conway's Game of Life and Life-like cell
 
 ## Stack
 - **Simulation:** WebGL2 fragment shaders (primary) + Canvas 2D (fallback)
-- **3D:** Three.js (lazy-loaded CDN)
+- **3D:** Three.js (lazy-loaded CDN via import map)
 - **Payments:** Gumroad (digital downloads)
 - **POD:** Printful
 - **Hosting:** Cloudflare Pages (static)
-- **Framework:** Vanilla JS — no build step, single HTML file core
+- **Framework:** Vanilla JS — no build step, native ES modules
 
 ## Project Structure (actual repo contents)
 ```
 cellular-art-generator/
-├── index.html              → ENTIRE app: single file (HTML+CSS+JS+GLSL inline, no build)
-├── v0-prototype.html       → Earlier prototype (reference only)
-├── img example/            → Print-quality reference images
-├── openspec/               → OpenSpec design docs
+├── index.html              → page shell (markup only; importmap + module entry)
+├── styles/app.css          → all styles
+├── src/
+│   ├── main.js             → entry (imports app + features; lazy selftest)
+│   ├── state.js            → state + FEATURES flags + VIEW2D/viewUV/clampView
+│   ├── palettes.js         → PALETTES, activePal(), paletteLUT32() (the ONE LUT)
+│   ├── rules.js            → rule/pattern presets + parsing + ruleString (pure)
+│   ├── shaders.js          → GLSL sources
+│   ├── engine-gl.js        → GLEngine  ┐ same contract; selftest exercises
+│   ├── engine-cpu.js       → CPUEngine ┘ whichever is active
+│   ├── engine.js           → selection; exports live `engine` binding + canvas
+│   ├── voxel.js            → Voxel3D (pure JS volumetric CA)
+│   ├── three3d.js          → THREE3D: surfaces/black hole lens/terrain/voxels
+│   ├── timeline.js         → SNAP rewind snapshots
+│   ├── ambience.js         → noise generator + its card bindings
+│   ├── features/exports.js → PNG + video export + their card bindings
+│   └── app.js              → all other UI bindings, setViewMode, frame loop, init
+├── test/selftest.js        → in-browser checks (#selftest)
+├── test/ci-selftest.mjs    → headless Playwright runner (used by CI)
+├── .github/workflows/ci.yml→ selftest must ALL-PASS on every push
+├── archive/                → v0 prototype (reference only)
+├── img-example/            → print-quality reference images (NOT tracked in git)
+├── openspec/               → OpenSpec design docs + architecture audit
 ├── research/               → Market research
 └── CLAUDE.md               → This file
 ```
-Planned but NOT yet created: blog/, gallery/, shop.html, faq.html, about.html,
-separate src/ tree. Everything lives inline in index.html — edit there.
+Planned but NOT yet created: blog/, gallery/, shop.html, faq.html, about.html
+(sprint 4 — separate static pages importing the shared src/ modules).
+Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 
 ## Engine features (index.html)
 - WebGL2 CA sim (ping-pong RGBA32F state) + Canvas2D fallback
