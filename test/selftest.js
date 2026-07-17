@@ -8,7 +8,7 @@ import { activePal } from '../src/palettes.js';
 import { engine, canvas } from '../src/engine.js';
 import { parse3dCounts } from '../src/rules.js';
 import { Voxel3D } from '../src/voxel.js';
-import { makeNoiseKernel } from '../src/ambience.js';
+import { makeNoiseKernel, midiToFreq } from '../src/ambience.js';
 import { setRunning, clearGrid, applyRules, eventToCell } from '../src/app.js';
 
 setTimeout(() => {
@@ -89,6 +89,9 @@ setTimeout(() => {
       pb = b; pw = w;
     }
     check('noise-brown-smoother-than-white', bounded && db < dw * 0.05);
+    // Voyager melody: equal-tempered pitch helper (A4=440, octave doubles)
+    check('midi-to-freq',
+      Math.abs(midiToFreq(69) - 440) < 1e-9 && Math.abs(midiToFreq(81) - 880) < 1e-6);
   } catch (err) {
     results.push('FAIL exception: ' + err.message);
   }

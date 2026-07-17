@@ -91,9 +91,14 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
   sound (userPlayToggle, the click is the autoplay gesture)
 - Layout: sidebar = Create (playback + rule/pattern + compact sound play/volume)
   → Surface → Look → Ambience (sound picker + timer) → Export
-- Ambience v2: 6 noise colors + Ocean (brown noise + randomized swell LFO on
-  lowpass/gain/pan), fade-in 1.8s / fade-out 1.2s / type crossfade 0.6s,
-  per-type loudness calibration (NOISE_CAL), DynamicsCompressor limiter
+- Ambience v2: 6 noise colors + Ocean (brown + swell LFO) + Surf (steady
+  brown→lowpass bed) + Voyager (cinematic: steady ocean bed + generative
+  organ arpeggio — original A-minor progression, additive-drawbar organ voice
+  playOrgan/playPad, synthetic convolver reverb makeReverbIR, lookahead
+  scheduler on g.timers halted via g.stopped; NOT a copy of any scored
+  melody). Fade-in 5.5s / fade-out 3.5s / crossfade 1.6s starting ~26 dB
+  below target, per-type loudness calibration (NOISE_CAL), compressor limiter.
+  midiToFreq is the pitch helper (selftested)
 - Video export: 3/5/10s WebM (VP9→VP8→MP4 Safari) of the live viewport (2D or
   3D), explicit requestFrame pump @30fps, 12 Mbps. FEATURES.videoExport =
   premium gating hook (sprint 3 Gumroad)

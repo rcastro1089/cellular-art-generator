@@ -42,8 +42,63 @@ const FADE_IN = 5.5, FADE_OUT = 3.5, XFADE = 1.6;
 /* Per-type loudness calibration so switching sounds keeps perceived volume
    constant (the raw kernels have very different RMS). */
 export const NOISE_CAL = {
-  ocean: 1.15, brown: 1.0, pink: 1.15, white: 0.85, grey: 0.8, blue: 1.05, violet: 1.5,
+  ocean: 1.15, surf: 1.1, voyager: 0.8, brown: 1.0, pink: 1.15,
+  white: 0.85, grey: 0.8, blue: 1.05, violet: 1.5,
 };
+
+/* ── Cinematic melody helpers (Voyager preset) ─────────────────────
+   Original ambient composition evoking the arpeggiated-organ, minor-key,
+   deep-reverb style of space-cinema scores — synthesized from scratch, no
+   samples, no copied melody. */
+export const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
+
+/* Decaying-noise impulse response → a big synthetic reverb space. */
+function makeReverbIR(ctx, seconds, decay){
+  const rate = ctx.sampleRate, len = Math.floor(rate * seconds);
+  const buf = ctx.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++){
+    const d = buf.getChannelData(ch);
+    for (let i = 0; i < len; i++)
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+  }
+  return buf;
+}
+
+/* One organ note: additive drawbar timbre (fundamental + octave + fifth +
+   sub) through a soft-attack / long-release envelope. Oscillators self-stop
+   and get GC'd — no bookkeeping needed. */
+function playOrgan(ctx, dest, freq, t, dur){
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(0.85, t + 0.22);
+  env.gain.setValueAtTime(0.85, t + Math.max(dur * 0.5, 0.15));
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur + 1.3);
+  env.connect(dest);
+  [[1, 0.55], [2, 0.22], [3, 0.1], [0.5, 0.16]].forEach(([mult, amp]) => {
+    const o = ctx.createOscillator();
+    o.type = 'sine'; o.frequency.value = freq * mult;
+    const a = ctx.createGain(); a.gain.value = amp;
+    o.connect(a); a.connect(env);
+    o.start(t); o.stop(t + dur + 1.5);
+  });
+}
+
+/* A slow sustained pad chord tone under the arpeggio (the "vast" bed). */
+function playPad(ctx, dest, freq, t, dur){
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(0.42, t + 1.2);
+  env.gain.setValueAtTime(0.42, t + dur * 0.5);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  env.connect(dest);
+  [[1, 'triangle', 0.5], [1.5, 'sine', 0.2], [2, 'sine', 0.14]].forEach(([mult, type, amp]) => {
+    const o = ctx.createOscillator();
+    o.type = type; o.frequency.value = freq * mult;
+    const a = ctx.createGain(); a.gain.value = amp;
+    o.connect(a); a.connect(env);
+    o.start(t); o.stop(t + dur + 0.2);
+  });
+}
 
 export const AMBIENCE = {
   ctx: null, master: null, current: null, playing: false, timer: null,
@@ -100,8 +155,9 @@ export const AMBIENCE = {
      timers, type } — multiple graphs can coexist during a crossfade. */
   _spawn(type){
     const ctx = this.ctx;
-    const kernel = type === 'grey' || type === 'ocean'
-      ? (type === 'ocean' ? 'brown' : 'white') : type;
+    const kernel = type === 'grey' ? 'white'
+      : (type === 'ocean' || type === 'surf' || type === 'voyager') ? 'brown'
+      : type;
     let node;
     if (this.workletReady){
       node = new AudioWorkletNode(ctx, 'ca-noise', {
@@ -117,7 +173,7 @@ export const AMBIENCE = {
       };
       node = sp;
     }
-    const g = { type, nodes: [node], timers: [], gain: ctx.createGain() };
+    const g = { type, nodes: [node], timers: [], stopped: false, gain: ctx.createGain() };
     g.gain.gain.value = 0.0001;
     let tail = node;
     if (type === 'grey'){                        // approx inverse equal-loudness contour
@@ -156,9 +212,61 @@ export const AMBIENCE = {
       };
       cycle();
     }
+    if (type === 'surf' || type === 'voyager'){
+      // steady ocean bed: brown noise through a fixed lowpass, constant level
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 500; lp.Q.value = 0.3;
+      const bed = ctx.createGain();
+      bed.gain.value = type === 'voyager' ? 0.42 : 0.62;   // sit lower under the melody
+      tail.connect(lp); lp.connect(bed);
+      g.nodes.push(lp, bed);
+      tail = bed;
+    }
+    if (type === 'voyager') this._buildVoyagerMelody(ctx, g);   // organ arpeggio, summed in parallel
     tail.connect(g.gain);
     g.gain.connect(this.master);
     return g;
+  },
+
+  /* Generative cinematic melody: a rising organ arpeggio over an original
+     A-minor progression + a low sustained pad on each chord change, all
+     drenched in synthetic reverb. Summed into g.gain alongside the ocean
+     bed. A lookahead scheduler keeps notes on the audio clock; it re-arms
+     via g.timers so _kill() (which sets g.stopped) tears it down cleanly. */
+  _buildVoyagerMelody(ctx, g){
+    const conv = ctx.createConvolver();
+    conv.buffer = makeReverbIR(ctx, 3.4, 2.4);
+    const melBus = ctx.createGain();                 // pre-reverb note sum
+    const wet = ctx.createGain(); wet.gain.value = 0.9;
+    const dry = ctx.createGain(); dry.gain.value = 0.3;
+    const melOut = ctx.createGain(); melOut.gain.value = 0.5;   // melody level under the bed
+    melBus.connect(conv); conv.connect(wet); wet.connect(melOut);
+    melBus.connect(dry); dry.connect(melOut);
+    melOut.connect(g.gain);
+    g.nodes.push(conv, melBus, wet, dry, melOut);
+
+    const prog = [           // original i–VI–III–VII feel in A natural minor
+      [57, 60, 64, 69],      // Am
+      [53, 57, 60, 65],      // F
+      [48, 55, 60, 64],      // C
+      [55, 59, 62, 67],      // G
+    ];
+    const noteDur = 0.42;
+    let nextTime = ctx.currentTime + 0.2, step = 0;
+    const scheduler = () => {
+      if (g.stopped) return;
+      while (nextTime < ctx.currentTime + 0.3){
+        const chord = prog[Math.floor(step / 8) % prog.length];
+        const within = step % 8;                     // 8-note run: chord tones then +1 octave (rising)
+        const m = chord[within % chord.length] + (within >= chord.length ? 12 : 0);
+        playOrgan(ctx, melBus, midiToFreq(m), nextTime, noteDur);
+        if (within === 0) playPad(ctx, melBus, midiToFreq(chord[0] - 12), nextTime, 5.5);
+        nextTime += noteDur;
+        step++;
+      }
+      g.timers.push(setTimeout(scheduler, 60));
+    };
+    scheduler();
   },
 
   _target(){
@@ -168,6 +276,7 @@ export const AMBIENCE = {
 
   _kill(g, fade){
     if (!g) return;
+    g.stopped = true;                          // halt the Voyager scheduler
     const t = this.ctx.currentTime;
     g.gain.gain.cancelScheduledValues(t);
     g.gain.gain.setValueAtTime(Math.max(g.gain.gain.value, 0.0001), t);
