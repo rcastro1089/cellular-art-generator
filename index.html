@@ -124,6 +124,27 @@
             <input type="range" id="noiseVolRange" min="0" max="100" value="40">
             <span class="val" id="noiseVolVal">40%</span>
           </div>
+          <div class="field">
+            <label>Sound</label>
+            <select id="noiseTypeSelect" style="flex:1">
+              <option value="ocean" selected>Ocean — waves breaking</option>
+              <option value="brown">Brown — deep rumble</option>
+              <option value="pink">Pink — steady rain</option>
+              <option value="white">White — full spectrum</option>
+              <option value="grey">Grey — perceptually flat</option>
+              <option value="blue">Blue — airy hiss</option>
+              <option value="violet">Violet — bright sizzle</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Timer</label>
+            <select id="noiseTimerSelect" style="flex:1">
+              <option value="0" selected>Off</option>
+              <option value="15">15 min</option>
+              <option value="30">30 min</option>
+              <option value="60">60 min</option>
+            </select>
+          </div>
         </div>
         <details class="adv">
           <summary>Advanced</summary>
@@ -298,33 +319,6 @@
             <span class="val" id="bloomVal">1.2</span>
           </div>
         </details>
-      </div>
-
-      <!-- AMBIENCE (sound picker + timer; play/volume live in Create) -->
-      <div class="card">
-        <h3>Ambience</h3>
-        <div class="field">
-          <label>Sound</label>
-          <select id="noiseTypeSelect" style="flex:1">
-            <option value="ocean" selected>Ocean — waves breaking</option>
-            <option value="brown">Brown — deep rumble</option>
-            <option value="pink">Pink — steady rain</option>
-            <option value="white">White — full spectrum</option>
-            <option value="grey">Grey — perceptually flat</option>
-            <option value="blue">Blue — airy hiss</option>
-            <option value="violet">Violet — bright sizzle</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Timer</label>
-          <select id="noiseTimerSelect" style="flex:1">
-            <option value="0" selected>Off</option>
-            <option value="15">15 min</option>
-            <option value="30">30 min</option>
-            <option value="60">60 min</option>
-          </select>
-        </div>
-        <div class="card-note">Play &amp; volume live in Create. The timer fades sound out on its own — made for studying and sleep.</div>
       </div>
 
       <!-- EXPORT -->

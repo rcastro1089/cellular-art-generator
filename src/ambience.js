@@ -35,8 +35,9 @@ export function makeNoiseKernel(type){
   };
 }
 
-/* Envelope times (s): slow, deliberate — this is a focus/sleep tool. */
-const FADE_IN = 1.8, FADE_OUT = 1.2, XFADE = 0.6;
+/* Envelope times (s): long, gentle swells — this is a focus/sleep tool, so
+   the sound eases in slowly and washes out without a noticeable edge. */
+const FADE_IN = 5.5, FADE_OUT = 3.5, XFADE = 1.6;
 
 /* Per-type loudness calibration so switching sounds keeps perceived volume
    constant (the raw kernels have very different RMS). */
@@ -192,8 +193,11 @@ export const AMBIENCE = {
     this.current = g;
     const t = this.ctx.currentTime;
     const dur = old ? XFADE : FADE_IN;           // first play breathes in; switches crossfade
-    g.gain.gain.setValueAtTime(0.0001, t);
-    g.gain.gain.exponentialRampToValueAtTime(this._target(), t + dur);
+    const tgt = this._target();
+    // start ~26 dB below target (not near-silence) so the exponential swell is
+    // gradual across the whole ramp instead of jumping up only at the very end
+    g.gain.gain.setValueAtTime(Math.max(tgt * 0.05, 0.0002), t);
+    g.gain.gain.exponentialRampToValueAtTime(tgt, t + dur);
     if (old) this._kill(old, XFADE);
     this.playing = true;
     this._armTimer();
