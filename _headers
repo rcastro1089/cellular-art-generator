@@ -1,0 +1,16 @@
+# Cloudflare Pages headers. No content-hashing in this no-build app, so JS/CSS
+# use short revalidated caches (avoids stale ES modules); fonts/icons are inline.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+/*.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/styles/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

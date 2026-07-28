@@ -5,6 +5,11 @@ import { engine, canvas } from '../engine.js';
 import { THREE3D } from '../three3d.js';
 import { ruleString } from '../rules.js';
 import { setRunning } from '../app.js';
+import { gatePro, isPro } from '../pro.js';
+
+/* Free tier: one social-sized PNG, always signed. Print resolutions,
+   transparent background, video and watermark removal are Pro. */
+const FREE_SIZE = '1920x1080';
 
 /* Brand signature stamped on exports (on by default; Advanced can hide it):
    [logo mark]  Grown, not drawn — Cellscape  ·  B3/S23 · gen 4218 */
@@ -47,6 +52,10 @@ function drawSignature(ctx, W, H){
 
 export async function exportPNG(){
   const btn = $('exportBtn');
+  // ── Pro gates (checked before we touch the run state / spinner) ──
+  if ($('exportSelect').value !== FREE_SIZE && !gatePro('Print-quality export')) return;
+  if ($('transparentCheck').checked && !gatePro('Transparent background')) return;
+  if (!$('overlayCheck').checked && !gatePro('Watermark removal')) return;
   const [w, h] = $('exportSelect').value.split('x').map(Number);
   const wasRunning = state.running;
   setRunning(false);
@@ -64,7 +73,8 @@ export async function exportPNG(){
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');
     ctx.putImageData(new ImageData(data, W, H), 0, 0);
-    if ($('overlayCheck').checked) drawSignature(ctx, W, H);
+    // Free exports are always signed; only Pro may drop the signature.
+    if (!isPro() || $('overlayCheck').checked) drawSignature(ctx, W, H);
     const blob = await new Promise(res => c.toBlob(res, 'image/png'));
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -95,6 +105,7 @@ function videoMime(){
 let recordingVideo = false;
 export async function exportVideo(){
   if (recordingVideo) return;
+  if (!gatePro('Video export')) return;
   const btn = $('videoBtn');
   const mime = videoMime();
   if (!mime){ toast('Video capture not supported in this browser', 'err'); return; }

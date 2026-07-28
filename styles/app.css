@@ -328,3 +328,54 @@ details.adv > *:not(summary){animation:advIn .18s ease}
 }
 .quick-sound .field{margin-bottom:0}
 .quick-sound #noiseBtn{margin-bottom:9px}
+
+/* ── CELLSCAPE PRO ── */
+.pro-badge{
+  display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;
+  font-size:.58rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:#fff;background:linear-gradient(120deg,var(--accent),var(--accent2));
+  vertical-align:middle;
+}
+.btn.pro-cta{
+  margin-top:9px;color:#fff;font-weight:600;
+  border-color:transparent;
+  background:linear-gradient(120deg,rgba(0,212,255,.16),rgba(123,47,247,.22));
+  box-shadow:inset 0 0 0 1px rgba(123,47,247,.4);
+}
+.btn.pro-cta:hover{background:linear-gradient(120deg,rgba(0,212,255,.28),rgba(123,47,247,.36))}
+.btn.pro-cta.is-unlocked{
+  background:rgba(57,255,176,.12);box-shadow:inset 0 0 0 1px rgba(57,255,176,.4);
+  color:#39ffb0;pointer-events:none;
+}
+/* When Pro is active, hide the badges and sales copy — the app is fully unlocked. */
+body.is-pro .pro-badge{display:none}
+
+/* Modal */
+.modal{
+  position:fixed;inset:0;z-index:200;display:none;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(4,4,10,.72);backdrop-filter:blur(6px);
+}
+.modal.show{display:flex}
+.modal-box{
+  position:relative;width:100%;max-width:400px;
+  background:linear-gradient(180deg,rgba(28,28,50,.96),rgba(16,16,32,.96));
+  border:1px solid var(--panel-border);border-radius:16px;padding:26px 24px 22px;
+  box-shadow:0 24px 70px -20px rgba(0,0,0,.8);
+}
+.modal-box h2{
+  display:flex;align-items:center;gap:8px;font-size:1.15rem;margin:0 0 6px;
+}
+.modal-close{
+  position:absolute;top:12px;right:12px;width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--panel-border);
+  border-radius:8px;color:var(--muted);cursor:pointer;
+}
+.modal-close:hover{color:var(--accent);border-color:var(--accent)}
+.modal-sub{font-size:.78rem;color:var(--muted);line-height:1.5;margin:0 0 16px}
+.pro-list{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:9px}
+.pro-list li{display:flex;align-items:center;gap:9px;font-size:.82rem}
+.pro-list .ic{color:#39ffb0;flex:0 0 auto}
+.pro-key-row{display:flex;gap:8px;margin-top:12px}
+.pro-key-row input{flex:1}

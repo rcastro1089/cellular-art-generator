@@ -3,11 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cellscape — Cellular Automata Art Generator</title>
-<meta name="description" content="Create stunning generative wall art with Conway's Game of Life and 30+ cellular automata rules. GPU-accelerated, 27 color palettes, 4K PNG export. Free online tool.">
-<meta property="og:title" content="Cellscape — Cellular Automata Art">
-<meta property="og:description" content="Grown, not drawn. Life-like cellular automata with neon bloom, 27 palettes, 3D surfaces and print-quality export.">
+<title>Cellscape — Conway's Game of Life & Cellular Automata Art Generator</title>
+<meta name="description" content="Play Conway's Game of Life online and turn it into art. A free GPU-accelerated cellular automata generator with 30+ rules, 27 palettes, 3D surfaces and print-quality 4K export.">
+<meta name="keywords" content="game of life, conway's game of life, game of life simulator, cellular automata, cellular automata simulator, generative art, algorithmic art, game of life art, wall art">
+<link rel="canonical" href="https://cellscape.art/">
+<meta name="theme-color" content="#0a0a12">
+<!-- Open Graph -->
+<meta property="og:title" content="Cellscape — Conway's Game of Life Art Generator">
+<meta property="og:description" content="Grown, not drawn. Play the Game of Life and grow print-quality generative art — 30+ rules, 27 palettes, 3D surfaces, 4K export. Free.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://cellscape.art/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cellscape — Conway's Game of Life Art Generator">
+<meta name="twitter:description" content="Play the Game of Life and grow print-quality generative art. Free, GPU-accelerated, 4K export.">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<!-- Structured data: this page is a free web app -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Cellscape",
+  "url": "https://cellscape.art/",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any (web browser)",
+  "description": "Play Conway's Game of Life online and grow it into print-quality generative art. GPU-accelerated cellular automata generator with 30+ rules, 27 palettes, 3D surfaces and 4K export.",
+  "browserRequirements": "Requires a WebGL2-capable browser",
+  "offers": [
+    { "@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free" },
+    { "@type": "Offer", "priceCurrency": "USD", "name": "Cellscape Pro — print-quality & watermark-free export" }
+  ]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -51,6 +82,9 @@
     <symbol id="i-rotl" viewBox="0 0 24 24"><path d="M4.5 9.5a8.3 8.3 0 1 1-.5 5"/><path d="M4 4.5v5h5"/></symbol>
     <symbol id="i-rotr" viewBox="0 0 24 24"><path d="M19.5 9.5a8.3 8.3 0 1 0 .5 5"/><path d="M20 4.5v5h-5"/></symbol>
     <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3.5v17M3.5 12h17"/><path d="m8.8 6.2 3.2-3.2 3.2 3.2M8.8 17.8l3.2 3.2 3.2-3.2M6.2 8.8 3 12l3.2 3.2M17.8 8.8 21 12l-3.2 3.2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 6.5"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3.5l1.9 4.6L18.5 10l-4.6 1.9L12 16.5 10.1 11.9 5.5 10l4.6-1.9z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="currentColor" stroke="none"/></symbol>
   </defs>
 </svg>
 
@@ -329,17 +363,17 @@
         <div class="field">
           <label>Size</label>
           <select id="exportSelect" style="flex:1">
-            <option value="1920x1080">1920 × 1080 — Full HD</option>
-            <option value="3840x2160" selected>3840 × 2160 — 4K</option>
-            <option value="3600x3600">3600 × 3600 — Square 12″ @300dpi</option>
-            <option value="4500x5400">4500 × 5400 — T-shirt DTG @300dpi</option>
-            <option value="5400x7200">5400 × 7200 — Poster 18×24″ @300dpi</option>
-            <option value="7200x10800">7200 × 10800 — Poster 24×36″ @300dpi</option>
+            <option value="1920x1080">1920 × 1080 — Full HD (free)</option>
+            <option value="3840x2160" selected>3840 × 2160 — 4K · Pro</option>
+            <option value="3600x3600">3600 × 3600 — Square 12″ @300dpi · Pro</option>
+            <option value="4500x5400">4500 × 5400 — T-shirt DTG @300dpi · Pro</option>
+            <option value="5400x7200">5400 × 7200 — Poster 18×24″ @300dpi · Pro</option>
+            <option value="7200x10800">7200 × 10800 — Poster 24×36″ @300dpi · Pro</option>
           </select>
         </div>
         <button class="btn primary full" id="exportBtn"><svg class="ic"><use href="#i-download"/></svg>Export PNG</button>
         <div class="field" style="margin-top:10px">
-          <label>Video</label>
+          <label>Video<span class="pro-badge">Pro</span></label>
           <select id="videoDurSelect" style="flex:1">
             <option value="3">3 seconds</option>
             <option value="5" selected>5 seconds</option>
@@ -347,6 +381,8 @@
           </select>
         </div>
         <button class="btn full" id="videoBtn"><svg class="ic"><use href="#i-video"/></svg>Export video</button>
+        <button class="btn full pro-cta" id="proUnlockBtn"><svg class="ic"><use href="#i-sparkles"/></svg>Unlock Pro</button>
+        <div class="card-note">Free exports a signed 1920×1080 PNG. <strong>Cellscape Pro</strong> unlocks print-quality 4K/300dpi files, transparent garment PNGs, video, and watermark-free export.</div>
         <details class="adv">
           <summary>Advanced</summary>
           <div class="field" style="margin-top:8px">
@@ -357,13 +393,33 @@
               <option value="smart">Smart crop (densest area)</option>
             </select>
           </div>
-          <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)</label>
-          <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Signature label on export</label>
+          <label class="check-row"><input type="checkbox" id="transparentCheck"> Transparent background (garments)<span class="pro-badge">Pro</span></label>
+          <label class="check-row"><input type="checkbox" id="overlayCheck" checked> Signature label on export<span class="pro-badge">Pro to remove</span></label>
           <div class="card-note">Square (3600²) and wide formats above both export the full artwork. Video captures the live viewport as WebM.</div>
         </details>
       </div>
     </aside>
   </main>
+</div>
+<!-- ── CELLSCAPE PRO unlock modal ── -->
+<div id="proModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="proModalTitle">
+  <div class="modal-box">
+    <button id="proModalClose" class="modal-close" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+    <h2 id="proModalTitle"><svg class="ic"><use href="#i-sparkles"/></svg>Cellscape Pro</h2>
+    <p class="modal-sub">Free is yours forever. Pro is for when you want to print, wear or share it at full quality.</p>
+    <ul class="pro-list">
+      <li><svg class="ic"><use href="#i-check"/></svg>Print-quality export up to 7200 × 10800 @300dpi</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Transparent PNGs for garments &amp; stickers</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Video export (WebM)</li>
+      <li><svg class="ic"><use href="#i-check"/></svg>Remove the signature watermark</li>
+    </ul>
+    <button id="proBuyBtn" class="btn primary full"><svg class="ic"><use href="#i-sparkles"/></svg>Get Cellscape Pro</button>
+    <div class="pro-key-row">
+      <input id="proKeyInput" type="text" placeholder="Paste your license key" autocomplete="off" spellcheck="false">
+      <button id="proActivateBtn" class="btn">Activate</button>
+    </div>
+    <div class="card-note">Already bought? Paste the license key from your Gumroad receipt to unlock this browser.</div>
+  </div>
 </div>
 <div id="toast"></div>
 

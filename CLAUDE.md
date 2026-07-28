@@ -110,10 +110,29 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 - [x] design.md — HOW
 - [x] tasks.md — EXECUTION PLAN
 
+## Monetization — Fase A (validation, decided 2026-07-28)
+- **Strategy:** research shows TOOL demand is proven ("game of life" 27.1K/mo)
+  but PRODUCT demand (buying CA prints) is UNPROVEN (product keywords = 0 vol).
+  So launch the finished tool FREE to capture the game-of-life traffic, and
+  measure willingness to pay before building any fulfillment. Physical POD
+  (Printful) is deferred until digital conversion is validated.
+- **Cellscape Pro** (src/pro.js): client-side license unlock via Gumroad.
+  Free tier = full tool + one signed 1920×1080 PNG. Pro unlocks print-res
+  export (up to 7200×10800 @300dpi), transparent PNG, video, watermark
+  removal. Gating in features/exports.js via gatePro()/isPro(). No backend yet
+  → optimistic + bypassable BY DESIGN (real enforcement = Workers, sprint 3).
+  DEV_KEY='CELLSCAPE-DEV' unlocks the Pro UX locally before the Gumroad product
+  exists. Set GUMROAD_PERMALINK in pro.js to the real /l/<slug> once created;
+  if the API rejects product_permalink, switch the body param to product_id.
+- **Domain:** cellscape.art (user buying). Deploy files: robots.txt, sitemap.xml,
+  _headers (Cloudflare Pages), SEO <head> (canonical, OG/Twitter, WebApplication
+  JSON-LD, title retargeted to "Conway's Game of Life"). TODO before sharing
+  links: add /og-cover.png (1200×630 screenshot) — referenced but not committed.
+
 ## Key Contacts
 - DataForSEO: rcastro1089@gmail.com (token in api-tokens.sh)
-- Gumroad: automanexus.gumroad.com
-- Printful: needs setup
+- Gumroad: automanexus.gumroad.com (Cellscape Pro product = needs creating)
+- Printful: deferred to post-validation
 
 ## Key Decisions
 - SurfMap: Free tool, pay for export/print (NOT paywalled tool)
