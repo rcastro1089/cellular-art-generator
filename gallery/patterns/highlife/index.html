@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HighLife (B36/S23): The Rule With a Self-Replicator — Cellscape</title>
+<meta name="description" content="HighLife differs from Conway's Game of Life by a single digit — yet it's famous for supporting a small pattern that copies itself indefinitely. Try it live.">
+<meta name="keywords" content="highlife cellular automaton, highlife rule game of life, B36 S23, self-replicating pattern cellular automata">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/highlife/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HighLife: The Rule With a Self-Replicator">
+<meta property="og:description" content="Differs from Conway's Game of Life by a single digit, yet supports a pattern that copies itself indefinitely.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/highlife/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HighLife: The Rule With a Self-Replicator">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "HighLife: The Rule With a Self-Replicator",
+  "description": "HighLife differs from Conway's Game of Life by a single digit, yet it's famous for supporting a small pattern that copies itself indefinitely.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/highlife/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "HighLife", "item": "https://cellscape.art/gallery/patterns/highlife/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What's the difference between HighLife and Conway's Game of Life?", "acceptedAnswer": { "@type": "Answer", "text": "Conway's Life is B3/S23. HighLife is B36/S23 — identical except a dead cell with exactly 6 living neighbors is also born, in addition to the usual 3. That single extra birth condition is enough to give HighLife a self-replicating pattern that Conway's Life doesn't have." } },
+    { "@type": "Question", "name": "What does 'self-replicating' mean here?", "acceptedAnswer": { "@type": "Answer", "text": "A specific small HighLife pattern, when run forward, produces two separated copies of its own original shape after a fixed number of generations — and each of those copies goes on to replicate again, the same way Life's glider gun produces gliders, but replicating the entire generating structure rather than a smaller traveling pattern." } },
+    { "@type": "Question", "name": "Does HighLife still have gliders and other Life-like patterns?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — because the survival rule (S23) is identical to Conway's Life, many still lifes, oscillators, and spaceships that work in Conway's Life also work unchanged in HighLife. The extra B6 birth condition adds new behavior on top rather than replacing the old rule entirely." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?rule=highlife">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Rule · Life-like automaton</p>
+  <h1>HighLife (B36/S23)</h1>
+  <p class="lede">Change one digit in Conway's Game of Life and you get a rule capable of
+  something Conway's original can't do: HighLife supports a small pattern that copies itself,
+  indefinitely, entirely as a side effect of one extra birth condition.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B36/S23</span></div></div>
+    <div class="fact"><div class="k">Differs from Conway by</div><div class="v">Birth on 6 neighbors</div></div>
+    <div class="fact"><div class="k">Notable pattern</div><div class="v">Self-replicator</div></div>
+    <div class="fact"><div class="k">Survival rule</div><div class="v">Same as Conway (S23)</div></div>
+    <div class="fact"><div class="k">Neighborhood</div><div class="v">Moore (8-cell)</div></div>
+  </div>
+
+  <h2>One Digit, One New Capability</h2>
+  <p>Conway's Game of Life is <span class="rule">B3/S23</span>: a dead cell is born with exactly
+  3 living neighbors. HighLife adds a single extra birth condition — a dead cell is also born with
+  6 living neighbors — written <span class="rule">B36/S23</span>. Survival stays identical to
+  Conway's rule. That one addition sounds minor, but it opens up a capability Conway's Life
+  provably doesn't have on its own: a compact HighLife pattern exists that, after a fixed number of
+  generations, produces two separated copies of its own starting shape, each of which goes on to
+  replicate again the same way.</p>
+
+  <h2>Why It Matters</h2>
+  <p>HighLife is one of the clearest illustrations of how sensitive Life-like automata are to
+  their exact birth/survival digits — a single extra neighbor count in the birth rule is the
+  difference between "no self-replication is known to exist" and "a self-replicating pattern
+  exists and has been found." It's a useful rule to explore right after Conway's Life specifically
+  because it shares the same survival behavior, so familiar shapes like still lifes and gliders
+  carry over, making the contrast from the one changed digit easy to isolate.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?rule=highlife">Open HighLife pre-loaded</a> in Cellscape and randomize the grid —
+  compare it side by side with Conway's Life on an identical starting pattern to see exactly where
+  the extra birth condition changes the outcome.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>What's the difference between HighLife and Conway's Game of Life?</summary>
+      <p>Conway's Life is B3/S23. HighLife is B36/S23 — identical except a dead cell with exactly
+      6 living neighbors is also born, in addition to the usual 3. That single extra birth
+      condition is enough to give HighLife a self-replicating pattern that Conway's Life doesn't
+      have.</p>
+    </details>
+    <details>
+      <summary>What does "self-replicating" mean here?</summary>
+      <p>A specific small HighLife pattern, when run forward, produces two separated copies of its
+      own original shape after a fixed number of generations — and each of those copies goes on to
+      replicate again, the same way Life's glider gun produces gliders, but replicating the entire
+      generating structure rather than a smaller traveling pattern.</p>
+    </details>
+    <details>
+      <summary>Does HighLife still have gliders and other Life-like patterns?</summary>
+      <p>Yes — because the survival rule (S23) is identical to Conway's Life, many still lifes,
+      oscillators, and spaceships that work in Conway's Life also work unchanged in HighLife. The
+      extra B6 birth condition adds new behavior on top rather than replacing the old rule
+      entirely.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">See how HighLife fits among other Life-like rules in the
+  <a href="/blog/cellular-automata-art-guide/#beyond-conway">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

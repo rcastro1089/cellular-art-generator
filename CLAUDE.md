@@ -57,13 +57,39 @@ cellular-art-generator/
 │   ├── math-art-decor-ideas/             → inspiration ("scientific illustration"
 │   │                                        3.6K/mo, the single biggest keyword)
 │   └── gifts-for-programmers/            → gift guide ("programmer gifts"/"code art")
+├── gallery/
+│   ├── index.html                        → directory of ALL 26 patterns + 32
+│   │                                        rules from src/rules.js, each a
+│   │                                        live deep-link (?pattern=/?rule=)
+│   └── patterns/<slug>/                  → 10 dedicated deep pages (glider,
+│       gosper-glider-gun, seeds, day-and-night, pulsar, r-pentomino, highlife,
+│       lightweight-spaceship, block, diehard) — full history/mechanics/FAQ
+├── faq/index.html          → site-wide FAQ (own FAQPage JSON-LD)
+├── about/index.html        → project story/philosophy (no fabricated bio)
 └── CLAUDE.md               → This file
 ```
-All 6 blog pages: own Article+BreadcrumbList+FAQPage JSON-LD (distinct FAQ
-questions per page, no cannibalization), cross-link to each other + the pillar
-+ "/", zero JS, styles/blog.css only. Still planned (sprint 4): gallery/patterns/*
-(30+ pattern pages), faq.html, about.html. shop.html deferred with Printful
-(Fase A still validating digital conversion first).
+All blog + gallery + faq + about pages: own Article/BreadcrumbList/FAQPage
+JSON-LD where relevant (distinct FAQ questions per page, no cannibalization),
+cross-linked via consistent footers, zero JS, styles/blog.css only.
+
+**Deep-link feature (src/app.js, added 2026-07-28):** `?pattern=<slug>` and
+`?rule=<slug>` query params preload a named pattern/rule on page load (slug =
+kebab-case of the PATTERNS/PRESET_RULES name in src/rules.js, matched
+case-insensitively). This is what every gallery card's "Try it live" link
+uses — verified end-to-end (real click → correct rule/pattern loads, e.g.
+glider → population 5). Note some slugs differ from the display name (LWSS →
+`lwss`, "Day & Night" → `day-night`) — always slugify the exact PATTERNS/
+PRESET_RULES key, not the page's own URL slug, when linking.
+
+**Gallery content strategy (2026-07-28):** deliberately did NOT build 30
+separate near-duplicate pattern pages — for 0-search-volume keywords, that's
+textbook thin/programmatic content that risks a Helpful Content penalty.
+Instead: ONE comprehensive gallery index listing all 26 patterns + 32 rules
+(satisfies breadth), plus 10 genuinely distinct deep-dive pages for the most
+iconic/recognizable ones only. Same reasoning pattern as the earlier
+"tool-stays-at-/" decision — pick the SEO-sound version of the spec's intent,
+not its literal wording. shop.html still deferred with Printful (Fase A still
+validating digital conversion first).
 
 **SEO structure decision (2026-07-28):** the tool stays at `/` (index.html) —
 NOT split into a landing + separate `/generator` route as the original

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Glider: Conway's Game of Life Pattern Explained — Cellscape</title>
+<meta name="description" content="The glider is the smallest spaceship in Conway's Game of Life — 5 cells that travel diagonally forever. Its history, why it moves, and a live version to try.">
+<meta name="keywords" content="glider, game of life glider, conway glider pattern, smallest spaceship game of life">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/glider/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Glider: Conway's Game of Life Pattern Explained">
+<meta property="og:description" content="The smallest spaceship in Conway's Game of Life — 5 cells that travel diagonally forever.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/glider/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Glider: Conway's Game of Life Pattern Explained">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Glider: Conway's Game of Life Pattern Explained",
+  "description": "The glider is the smallest spaceship in Conway's Game of Life — 5 cells that travel diagonally forever.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/glider/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Glider", "item": "https://cellscape.art/gallery/patterns/glider/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Who discovered the glider?", "acceptedAnswer": { "@type": "Answer", "text": "The glider was found by Richard K. Guy in 1970, shortly after John Conway published the Game of Life rules — making it one of the first spaceships discovered in the system." } },
+    { "@type": "Question", "name": "Why does the glider move diagonally instead of just dying out?", "acceptedAnswer": { "@type": "Answer", "text": "Its 5-cell shape happens to regenerate itself, shifted by one cell diagonally, every 4 generations under Conway's B3/S23 rule — a coincidence of the birth/survival counts that makes the pattern self-perpetuating and self-translating rather than static or short-lived." } },
+    { "@type": "Question", "name": "How fast does a glider move?", "acceptedAnswer": { "@type": "Answer", "text": "One cell diagonally every 4 generations — commonly written as a speed of c/4 diagonal, where c is the fastest a signal can travel in the automaton (one cell per generation)." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=glider">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Spaceship</p>
+  <h1>The Glider</h1>
+  <p class="lede">Five cells, one rule, and an object that travels forever. The glider is the
+  smallest known "spaceship" in Conway's Game of Life — a pattern that translates across the grid,
+  unchanged in shape, indefinitely.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Spaceship</div></div>
+    <div class="fact"><div class="k">Cell count</div><div class="v">5</div></div>
+    <div class="fact"><div class="k">Period</div><div class="v">4 generations</div></div>
+    <div class="fact"><div class="k">Speed</div><div class="v">c/4 diagonal</div></div>
+    <div class="fact"><div class="k">Discovered</div><div class="v">1970, Richard K. Guy</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>How It Moves</h2>
+  <p>Every 4 generations, the glider's 5 cells reappear in the exact same relative arrangement,
+  shifted one cell diagonally. It isn't "moving" the way a sprite moves in a video game — every
+  generation, the entire pattern is destroyed and rebuilt by Conway's B3/S23 rule from scratch,
+  and it just so happens that this particular 5-cell shape regenerates itself offset by one cell
+  each cycle. That coincidence is what makes it a spaceship instead of just another short-lived
+  random pattern.</p>
+
+  <h2>Why It Matters</h2>
+  <p>The glider was one of the first patterns found, within weeks of John Conway publishing the
+  Game of Life rules in 1970, and it settled an early open question: can anything in this system
+  actually travel? Its existence also turned out to be foundational to nearly everything built in
+  Life since — gliders are the "signal" that more complex engineered patterns (like the
+  <a href="/gallery/patterns/gosper-glider-gun/">Gosper Glider Gun</a>) use to carry information
+  across the grid, the same way a wire carries a signal in a circuit. Without a stable, repeatable
+  traveling pattern, none of the logic-gate and computer constructions later built inside Life
+  would have been possible.</p>
+
+  <h2>See It Live</h2>
+  <p>Cellscape has the glider built in as a preset pattern. <a href="/?pattern=glider">Open it
+  pre-loaded</a> and press play to watch it travel — try switching the rule afterward to see how
+  few other Life-like rules produce a stable spaceship at all.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Who discovered the glider?</summary>
+      <p>The glider was found by Richard K. Guy in 1970, shortly after John Conway published the
+      Game of Life rules — making it one of the first spaceships discovered in the system.</p>
+    </details>
+    <details>
+      <summary>Why does the glider move diagonally instead of just dying out?</summary>
+      <p>Its 5-cell shape happens to regenerate itself, shifted by one cell diagonally, every 4
+      generations under Conway's B3/S23 rule — a coincidence of the birth/survival counts that
+      makes the pattern self-perpetuating and self-translating rather than static or short-lived.</p>
+    </details>
+    <details>
+      <summary>How fast does a glider move?</summary>
+      <p>One cell diagonally every 4 generations — commonly written as a speed of c/4 diagonal,
+      where c is the fastest a signal can travel in the automaton (one cell per generation).</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Read the full mechanics of Conway's Game of Life in the
+  <a href="/blog/cellular-automata-art-guide/">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

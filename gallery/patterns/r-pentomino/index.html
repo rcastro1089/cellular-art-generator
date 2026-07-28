@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The R-Pentomino: Game of Life's Most Famous Methuselah — Cellscape</title>
+<meta name="description" content="Just 5 cells, yet the R-pentomino doesn't stabilize until generation 1103 in Conway's Game of Life — producing 6 gliders and dozens of other patterns along the way. Try it live.">
+<meta name="keywords" content="r-pentomino, r pentomino game of life, methuselah cellular automaton, game of life long-lived pattern">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/r-pentomino/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The R-Pentomino: Game of Life's Most Famous Methuselah">
+<meta property="og:description" content="5 cells that don't stabilize until generation 1103.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/r-pentomino/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The R-Pentomino: Game of Life's Most Famous Methuselah">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The R-Pentomino: Game of Life's Most Famous Methuselah",
+  "description": "Just 5 cells, yet the R-pentomino doesn't stabilize until generation 1103 in Conway's Game of Life.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/r-pentomino/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "R-Pentomino", "item": "https://cellscape.art/gallery/patterns/r-pentomino/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is a methuselah pattern?", "acceptedAnswer": { "@type": "Answer", "text": "A methuselah is a small starting pattern that takes an unusually long time to stabilize into still lifes, oscillators, and spaceships, compared to how few cells it starts with. The R-pentomino is the most famous example — just 5 cells that don't settle down for over a thousand generations." } },
+    { "@type": "Question", "name": "How long does the R-pentomino take to stabilize?", "acceptedAnswer": { "@type": "Answer", "text": "1103 generations, at which point the population becomes a fixed combination of still lifes, oscillators, and gliders that no longer changes in any structurally new way." } },
+    { "@type": "Question", "name": "Why is such a small pattern so unpredictable?", "acceptedAnswer": { "@type": "Answer", "text": "Its asymmetric 5-cell shape puts several cells right at the edge of birth and survival thresholds simultaneously, so small interactions cascade for far longer than in more symmetric or more sparse starting shapes before the system runs out of new structure to produce." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=r-pentomino">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Methuselah</p>
+  <h1>The R-Pentomino</h1>
+  <p class="lede">Five cells, arranged in a shape barely bigger than a plus sign, that take 1103
+  generations to finally settle down. The R-pentomino is the single most famous "methuselah" in
+  Conway's Game of Life — proof of how much chaos a tiny starting pattern can generate.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Methuselah</div></div>
+    <div class="fact"><div class="k">Starting cells</div><div class="v">5</div></div>
+    <div class="fact"><div class="k">Stabilizes at</div><div class="v">Generation 1103</div></div>
+    <div class="fact"><div class="k">Gliders produced</div><div class="v">6</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>What Makes It a Methuselah</h2>
+  <p>Most 5-cell starting patterns in Conway's Game of Life either die out within a handful of
+  generations or settle almost immediately into a small still life or oscillator. The R-pentomino
+  is the exception: its slightly asymmetric arrangement — one of the twelve "pentomino" shapes,
+  the five-cell polyominoes named after letters they resemble — sets off a long chain reaction. The
+  pattern grows, fragments, throws off debris, and interacts with itself for over a thousand
+  generations before finally settling into a fixed population of still lifes, oscillators, and 6
+  gliders that drift away, unchanged, forever after.</p>
+
+  <h2>Why It Matters</h2>
+  <p>The R-pentomino was one of the earliest patterns to demonstrate just how unpredictable
+  Conway's simple rule could be — a starting condition small enough to draw by hand, with
+  consequences too complex to predict without actually running the simulation. It remains one of
+  the standard examples used to illustrate the difference between a system's rule (trivially
+  simple — B3/S23) and its behavior (genuinely unpredictable without simulation), a distinction
+  that recurs throughout cellular automata and complexity theory more broadly.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=r-pentomino">Open the R-pentomino pre-loaded</a> in Cellscape, set the
+  speed up, and let it run — the population count on-screen will climb, fall, and fluctuate for
+  a surprisingly long time before finally leveling off.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>What is a methuselah pattern?</summary>
+      <p>A methuselah is a small starting pattern that takes an unusually long time to stabilize
+      into still lifes, oscillators, and spaceships, compared to how few cells it starts with. The
+      R-pentomino is the most famous example — just 5 cells that don't settle down for over a
+      thousand generations.</p>
+    </details>
+    <details>
+      <summary>How long does the R-pentomino take to stabilize?</summary>
+      <p>1103 generations, at which point the population becomes a fixed combination of still
+      lifes, oscillators, and gliders that no longer changes in any structurally new way.</p>
+    </details>
+    <details>
+      <summary>Why is such a small pattern so unpredictable?</summary>
+      <p>Its asymmetric 5-cell shape puts several cells right at the edge of birth and survival
+      thresholds simultaneously, so small interactions cascade for far longer than in more
+      symmetric or more sparse starting shapes before the system runs out of new structure to
+      produce.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Read more about emergence and unpredictability in the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a>, or
+  browse the <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

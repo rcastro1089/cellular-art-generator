@@ -649,6 +649,23 @@ requestAnimationFrame(frame);
   const m = location.hash.match(/mode=(torus|sphere|voxel|knot|mobius|blackhole|terrain)/);   // shareable view mode
   if (m) setViewMode(m[1]);
 }
+{
+  /* Deep-link a rule/pattern via ?rule=slug&pattern=slug (e.g. from a gallery
+     page: ?rule=conway&pattern=glider-gun). Slugs are kebab-case of the preset
+     name, matched case-insensitively so URLs stay readable. */
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const qs = new URLSearchParams(location.search);
+  const rp = qs.get('rule');
+  if (rp){
+    const r = PRESET_RULES.find(x => slug(x.name) === slug(rp));
+    if (r) applyRules(r.b, r.s, true);
+  }
+  const pp = qs.get('pattern');
+  if (pp){
+    const name = Object.keys(PATTERNS).find(n => slug(n) === slug(pp));
+    if (name) loadPattern(name);
+  }
+}
 console.log(`%cCellscape %c— grown, not drawn`,
   'font-size:16px;color:#00d4ff;font-weight:bold', 'font-size:12px;color:#8a8aa3');
 console.log(`Renderer: ${engine.name} · Grid: ${state.grid}² · Rule: ${ruleString()}`);

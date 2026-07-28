@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Cellscape — Grown, Not Drawn</title>
+<meta name="description" content="Why Cellscape exists: a free tool for turning cellular automata like Conway's Game of Life into print-quality generative art, built as an independent, transparently-run project.">
+<link rel="canonical" href="https://cellscape.art/about/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="website">
+<meta property="og:title" content="About Cellscape">
+<meta property="og:description" content="Why Cellscape exists, and how the project is built and run.">
+<meta property="og:url" content="https://cellscape.art/about/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About Cellscape">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles/blog.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/">Open the generator →</a>
+</div>
+
+<article>
+  <p class="kicker">About</p>
+  <h1>Grown, Not Drawn</h1>
+  <p class="lede">Cellscape exists because a rule as small as B3/S23 can produce something worth
+  looking at — and almost nothing lets you actually watch that happen and walk away with a
+  print-quality piece of it.</p>
+
+  <h2>Why This Exists</h2>
+  <p>Cellular automata have been studied since the 1940s and played with online since the web
+  could render a grid of squares, but most tools built around them stop at the simulation itself:
+  you can watch Conway's Game of Life run, and that's it. Cellscape was built to close the gap
+  between "interesting simulation" and "art you'd actually hang on a wall" — GPU-accelerated
+  rendering, 27 color palettes, long-exposure history trails, non-planar surfaces like a torus or
+  sphere, and export at resolutions meant for real printing, not just a screenshot.</p>
+
+  <h2>The Name</h2>
+  <p>"Cellscape" is a landscape made of cells — and "grown, not drawn" is the whole philosophy in
+  four words. Nothing in the output is hand-placed. Every shape, every color transition, every
+  structure traces back to one small rule applied over and over to a grid, the same way a
+  crystal's structure traces back to its underlying lattice. The art is a side effect of the rule,
+  discovered by running it, not designed pixel by pixel.</p>
+
+  <h2>How It's Built</h2>
+  <p>Cellscape is a single-page web app with no build step — vanilla JavaScript, WebGL2 fragment
+  shaders for the simulation and rendering pipeline, and Three.js for the 3D surfaces, all loaded
+  directly by the browser. There's no server-side simulation and no account system: everything
+  runs on your own device, and nothing about your session is stored anywhere else. A Canvas 2D
+  fallback keeps the tool working even without WebGL2 support.</p>
+
+  <h2>How the Project Is Run</h2>
+  <p>Cellscape is an independent project, not a funded startup, and it's built around a
+  deliberately honest approach to figuring out what's actually worth building next: the full tool
+  is free, permanently, because the interesting question isn't whether people will use a cellular
+  automata generator — that's well established — it's whether people value the output enough to
+  pay for a print-quality version of it. Cellscape Pro (a one-time unlock for print-resolution
+  export, transparent PNGs, video, and watermark removal) exists to answer that question honestly,
+  without ever gating the underlying tool itself.</p>
+
+  <h2>Explore</h2>
+  <p>Read how the underlying rules actually work in the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a>, browse
+  every named pattern and rule in the <a href="/gallery/">gallery</a>, or just
+  <a href="/">open the generator</a> and start playing.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/blog/">Blog</a>
+  <a href="/faq/">FAQ</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

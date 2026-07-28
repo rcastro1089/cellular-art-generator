@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — Cellscape (Cellular Automata &amp; Game of Life Generator)</title>
+<meta name="description" content="Answers about Cellscape: what it costs, how the rules and exports work, Cellscape Pro, and how cellular automata art actually works.">
+<link rel="canonical" href="https://cellscape.art/faq/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cellscape FAQ">
+<meta property="og:description" content="Answers about Cellscape, Cellscape Pro, and how cellular automata art works.">
+<meta property="og:url" content="https://cellscape.art/faq/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cellscape FAQ">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is Cellscape completely free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every rule, palette, surface, and simulation feature is free with no account required, and free exports include a signed 1920×1080 PNG. Cellscape Pro is an optional one-time unlock for print-resolution export, transparent PNGs, video, and watermark removal — the core tool never requires it." } },
+    { "@type": "Question", "name": "What is Cellscape Pro and how do I get it?", "acceptedAnswer": { "@type": "Answer", "text": "Cellscape Pro is a one-time purchase via Gumroad that unlocks print-quality export (up to 7200×10800 at 300dpi), transparent PNGs for garments, video export, and the ability to remove the signature watermark. Click 'Unlock Pro' in the Export card, buy the license, then paste the license key from your receipt to activate it in your browser." } },
+    { "@type": "Question", "name": "Do I need an account to use Cellscape?", "acceptedAnswer": { "@type": "Answer", "text": "No. There's no sign-up, login, or account of any kind for the free tier. Cellscape Pro only requires a license key from your Gumroad purchase, pasted once into the unlock dialog." } },
+    { "@type": "Question", "name": "What image sizes can I export?", "acceptedAnswer": { "@type": "Answer", "text": "Free exports are 1920×1080. Cellscape Pro adds 4K (3840×2160), a 3600×3600 square print size, a 4500×5400 t-shirt DTG size, and poster sizes up to 7200×10800 at 300dpi — enough for large-format printing." } },
+    { "@type": "Question", "name": "Can I use Cellscape's art commercially or for prints I sell?", "acceptedAnswer": { "@type": "Answer", "text": "Cellscape doesn't restrict what you do with art you generate and export yourself — the tool is free to use for personal or commercial output. If you plan to sell physical prints at scale, make sure the resolution you export (available via Cellscape Pro) matches your printer's requirements." } },
+    { "@type": "Question", "name": "Why does Cellscape default to Conway's Game of Life?", "acceptedAnswer": { "@type": "Answer", "text": "Conway's Game of Life (rule B3/S23) is the best-known and most-studied cellular automaton, and the most approachable starting point for understanding how the birth/survival rule system works before exploring the 30+ other rule presets available." } },
+    { "@type": "Question", "name": "Does Cellscape work offline or need an internet connection?", "acceptedAnswer": { "@type": "Answer", "text": "The page itself needs to load once over the internet (it's hosted, not downloadable), but the simulation, rendering, and export all run entirely in your browser afterward — no server round-trip is needed to play, paint, or export." } },
+    { "@type": "Question", "name": "What browsers does Cellscape support?", "acceptedAnswer": { "@type": "Answer", "text": "Any modern browser with WebGL2 support — current versions of Chrome, Edge, Firefox, and Safari all work, on both desktop and mobile. Older browsers without WebGL2 fall back to a slower Canvas 2D renderer automatically." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/">Open the generator →</a>
+</div>
+
+<article>
+  <p class="kicker">FAQ</p>
+  <h1>Frequently Asked Questions</h1>
+  <p class="lede">Everything about how Cellscape works, what's free, and what Cellscape Pro adds.</p>
+
+  <div class="faq">
+    <details open>
+      <summary>Is Cellscape completely free?</summary>
+      <p>Yes. Every rule, palette, surface, and simulation feature is free with no account
+      required, and free exports include a signed 1920×1080 PNG. Cellscape Pro is an optional
+      one-time unlock for print-resolution export, transparent PNGs, video, and watermark removal
+      — the core tool never requires it.</p>
+    </details>
+    <details>
+      <summary>What is Cellscape Pro and how do I get it?</summary>
+      <p>Cellscape Pro is a one-time purchase via Gumroad that unlocks print-quality export (up to
+      7200×10800 at 300dpi), transparent PNGs for garments, video export, and the ability to
+      remove the signature watermark. Click "Unlock Pro" in the Export card, buy the license, then
+      paste the license key from your receipt to activate it in your browser.</p>
+    </details>
+    <details>
+      <summary>Do I need an account to use Cellscape?</summary>
+      <p>No. There's no sign-up, login, or account of any kind for the free tier. Cellscape Pro
+      only requires a license key from your Gumroad purchase, pasted once into the unlock dialog.</p>
+    </details>
+    <details>
+      <summary>What image sizes can I export?</summary>
+      <p>Free exports are 1920×1080. Cellscape Pro adds 4K (3840×2160), a 3600×3600 square print
+      size, a 4500×5400 t-shirt DTG size, and poster sizes up to 7200×10800 at 300dpi — enough for
+      large-format printing.</p>
+    </details>
+    <details>
+      <summary>Can I use Cellscape's art commercially or for prints I sell?</summary>
+      <p>Cellscape doesn't restrict what you do with art you generate and export yourself — the
+      tool is free to use for personal or commercial output. If you plan to sell physical prints
+      at scale, make sure the resolution you export (available via Cellscape Pro) matches your
+      printer's requirements.</p>
+    </details>
+    <details>
+      <summary>Why does Cellscape default to Conway's Game of Life?</summary>
+      <p>Conway's Game of Life (rule B3/S23) is the best-known and most-studied cellular
+      automaton, and the most approachable starting point for understanding how the
+      birth/survival rule system works before exploring the 30+ other rule presets available.</p>
+    </details>
+    <details>
+      <summary>Does Cellscape work offline or need an internet connection?</summary>
+      <p>The page itself needs to load once over the internet (it's hosted, not downloadable), but
+      the simulation, rendering, and export all run entirely in your browser afterward — no server
+      round-trip is needed to play, paint, or export.</p>
+    </details>
+    <details>
+      <summary>What browsers does Cellscape support?</summary>
+      <p>Any modern browser with WebGL2 support — current versions of Chrome, Edge, Firefox, and
+      Safari all work, on both desktop and mobile. Older browsers without WebGL2 fall back to a
+      slower Canvas 2D renderer automatically.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Still have a question? See the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a>, browse
+  the <a href="/gallery/">pattern &amp; rule gallery</a>, or
+  <a href="/">open the generator</a> and explore.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/blog/">Blog</a>
+  <a href="/about/">About</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

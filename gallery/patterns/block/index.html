@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Block: The Simplest Still Life in Conway's Game of Life — Cellscape</title>
+<meta name="description" content="The block is a 2×2 square that never changes once formed — the simplest and most common still life in Conway's Game of Life. Why it's stable, and why it matters. Try it live.">
+<meta name="keywords" content="block still life, game of life still life, block pattern conway, simplest game of life pattern">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/block/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Block: The Simplest Still Life in Conway's Game of Life">
+<meta property="og:description" content="A 2×2 square that never changes once formed.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/block/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Block: The Simplest Still Life in Conway's Game of Life">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Block: The Simplest Still Life in Conway's Game of Life",
+  "description": "The block is a 2×2 square that never changes once formed — the simplest and most common still life in Conway's Game of Life.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/block/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Block", "item": "https://cellscape.art/gallery/patterns/block/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Why doesn't the block ever change?", "acceptedAnswer": { "@type": "Answer", "text": "Each of the block's 4 cells has exactly 3 living neighbors (the other 3 cells in the square), satisfying Conway's survival condition (2 or 3 neighbors) every single generation. None of the 4 empty cells directly touching the block have exactly 3 living neighbors, so none of them are born either — the entire configuration is a fixed point of the rule." } },
+    { "@type": "Question", "name": "Is the block the most common still life?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — it's statistically the most frequently occurring still life to emerge from random starting conditions in Conway's Game of Life, more common than the beehive, loaf, boat, or tub." } },
+    { "@type": "Question", "name": "Do other Life-like rules also have a stable block?", "acceptedAnswer": { "@type": "Answer", "text": "Only if the rule's survival condition includes 3 (since every block cell has exactly 3 neighbors) and its birth condition excludes 2 (since the block's diagonal-adjacent empty cells have exactly 2 neighbors). Rules that differ on either count will see a block collapse, grow, or transform." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=block">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Still life</p>
+  <h1>The Block</h1>
+  <p class="lede">Four cells in a 2×2 square. Nothing happens to it, ever, once it forms — and
+  that stability is exactly why the block is the most common still life to emerge from a random
+  soup in Conway's Game of Life.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Still life</div></div>
+    <div class="fact"><div class="k">Cell count</div><div class="v">4</div></div>
+    <div class="fact"><div class="k">Period</div><div class="v">1 (never changes)</div></div>
+    <div class="fact"><div class="k">Frequency</div><div class="v">Most common still life</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>The Math Behind Its Stability</h2>
+  <p>Each of the block's 4 cells has exactly 3 living neighbors — the other 3 cells that make up
+  the square. Under Conway's rule, a living cell survives with 2 or 3 living neighbors, so all 4
+  cells survive, every generation, unchanged. Meanwhile, none of the empty cells touching the
+  block's edges or corners have exactly 3 living neighbors (the ones diagonally adjacent have only
+  2), so none of them are born either. The result is a genuine fixed point: apply the rule, and you
+  get back exactly what you started with.</p>
+
+  <h2>Why It Matters</h2>
+  <p>The block is the simplest possible demonstration that Conway's Game of Life doesn't force
+  everything into constant motion — stability is baked into the rule just as much as change is.
+  It's also a practical nuisance and a practical tool at once: blocks tend to accumulate as
+  "debris" left behind by more complex interactions, cluttering a simulation, but they're also
+  deliberately used as fixed reference markers or blockers in engineered patterns, specifically
+  because nothing needs to be done to keep them in place.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=block">Open the block pre-loaded</a> in Cellscape and press play — watch
+  the generation counter climb while the pattern itself never moves a single cell.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Why doesn't the block ever change?</summary>
+      <p>Each of the block's 4 cells has exactly 3 living neighbors (the other 3 cells in the
+      square), satisfying Conway's survival condition (2 or 3 neighbors) every single generation.
+      None of the 4 empty cells directly touching the block have exactly 3 living neighbors, so
+      none of them are born either — the entire configuration is a fixed point of the rule.</p>
+    </details>
+    <details>
+      <summary>Is the block the most common still life?</summary>
+      <p>Yes — it's statistically the most frequently occurring still life to emerge from random
+      starting conditions in Conway's Game of Life, more common than the beehive, loaf, boat, or
+      tub.</p>
+    </details>
+    <details>
+      <summary>Do other Life-like rules also have a stable block?</summary>
+      <p>Only if the rule's survival condition includes 3 (since every block cell has exactly 3
+      neighbors) and its birth condition excludes 2 (since the block's diagonal-adjacent empty
+      cells have exactly 2 neighbors). Rules that differ on either count will see a block
+      collapse, grow, or transform.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Read more about still lifes and Game of Life mechanics in the
+  <a href="/blog/cellular-automata-art-guide/#game-of-life">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

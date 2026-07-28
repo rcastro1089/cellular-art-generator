@@ -123,6 +123,35 @@ footer.site-foot{
 footer.site-foot a{color:var(--muted)}
 footer.site-foot a:hover{color:var(--accent)}
 
+/* ── Gallery / pattern reference pages ── */
+.fact-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;
+  margin:20px 0 28px;
+}
+.fact{
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:11px;
+  padding:12px 14px;
+}
+.fact .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.fact .v{font-size:15px;font-weight:700;color:#fff}
+
+.gallery-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;
+  margin:10px 0 8px;
+}
+.gallery-card{
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;
+  padding:14px 16px;text-decoration:none;display:block;
+}
+.gallery-card:hover{border-color:var(--accent)}
+.gallery-card .name{font-weight:700;color:#fff;font-size:14.5px;display:block;margin-bottom:3px}
+.gallery-card .meta{font-size:12px;color:var(--muted);display:block}
+.gallery-card .try{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;
+  font-weight:600;color:var(--accent);text-decoration:none;
+}
+.section-lede{color:var(--muted);font-size:14px;margin:8px 0 18px}
+
 @media (max-width:640px){
   .topbar{padding:16px}
   article{padding:4px 16px 60px}

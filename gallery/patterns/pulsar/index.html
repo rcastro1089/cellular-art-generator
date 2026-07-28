@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pulsar: Conway's Game of Life Pattern Explained — Cellscape</title>
+<meta name="description" content="The pulsar is the most common period-3 oscillator in Conway's Game of Life — 48 cells with 4-fold symmetry that pulse through 3 distinct states forever. Try it live.">
+<meta name="keywords" content="pulsar game of life, pulsar oscillator, conway game of life pulsar pattern">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/pulsar/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Pulsar: Conway's Game of Life Pattern Explained">
+<meta property="og:description" content="48 cells with 4-fold symmetry that pulse through 3 distinct states forever.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/pulsar/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Pulsar: Conway's Game of Life Pattern Explained">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Pulsar: Conway's Game of Life Pattern Explained",
+  "description": "The pulsar is the most common period-3 oscillator in Conway's Game of Life — 48 cells with 4-fold symmetry.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/pulsar/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Pulsar", "item": "https://cellscape.art/gallery/patterns/pulsar/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How many cells does a pulsar have?", "acceptedAnswer": { "@type": "Answer", "text": "48 cells at its peak state, arranged with 4-fold rotational and reflective symmetry — it looks the same rotated 90 degrees or mirrored along either axis." } },
+    { "@type": "Question", "name": "What does period 3 mean for the pulsar?", "acceptedAnswer": { "@type": "Answer", "text": "The pulsar returns to its exact starting arrangement every 3 generations, cycling through 3 distinct visual states before repeating — noticeably faster than the period-15 Pentadecathlon, another well-known oscillator." } },
+    { "@type": "Question", "name": "Is the pulsar common in random Game of Life soups?", "acceptedAnswer": { "@type": "Answer", "text": "It's one of the more frequently occurring larger oscillators to emerge from random starting conditions, alongside simpler ones like the blinker and toad, though it's less common than those smaller period-2 oscillators." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=pulsar">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Oscillator</p>
+  <h1>The Pulsar</h1>
+  <p class="lede">The pulsar is the largest and most symmetric of the commonly occurring
+  oscillators in Conway's Game of Life — 48 cells arranged with 4-fold symmetry, breathing through
+  3 distinct states every cycle.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Oscillator</div></div>
+    <div class="fact"><div class="k">Cell count</div><div class="v">48 (peak state)</div></div>
+    <div class="fact"><div class="k">Period</div><div class="v">3 generations</div></div>
+    <div class="fact"><div class="k">Symmetry</div><div class="v">4-fold rotational + reflective</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>Why It Looks the Way It Does</h2>
+  <p>Most naturally-occurring oscillators in Life are small and irregular — a blinker is just
+  three cells in a row, a toad is a slightly offset pair of rows. The pulsar is different: its
+  four-fold symmetry means whatever happens in one quadrant of the pattern is mirrored in all
+  three others, every generation. That symmetry isn't a coincidence of discovery — it's what makes
+  the pulsar's 3-generation breathing cycle stable in the first place, since each quadrant's
+  neighbor counts stay balanced against its mirror images throughout the whole cycle.</p>
+
+  <h2>Why It Matters</h2>
+  <p>The pulsar is one of the standard reference oscillators used throughout Life literature and
+  pattern catalogs, both because of its visual clarity (it's immediately recognizable, unlike many
+  smaller oscillators that look like random noise mid-cycle) and because its period-3 timing makes
+  it a useful building block for synchronizing more complex engineered patterns that need to
+  "tick" on a specific schedule.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=pulsar">Open the pulsar pre-loaded</a> in Cellscape and watch its 3-phase
+  breathing cycle — try long-exposure rendering to see all 3 phases overlaid into a single, denser
+  symmetric image.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>How many cells does a pulsar have?</summary>
+      <p>48 cells at its peak state, arranged with 4-fold rotational and reflective symmetry — it
+      looks the same rotated 90 degrees or mirrored along either axis.</p>
+    </details>
+    <details>
+      <summary>What does period 3 mean for the pulsar?</summary>
+      <p>The pulsar returns to its exact starting arrangement every 3 generations, cycling through
+      3 distinct visual states before repeating — noticeably faster than the period-15
+      Pentadecathlon, another well-known oscillator.</p>
+    </details>
+    <details>
+      <summary>Is the pulsar common in random Game of Life soups?</summary>
+      <p>It's one of the more frequently occurring larger oscillators to emerge from random
+      starting conditions, alongside simpler ones like the blinker and toad, though it's less
+      common than those smaller period-2 oscillators.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">See how oscillators fit into Game of Life's broader mechanics in the
+  <a href="/blog/cellular-automata-art-guide/#game-of-life">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

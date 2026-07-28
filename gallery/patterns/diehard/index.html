@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diehard: The Game of Life Pattern That Vanishes Completely — Cellscape</title>
+<meta name="description" content="Diehard is a 7-cell Game of Life pattern that survives 130 generations of growth and collapse, then vanishes completely, leaving nothing behind. Try it live.">
+<meta name="keywords" content="diehard game of life, diehard pattern conway, game of life vanishing pattern, methuselah cellular automaton">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/diehard/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Diehard: The Game of Life Pattern That Vanishes Completely">
+<meta property="og:description" content="Survives 130 generations, then vanishes completely, leaving nothing behind.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/diehard/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Diehard: The Game of Life Pattern That Vanishes Completely">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Diehard: The Game of Life Pattern That Vanishes Completely",
+  "description": "Diehard is a 7-cell Game of Life pattern that survives 130 generations of growth and collapse, then vanishes completely.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/diehard/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Diehard", "item": "https://cellscape.art/gallery/patterns/diehard/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How many generations does Diehard survive?", "acceptedAnswer": { "@type": "Answer", "text": "Exactly 130 generations. On generation 130, every living cell in the pattern dies simultaneously, leaving a completely empty grid with no survivors, no still lifes, and no spaceships left behind." } },
+    { "@type": "Question", "name": "Why is it called Diehard?", "acceptedAnswer": { "@type": "Answer", "text": "The name refers to how long the pattern holds on before dying — it survives far longer than its 7-cell size would suggest, growing to dozens of live cells at points, before eventually collapsing to nothing." } },
+    { "@type": "Question", "name": "Is Diehard the longest-lived pattern that fully dies out?", "acceptedAnswer": { "@type": "Answer", "text": "Among small, well-known starting patterns, Diehard is one of the most famous examples of a pattern that eventually reaches total extinction rather than stabilizing into still lifes or oscillators — it's specifically notable for how long it takes to die completely, not for surviving forever." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=diehard">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Methuselah</p>
+  <h1>Diehard</h1>
+  <p class="lede">Seven cells that grow, twist, and fragment for 130 generations — and then die
+  completely, all at once, leaving an entirely empty grid behind. Diehard is one of the most
+  dramatic small patterns in Conway's Game of Life.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Methuselah (fully dies out)</div></div>
+    <div class="fact"><div class="k">Starting cells</div><div class="v">7</div></div>
+    <div class="fact"><div class="k">Final generation</div><div class="v">130</div></div>
+    <div class="fact"><div class="k">Survivors afterward</div><div class="v">None</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>A Pattern That Actually Dies</h2>
+  <p>Most well-known methuselahs — like the <a href="/gallery/patterns/r-pentomino/">R-pentomino</a>
+  — eventually settle into a stable mix of still lifes, oscillators, and drifting spaceships that
+  persist forever. Diehard is different: it takes just as long to play out, growing and
+  fragmenting for well over a hundred generations, but the ending is total. On exactly generation
+  130, every remaining living cell dies simultaneously under Conway's rule, and nothing is left —
+  no still life, no oscillator, no glider drifting away. It's one of the more striking
+  demonstrations that Conway's Game of Life doesn't guarantee eternal structure just because a
+  pattern manages to survive for a while.</p>
+
+  <h2>Why It Matters</h2>
+  <p>Diehard is frequently cited alongside the Acorn and R-pentomino as one of the classic small
+  methuselahs used to illustrate how unpredictable Conway's simple rule can be — but it earns its
+  own distinct place in that group precisely because of its ending. Where most long-lived small
+  patterns are notable for what they eventually produce, Diehard is notable for producing nothing
+  at all, despite taking just as long to get there.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=diehard">Open Diehard pre-loaded</a> in Cellscape and let it run — watch
+  the population count rise and fall over well over a hundred generations before it suddenly drops
+  straight to zero.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>How many generations does Diehard survive?</summary>
+      <p>Exactly 130 generations. On generation 130, every living cell in the pattern dies
+      simultaneously, leaving a completely empty grid with no survivors, no still lifes, and no
+      spaceships left behind.</p>
+    </details>
+    <details>
+      <summary>Why is it called Diehard?</summary>
+      <p>The name refers to how long the pattern holds on before dying — it survives far longer
+      than its 7-cell size would suggest, growing to dozens of live cells at points, before
+      eventually collapsing to nothing.</p>
+    </details>
+    <details>
+      <summary>Is Diehard the longest-lived pattern that fully dies out?</summary>
+      <p>Among small, well-known starting patterns, Diehard is one of the most famous examples of
+      a pattern that eventually reaches total extinction rather than stabilizing into still lifes
+      or oscillators — it's specifically notable for how long it takes to die completely, not for
+      surviving forever.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Read more about methuselahs and emergent unpredictability in the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a>, or
+  browse the <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

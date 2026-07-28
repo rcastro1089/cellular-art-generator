@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Gosper Glider Gun: The Pattern That Proved Life Could Grow Forever — Cellscape</title>
+<meta name="description" content="The Gosper Glider Gun fires a new glider every 30 generations, forever. Discovered by Bill Gosper in 1970, it proved Conway's Game of Life could grow without bound. Try it live.">
+<meta name="keywords" content="glider gun, gosper glider gun, game of life glider gun, conway glider gun pattern">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/gosper-glider-gun/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Gosper Glider Gun: The Pattern That Proved Life Could Grow Forever">
+<meta property="og:description" content="Fires a new glider every 30 generations, forever. Discovered by Bill Gosper in 1970.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/gosper-glider-gun/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Gosper Glider Gun: The Pattern That Proved Life Could Grow Forever">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Gosper Glider Gun: The Pattern That Proved Life Could Grow Forever",
+  "description": "The Gosper Glider Gun fires a new glider every 30 generations, forever. Discovered by Bill Gosper in 1970, it proved Conway's Game of Life could grow without bound.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/gosper-glider-gun/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Gosper Glider Gun", "item": "https://cellscape.art/gallery/patterns/gosper-glider-gun/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Who invented the Gosper Glider Gun?", "acceptedAnswer": { "@type": "Answer", "text": "Bill Gosper, a mathematician at MIT, discovered it in November 1970 as part of a group racing to answer a question John Conway had posed: does anything in the Game of Life grow without bound?" } },
+    { "@type": "Question", "name": "Why was the glider gun such a big deal?", "acceptedAnswer": { "@type": "Answer", "text": "Conway had offered a $50 prize to anyone who could prove or disprove that Life patterns are always bounded in population. The glider gun settled it decisively: a small, finite starting pattern that emits an endless stream of gliders means Life's population can grow forever, with no upper limit." } },
+    { "@type": "Question", "name": "How often does it fire?", "acceptedAnswer": { "@type": "Answer", "text": "Every 30 generations, the gun's two \"shuttle\" structures complete a cycle and release one new glider, which then travels away from the gun indefinitely under Conway's B3/S23 rule." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=gosper-glider-gun">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Gun</p>
+  <h1>The Gosper Glider Gun</h1>
+  <p class="lede">A single, finite pattern that never stops producing new ones. The Gosper Glider
+  Gun fires a fresh glider every 30 generations, forever — and in doing so, answered one of the
+  first big open questions about Conway's Game of Life.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Gun</div></div>
+    <div class="fact"><div class="k">Cell count</div><div class="v">36</div></div>
+    <div class="fact"><div class="k">Firing period</div><div class="v">30 generations</div></div>
+    <div class="fact"><div class="k">Discovered</div><div class="v">Nov. 1970, Bill Gosper</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>The $50 Question</h2>
+  <p>When John Conway published the Game of Life in 1970, he wasn't sure whether every pattern was
+  doomed to either die out or settle into a bounded, unchanging population. He offered $50 to
+  whoever could either prove that no pattern grows forever, or find one that did. A group at MIT,
+  led by Bill Gosper, took the second approach — and within the year, found a pattern built from
+  two interacting "shuttle" oscillators positioned so that each cycle nudges out a complete,
+  independent glider before resetting. Conway paid up.</p>
+
+  <h2>Why It Matters</h2>
+  <p>Beyond settling the growth question, the glider gun turned out to be a foundational building
+  block. A steady, periodic stream of <a href="/gallery/patterns/glider/">gliders</a> is exactly
+  what later engineers needed to build logic gates inside Life — a glider stream can represent a
+  repeating signal, and colliding two streams at the right angle can simulate an AND or OR gate.
+  Decades later, that same idea scaled up into full Turing-complete computers built entirely out
+  of Game of Life cells, all tracing back to the same basic firing mechanism Gosper found in 1970.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=gosper-glider-gun">Open the Gosper Glider Gun pre-loaded</a> in Cellscape
+  and press play — give it a few hundred generations and long-exposure rendering to watch the
+  stream of gliders trace a visible, repeating diagonal path across the grid.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Who invented the Gosper Glider Gun?</summary>
+      <p>Bill Gosper, a mathematician at MIT, discovered it in November 1970 as part of a group
+      racing to answer a question John Conway had posed: does anything in the Game of Life grow
+      without bound?</p>
+    </details>
+    <details>
+      <summary>Why was the glider gun such a big deal?</summary>
+      <p>Conway had offered a $50 prize to anyone who could prove or disprove that Life patterns
+      are always bounded in population. The glider gun settled it decisively: a small, finite
+      starting pattern that emits an endless stream of gliders means Life's population can grow
+      forever, with no upper limit.</p>
+    </details>
+    <details>
+      <summary>How often does it fire?</summary>
+      <p>Every 30 generations, the gun's two "shuttle" structures complete a cycle and release one
+      new glider, which then travels away from the gun indefinitely under Conway's B3/S23 rule.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Learn more about Conway's Game of Life in the
+  <a href="/blog/cellular-automata-art-guide/">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

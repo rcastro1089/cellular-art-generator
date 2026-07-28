@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Lightweight Spaceship (LWSS): Game of Life Pattern Explained — Cellscape</title>
+<meta name="description" content="The lightweight spaceship (LWSS) travels orthogonally across Conway's Game of Life, faster and larger than a glider. Its mechanics, history, and a live version to try.">
+<meta name="keywords" content="lightweight spaceship, LWSS game of life, orthogonal spaceship conway, game of life spaceship patterns">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/lightweight-spaceship/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Lightweight Spaceship (LWSS): Game of Life Pattern Explained">
+<meta property="og:description" content="Travels orthogonally, faster and larger than a glider.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/lightweight-spaceship/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Lightweight Spaceship (LWSS): Game of Life Pattern Explained">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Lightweight Spaceship (LWSS): Game of Life Pattern Explained",
+  "description": "The lightweight spaceship travels orthogonally across Conway's Game of Life, faster and larger than a glider.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/lightweight-spaceship/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Lightweight Spaceship", "item": "https://cellscape.art/gallery/patterns/lightweight-spaceship/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How is the LWSS different from a glider?", "acceptedAnswer": { "@type": "Answer", "text": "A glider is 5 cells and moves diagonally at c/4. The LWSS is 9 cells and moves orthogonally (straight up, down, left, or right) at c/2 — twice as fast, in a straight rather than diagonal line, and along a different axis of movement entirely." } },
+    { "@type": "Question", "name": "What does c/2 speed mean?", "acceptedAnswer": { "@type": "Answer", "text": "c is the fastest anything can move in the automaton — one cell per generation. The LWSS moves at half that: one cell every 2 generations, in the direction it's facing." } },
+    { "@type": "Question", "name": "Are there other spaceships related to the LWSS?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — the LWSS is the smallest of a family of orthogonal spaceships that also includes the middleweight spaceship (MWSS) and heavyweight spaceship (HWSS), each one cell wider and slightly different in exact shape, all moving at the same c/2 orthogonal speed." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?pattern=lwss">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Pattern · Spaceship</p>
+  <h1>The Lightweight Spaceship (LWSS)</h1>
+  <p class="lede">Where the glider glides diagonally, the lightweight spaceship travels in a
+  straight line — faster, larger, and along an entirely different axis of Conway's Game of Life.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Category</div><div class="v">Spaceship</div></div>
+    <div class="fact"><div class="k">Cell count</div><div class="v">9</div></div>
+    <div class="fact"><div class="k">Period</div><div class="v">4 generations</div></div>
+    <div class="fact"><div class="k">Speed</div><div class="v">c/2 orthogonal</div></div>
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3/S23</span></div></div>
+  </div>
+
+  <h2>How It Differs From the Glider</h2>
+  <p>The <a href="/gallery/patterns/glider/">glider</a> is the smallest spaceship, moving
+  diagonally at a quarter of the theoretical maximum speed. The lightweight spaceship (LWSS) is
+  the smallest of a different family entirely — one that moves orthogonally (straight along a row
+  or column) rather than diagonally, and at c/2 rather than c/4, twice as fast. Its 9-cell shape
+  regenerates itself shifted one cell in its direction of travel every 4 generations, the same
+  self-perpetuating mechanism that makes the glider work, just applied to a larger, differently
+  oriented pattern.</p>
+
+  <h2>Why It Matters</h2>
+  <p>The LWSS is the smallest member of a small family of named orthogonal spaceships —
+  middleweight (MWSS) and heavyweight (HWSS) follow the same basic template at slightly larger
+  sizes. Having both a diagonal (glider) and an orthogonal (LWSS) traveling pattern gave early Life
+  researchers two independent "signal carriers" moving along different axes, which turned out to
+  matter for building more complex engineered patterns that need traffic moving in more than one
+  direction across the grid.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?pattern=lwss">Open the LWSS pre-loaded</a> in Cellscape and press play — notice how
+  it travels in a straight line rather than diagonally, and compare its speed directly against a
+  glider on the same grid.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>How is the LWSS different from a glider?</summary>
+      <p>A glider is 5 cells and moves diagonally at c/4. The LWSS is 9 cells and moves
+      orthogonally (straight up, down, left, or right) at c/2 — twice as fast, in a straight rather
+      than diagonal line, and along a different axis of movement entirely.</p>
+    </details>
+    <details>
+      <summary>What does c/2 speed mean?</summary>
+      <p>c is the fastest anything can move in the automaton — one cell per generation. The LWSS
+      moves at half that: one cell every 2 generations, in the direction it's facing.</p>
+    </details>
+    <details>
+      <summary>Are there other spaceships related to the LWSS?</summary>
+      <p>Yes — the LWSS is the smallest of a family of orthogonal spaceships that also includes
+      the middleweight spaceship (MWSS) and heavyweight spaceship (HWSS), each one cell wider and
+      slightly different in exact shape, all moving at the same c/2 orthogonal speed.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">Read more about spaceships and Game of Life mechanics in the
+  <a href="/blog/cellular-automata-art-guide/#game-of-life">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

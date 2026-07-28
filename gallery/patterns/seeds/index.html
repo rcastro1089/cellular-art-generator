@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seeds (B2/S): The Cellular Automaton Rule Explained — Cellscape</title>
+<meta name="description" content="Seeds (B2/S) is a cellular automaton where nothing ever survives — every live cell dies each tick, yet the rule still produces explosive, lace-like growth. Try it live.">
+<meta name="keywords" content="seeds cellular automaton, seeds rule game of life, B2/S rule, life-like cellular automata">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/seeds/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Seeds (B2/S): The Cellular Automaton Rule Explained">
+<meta property="og:description" content="A rule where nothing ever survives, yet still produces explosive, lace-like growth.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/seeds/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Seeds (B2/S): The Cellular Automaton Rule Explained">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Seeds (B2/S): The Cellular Automaton Rule Explained",
+  "description": "Seeds is a cellular automaton where nothing ever survives, yet the rule still produces explosive, lace-like growth.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/seeds/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Seeds", "item": "https://cellscape.art/gallery/patterns/seeds/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What does the Seeds rule B2/S mean?", "acceptedAnswer": { "@type": "Answer", "text": "A dead cell with exactly 2 living neighbors is born (B2); no living cell ever survives to the next generation, no matter how many neighbors it has (S is empty). Every currently-alive cell dies every single tick." } },
+    { "@type": "Question", "name": "How can a rule where nothing survives produce interesting patterns?", "acceptedAnswer": { "@type": "Answer", "text": "Because births still happen based on the previous generation's live cells, new cells keep appearing even though none of the old ones remain. The pattern the births trace out is entirely different from the pattern that caused them, which produces a constantly shifting, lace-like structure rather than the static or oscillating shapes typical of Life-like rules with survival." } },
+    { "@type": "Question", "name": "Is Seeds related to Conway's Game of Life?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — it's a different point in the same Life-like rule family (2 states, Moore neighborhood, B/S notation), just with a different birth/survival combination. Removing all survival conditions turns out to produce a dramatically different, far more explosive personality than Conway's balanced B3/S23." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?rule=seeds">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Rule · Life-like automaton</p>
+  <h1>Seeds (B2/S)</h1>
+  <p class="lede">Every cell that's alive right now will be dead next generation, guaranteed — and
+  yet Seeds is one of the most visually explosive rules in the Life-like family. It's proof that
+  "nothing survives" doesn't mean "nothing happens."</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B2/S</span></div></div>
+    <div class="fact"><div class="k">Birth condition</div><div class="v">Exactly 2 neighbors</div></div>
+    <div class="fact"><div class="k">Survival condition</div><div class="v">None — ever</div></div>
+    <div class="fact"><div class="k">Character</div><div class="v">Explosive, lace-like</div></div>
+    <div class="fact"><div class="k">Neighborhood</div><div class="v">Moore (8-cell)</div></div>
+  </div>
+
+  <h2>How a Rule With No Survival Still Grows</h2>
+  <p>In Conway's Game of Life, a cell needs 2 or 3 living neighbors to survive — Seeds removes
+  survival from the equation entirely. Only birth matters: any dead cell with exactly 2 living
+  neighbors comes alive next generation. Since every currently-living cell is guaranteed to die,
+  the entire population is replaced every single tick — but replacement isn't the same as
+  disappearance. As long as the previous generation's live cells create new birth conditions
+  somewhere nearby, the pattern keeps regenerating, just never in the same place twice. The result
+  looks less like a static structure evolving and more like a wave of activity rippling outward.</p>
+
+  <h2>Why It Looks the Way It Does</h2>
+  <p>Because nothing ever stabilizes into a still life or a clean oscillator (there's no
+  "surviving" state to settle into), Seeds almost never produces the calm, structured look
+  Conway's Life eventually reaches. Instead, a small seed pattern tends to expand outward in
+  branching, lace-like fronts — visually closer to a chemical reaction-diffusion pattern or frost
+  crystallizing than to a "living" simulation. It's one of the more strikingly different Life-like
+  rules to render with long-exposure history mapping, since the trail left behind traces the
+  entire expanding wavefront rather than a handful of persistent shapes.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?rule=seeds">Open Seeds pre-loaded</a> in Cellscape, randomize the grid, and press
+  play — the contrast with Conway's Game of Life (B3/S23) is immediate and dramatic from the very
+  first few generations.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>What does the Seeds rule B2/S mean?</summary>
+      <p>A dead cell with exactly 2 living neighbors is born (B2); no living cell ever survives to
+      the next generation, no matter how many neighbors it has (S is empty). Every currently-alive
+      cell dies every single tick.</p>
+    </details>
+    <details>
+      <summary>How can a rule where nothing survives produce interesting patterns?</summary>
+      <p>Because births still happen based on the previous generation's live cells, new cells keep
+      appearing even though none of the old ones remain. The pattern the births trace out is
+      entirely different from the pattern that caused them, which produces a constantly shifting,
+      lace-like structure rather than the static or oscillating shapes typical of Life-like rules
+      with survival.</p>
+    </details>
+    <details>
+      <summary>Is Seeds related to Conway's Game of Life?</summary>
+      <p>Yes — it's a different point in the same Life-like rule family (2 states, Moore
+      neighborhood, B/S notation), just with a different birth/survival combination. Removing all
+      survival conditions turns out to produce a dramatically different, far more explosive
+      personality than Conway's balanced B3/S23.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">See how Seeds fits among other Life-like rules in the
+  <a href="/blog/cellular-automata-art-guide/#beyond-conway">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

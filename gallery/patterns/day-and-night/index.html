@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day &amp; Night (B3678/S34678): The Self-Symmetric Cellular Automaton — Cellscape</title>
+<meta name="description" content="Day & Night is a cellular automaton rule symmetric under color inversion — swap alive and dead, and the rule behaves identically. Its dead and living regions mirror each other.">
+<meta name="keywords" content="day and night cellular automaton, day night rule game of life, B3678 S34678, symmetric cellular automata">
+<link rel="canonical" href="https://cellscape.art/gallery/patterns/day-and-night/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Day & Night: The Self-Symmetric Cellular Automaton">
+<meta property="og:description" content="A rule symmetric under color inversion — dead and living regions mirror each other.">
+<meta property="og:url" content="https://cellscape.art/gallery/patterns/day-and-night/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Day & Night: The Self-Symmetric Cellular Automaton">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Day & Night: The Self-Symmetric Cellular Automaton",
+  "description": "Day & Night is a cellular automaton rule symmetric under color inversion — dead and living regions mirror each other.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/gallery/patterns/day-and-night/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Gallery", "item": "https://cellscape.art/gallery/" },
+    { "@type": "ListItem", "position": 3, "name": "Day & Night", "item": "https://cellscape.art/gallery/patterns/day-and-night/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What does B3678/S34678 mean?", "acceptedAnswer": { "@type": "Answer", "text": "A dead cell is born with 3, 6, 7, or 8 living neighbors; a living cell survives with 3, 4, 6, 7, or 8 living neighbors. Both lists happen to be close mirrors of each other around the 8-neighbor maximum, which is what produces the rule's inversion symmetry." } },
+    { "@type": "Question", "name": "What does 'symmetric under inversion' mean?", "acceptedAnswer": { "@type": "Answer", "text": "If you swap every alive cell for dead and every dead cell for alive across the whole grid, then run Day & Night forward, you get the same result as running the original grid forward and then inverting it. Dead regions ('night') behave exactly like living regions ('day') would under the same rule, which is where the name comes from." } },
+    { "@type": "Question", "name": "How does Day & Night look different from Conway's Game of Life?", "acceptedAnswer": { "@type": "Answer", "text": "Where Conway's Life tends to thin out into sparse, isolated structures, Day & Night's extra birth and survival conditions favor thicker, more solid regions of both states, often producing large blocky areas of \"day\" and \"night\" with active, churning boundaries between them." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/?rule=day-night">Try it live →</a>
+</div>
+
+<article>
+  <p class="kicker">Rule · Life-like automaton</p>
+  <h1>Day &amp; Night (B3678/S34678)</h1>
+  <p class="lede">Most cellular automata treat "alive" and "dead" as fundamentally different
+  states. Day &amp; Night is unusual: swap every living cell for a dead one and vice versa across
+  the whole grid, and the rule behaves exactly the same — dead regions mirror living ones.</p>
+
+  <div class="fact-grid">
+    <div class="fact"><div class="k">Rule</div><div class="v"><span class="rule">B3678/S34678</span></div></div>
+    <div class="fact"><div class="k">Birth condition</div><div class="v">3, 6, 7, or 8 neighbors</div></div>
+    <div class="fact"><div class="k">Survival condition</div><div class="v">3, 4, 6, 7, or 8 neighbors</div></div>
+    <div class="fact"><div class="k">Notable property</div><div class="v">Symmetric under inversion</div></div>
+    <div class="fact"><div class="k">Neighborhood</div><div class="v">Moore (8-cell)</div></div>
+  </div>
+
+  <h2>The Symmetry That Gives It Its Name</h2>
+  <p>Look closely at the two digit lists in <span class="rule">B3678/S34678</span>: both are
+  built almost entirely from the same high neighbor counts (6, 7, 8), plus 3 on each side. That
+  near-mirror structure around the 8-neighbor maximum means the rule doesn't meaningfully
+  distinguish "birth" from "survival" the way most Life-like rules do — a region of dead cells
+  surrounded the right way behaves just like a region of living cells would. Invert every cell on
+  the grid (dead becomes alive, alive becomes dead) and run the rule forward, and you get the same
+  outcome as running the original grid forward and inverting the result. That's where the name
+  comes from: "day" (alive) regions and "night" (dead) regions are two faces of the same behavior.</p>
+
+  <h2>What It Looks Like in Practice</h2>
+  <p>Rather than the sparse, structure-heavy look of Conway's Game of Life, Day &amp; Night tends
+  to produce large, solid regions of both states with visually active borders between them — less
+  "scattered organisms," more "two territories with a churning coastline." It's a good rule to
+  contrast directly against Seeds or Conway's Life, since all three sit in the same B/S family but
+  land in genuinely different places on the spectrum from sparse to solid.</p>
+
+  <h2>See It Live</h2>
+  <p><a href="/?rule=day-night">Open Day &amp; Night pre-loaded</a> in Cellscape and randomize the
+  grid — watch how quickly it settles into large connected regions compared to Conway's Life
+  running on the same random starting pattern.</p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>What does B3678/S34678 mean?</summary>
+      <p>A dead cell is born with 3, 6, 7, or 8 living neighbors; a living cell survives with 3, 4,
+      6, 7, or 8 living neighbors. Both lists happen to be close mirrors of each other around the
+      8-neighbor maximum, which is what produces the rule's inversion symmetry.</p>
+    </details>
+    <details>
+      <summary>What does "symmetric under inversion" mean?</summary>
+      <p>If you swap every alive cell for dead and every dead cell for alive across the whole
+      grid, then run Day &amp; Night forward, you get the same result as running the original
+      grid forward and then inverting it. Dead regions ("night") behave exactly like living
+      regions ("day") would under the same rule, which is where the name comes from.</p>
+    </details>
+    <details>
+      <summary>How does Day &amp; Night look different from Conway's Game of Life?</summary>
+      <p>Where Conway's Life tends to thin out into sparse, isolated structures, Day &amp; Night's
+      extra birth and survival conditions favor thicker, more solid regions of both states, often
+      producing large blocky areas of "day" and "night" with active, churning boundaries between
+      them.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">See how this rule fits among other Life-like rules in the
+  <a href="/blog/cellular-automata-art-guide/#beyond-conway">complete guide</a>, or browse the
+  <a href="/gallery/">full pattern &amp; rule gallery</a>.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/gallery/">Gallery</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>
