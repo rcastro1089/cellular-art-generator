@@ -111,6 +111,8 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 - [x] tasks.md — EXECUTION PLAN
 
 ## Monetization — Fase A (validation, decided 2026-07-28)
+> Full operational handoff (product IDs, API capabilities, test flow, pending
+> tasks) lives in **`docs/monetization.md`**. Summary below.
 - **Strategy:** research shows TOOL demand is proven ("game of life" 27.1K/mo)
   but PRODUCT demand (buying CA prints) is UNPROVEN (product keywords = 0 vol).
   So launch the finished tool FREE to capture the game-of-life traffic, and
