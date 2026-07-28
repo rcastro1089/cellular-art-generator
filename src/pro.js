@@ -18,6 +18,9 @@ const LS_KEY = 'cellscape_pro_license';
 /* Local dev/test key: unlocks the Pro UX before the Gumroad product is live.
    Remove (or leave — it only affects this browser) once real keys work. */
 const DEV_KEY = 'CELLSCAPE-DEV';
+/* The bundle is public, so a hardcoded unlock key would be a free bypass in
+   production. DEV_KEY is therefore honored on local dev hosts only. */
+const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
 
 export const PRO = { active: false };
 export const isPro = () => PRO.active;
@@ -44,7 +47,7 @@ export function gatePro(feature){
 export async function verifyLicense(key){
   key = (key || '').trim();
   if (!key) return false;
-  if (key === DEV_KEY){ localStorage.setItem(LS_KEY, key); setPro(true); return true; }
+  if (key === DEV_KEY && IS_LOCAL){ localStorage.setItem(LS_KEY, key); setPro(true); return true; }
   try {
     const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
       method: 'POST',
@@ -67,8 +70,12 @@ export async function verifyLicense(key){
 function restore(){
   const key = localStorage.getItem(LS_KEY);
   if (!key) return;
+  if (key === DEV_KEY){                      // dev unlock: local hosts only
+    if (IS_LOCAL) setPro(true);
+    else localStorage.removeItem(LS_KEY);
+    return;
+  }
   setPro(true);
-  if (key === DEV_KEY) return;
   fetch('https://api.gumroad.com/v2/licenses/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
