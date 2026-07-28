@@ -48,13 +48,22 @@ cellular-art-generator/
 ├── styles/blog.css         → standalone stylesheet for static content pages
 │                             (blog/gallery/etc.) — decoupled from app.css/#app
 ├── blog/
-│   └── cellular-automata-art-guide/index.html → pillar article (3000+ words,
-│       targets "cellular automata" 2.9K/mo; Article+Breadcrumb+FAQPage JSON-LD)
+│   ├── index.html                        → blog index, links all posts
+│   ├── cellular-automata-art-guide/      → pillar (3,011 words, "cellular
+│   │                                        automata" 2.9K/mo) + Related Reading
+│   ├── algorithmic-art-generators/       → comparison ("algorithmic art"/"design")
+│   ├── cellular-automata-types/          → reference/taxonomy (CA/1D/Lenia/etc)
+│   ├── how-to-make-generative-art/       → tutorial (+ HowTo JSON-LD)
+│   ├── math-art-decor-ideas/             → inspiration ("scientific illustration"
+│   │                                        3.6K/mo, the single biggest keyword)
+│   └── gifts-for-programmers/            → gift guide ("programmer gifts"/"code art")
 └── CLAUDE.md               → This file
 ```
-Still planned (sprint 4): gallery/patterns/* (30+ pattern pages), 5 blog cluster
-articles linking to the pillar, faq.html, about.html. shop.html deferred with
-Printful (Fase A still validating digital conversion first).
+All 6 blog pages: own Article+BreadcrumbList+FAQPage JSON-LD (distinct FAQ
+questions per page, no cannibalization), cross-link to each other + the pillar
++ "/", zero JS, styles/blog.css only. Still planned (sprint 4): gallery/patterns/*
+(30+ pattern pages), faq.html, about.html. shop.html deferred with Printful
+(Fase A still validating digital conversion first).
 
 **SEO structure decision (2026-07-28):** the tool stays at `/` (index.html) —
 NOT split into a landing + separate `/generator` route as the original

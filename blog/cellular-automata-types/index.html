@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Types of Cellular Automata: A Reference Guide — Cellscape</title>
+<meta name="description" content="A structured reference to the families of cellular automata — elementary 1D, Life-like 2D, multi-state, totalistic, continuous, and 3D — with what makes each one distinct.">
+<meta name="keywords" content="types of cellular automata, cellular automaton types, elementary cellular automata, life-like cellular automata, continuous cellular automata, lenia">
+<link rel="canonical" href="https://cellscape.art/blog/cellular-automata-types/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Types of Cellular Automata: A Reference Guide">
+<meta property="og:description" content="Elementary 1D, Life-like 2D, multi-state, totalistic, continuous, and 3D cellular automata — what makes each family distinct.">
+<meta property="og:url" content="https://cellscape.art/blog/cellular-automata-types/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Types of Cellular Automata: A Reference Guide">
+<meta name="twitter:description" content="Elementary 1D, Life-like 2D, multi-state, totalistic, continuous, and 3D cellular automata — what makes each family distinct.">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Types of Cellular Automata: A Reference Guide",
+  "description": "A structured reference to the families of cellular automata — elementary 1D, Life-like 2D, multi-state, totalistic, continuous, and 3D — with what makes each one distinct.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/blog/cellular-automata-types/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://cellscape.art/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Types of Cellular Automata: A Reference Guide", "item": "https://cellscape.art/blog/cellular-automata-types/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What are the main types of cellular automata?", "acceptedAnswer": { "@type": "Answer", "text": "The main families are elementary (1D, 2-state, 3-cell neighborhood), Life-like (2D, 2-state, Moore neighborhood, B/S notation), multi-state (more than 2 states per cell, like Brian's Brain), totalistic vs. outer-totalistic (whether a cell's own state counts toward its neighbor sum), continuous (states are real numbers instead of discrete, like Lenia), and higher-dimensional (3D/voxel automata)." } },
+    { "@type": "Question", "name": "What's the difference between totalistic and outer-totalistic rules?", "acceptedAnswer": { "@type": "Answer", "text": "A totalistic rule's next state depends only on the sum of all neighbor states including the cell's own current state. An outer-totalistic rule (which includes Conway's Game of Life) separates the cell's own state from its neighbor sum, applying different logic depending on whether the cell itself is currently alive or dead — which is exactly what B/S notation encodes." } },
+    { "@type": "Question", "name": "Is Lenia a cellular automaton?", "acceptedAnswer": { "@type": "Answer", "text": "Lenia is often described as a continuous generalization of cellular automata: instead of discrete alive/dead cells updated in fixed integer steps, Lenia uses continuous-valued cells, a smooth neighborhood kernel, and continuous time steps. It produces smoothly moving, organism-like blobs rather than Life's blocky patterns, while keeping the same core idea of local rules producing global structure." } }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/">Open the generator →</a>
+</div>
+
+<article>
+  <p class="kicker">Reference · Updated July 2026 · ~10 min read</p>
+  <h1>Types of Cellular Automata: A Reference Guide</h1>
+  <p class="lede">"Cellular automaton" covers a much wider space than Conway's Game of Life alone.
+  This is a structured reference to the major families — how they differ in dimension, state
+  count, and neighborhood rules — for anyone who already knows the basics and wants the fuller
+  taxonomy. New to the topic? Start with the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a> first.</p>
+
+  <p>Every classification below answers a different question about the same underlying idea — a
+  grid of cells, a neighborhood, and a rule repeated over time. Dimension asks how many axes the
+  grid spans. State count asks how many values a single cell can hold. Rule structure asks exactly
+  what information the rule is allowed to use about a cell's neighbors. None of these categories
+  are mutually exclusive — Conway's Game of Life, for instance, is simultaneously 2D, binary, and
+  outer-totalistic — but naming each axis separately makes it much easier to place an unfamiliar
+  automaton into context the first time you encounter it.</p>
+
+  <h2>By Dimension</h2>
+  <h3>1D: Elementary Cellular Automata</h3>
+  <p>A single row of cells, each with 2 possible states, where the next state of every cell
+  depends only on itself and its two immediate neighbors. That 3-cell neighborhood with 2 states
+  gives exactly 256 possible rules — small enough that Stephen Wolfram catalogued and numbered
+  every one of them. Rule 30 produces chaotic, seemingly random output from a single starting
+  cell; Rule 90 produces a perfect Sierpiński triangle; Rule 110 has been proven Turing complete.
+  Rendered by stacking each generation as a new row, 1D automata turn time itself into an image's
+  vertical axis.</p>
+  <h3>2D: Life-like Automata</h3>
+  <p>A grid of cells, 2 states each, updated using the 8-cell Moore neighborhood and B/S
+  ("birth/survival") notation. Conway's Game of Life (B3/S23) is the best-known example; small
+  changes to the birth/survival digits produce dramatically different personalities — see the
+  <a href="/blog/cellular-automata-art-guide/">pillar guide</a> for a fuller walkthrough of
+  specific Life-like rules and their behavior.</p>
+  <h3>3D and Higher: Voxel Automata</h3>
+  <p>The same neighbor-counting logic extended into a cubic lattice of voxels instead of a flat
+  grid, typically using a 26-neighbor (3D Moore) or 6-neighbor (3D von Neumann) neighborhood.
+  Because a 3D grid has vastly more neighbor-count combinations than 2D, most explored 3D rules
+  favor sparse growth patterns — otherwise the volume fills solid almost immediately. Rendered as
+  cubes or point clouds, exposure history (which voxels have ever been alive, and when) becomes a
+  particularly effective way to reveal a 3D automaton's structure, since a live frame alone often
+  hides more than it shows in three dimensions.</p>
+
+  <h2>By State Count</h2>
+  <h3>2-State (Binary)</h3>
+  <p>Every cell is simply alive or dead — the entire Life-like family and elementary 1D automata
+  fall here. This is the simplest and by far the most studied category.</p>
+  <h3>Multi-State</h3>
+  <p>Cells can hold more than two values, letting a single automaton model more complex local
+  behavior. <strong>Brian's Brain</strong> is the canonical example: each cell is off, firing, or
+  dying, and a firing cell always becomes dying regardless of neighbors, producing traveling
+  sparks rather than static structures. <strong>WireWorld</strong> uses four states (empty, wire,
+  electron head, electron tail) specifically to let logic circuits be built inside the automaton.
+  Von Neumann's original self-replicating automaton used 29 states.</p>
+
+  <h2>By Rule Structure</h2>
+  <h3>Totalistic Rules</h3>
+  <p>The next state depends only on the total sum of all neighbor states (including, in a fully
+  totalistic rule, the cell's own current state) — not on which specific neighbors are alive, just
+  how many. This makes the rule table small and easy to enumerate, at the cost of not being able
+  to express rules that care about neighbor arrangement, not just count.</p>
+  <h3>Outer-Totalistic Rules</h3>
+  <p>The cell's own current state is considered separately from the sum of its neighbors, so the
+  rule can treat "a live cell with 3 live neighbors" differently from "a dead cell with 3 live
+  neighbors." This is exactly what B/S notation encodes, and it's why Life-like automata are
+  technically outer-totalistic rather than fully totalistic — the distinction between birth and
+  survival requires knowing the cell's own prior state.</p>
+
+  <h2>By State Space</h2>
+  <h3>Discrete (Classical)</h3>
+  <p>Every cellular automaton covered above uses discrete states — a cell is exactly alive, dead,
+  or one of a finite list of named states, and time advances in fixed whole-number steps.</p>
+  <h3>Continuous: Lenia and Relatives</h3>
+  <p>Lenia generalizes the same core idea — local neighborhood, local rule, repeated over time —
+  into continuous values: cells hold real numbers instead of binary states, the neighborhood is a
+  smooth weighted kernel instead of a hard-edged 8-cell square, and time advances in small
+  continuous steps instead of discrete generations. The result looks strikingly different from
+  Life-like automata: smoothly moving, organism-like blobs ("orbium" and similar named creatures)
+  rather than blocky still lifes and gliders, despite following the same underlying philosophy of
+  simple local rules producing complex global behavior.</p>
+
+  <h2>By Boundary Behavior</h2>
+  <h3>Toroidal (Wrapped)</h3>
+  <p>Opposite edges of the grid connect to each other, so a pattern that exits the right edge
+  reappears on the left. This keeps every cell's neighborhood consistent everywhere on the grid,
+  which is why most simulators — including <a href="/">Cellscape</a> — default to it.</p>
+  <h3>Fixed / Bounded</h3>
+  <p>Cells beyond the edge of the grid are simply treated as permanently dead (or some other fixed
+  value), rather than wrapping around. This is simpler to reason about for finite-pattern analysis
+  but distorts rule behavior for anything that reaches the boundary, and permanently deletes
+  patterns that drift off the edge.</p>
+
+  <h2>Why the Classification Matters</h2>
+  <p>Beyond satisfying curiosity, knowing which axis of this taxonomy you're adjusting explains
+  <em>why</em> a change produces the effect it does. Moving from 2 states to multiple states (as
+  in Brian's Brain) is what turns static structures into traveling waves. Moving from discrete to
+  continuous state space (as in Lenia) is what turns blocky, grid-aligned shapes into smoothly
+  moving blobs. Switching from totalistic to outer-totalistic rules is what makes birth and
+  survival behave differently in the first place — without that distinction, Conway's Game of Life
+  as commonly known wouldn't be expressible at all. Each axis is a genuinely independent lever, and
+  most of the more exotic-looking automata online are simply a combination of a few of these
+  choices pushed further than the Life-like defaults.</p>
+
+  <div class="callout">
+    <p><strong>Explore several of these live:</strong> <a href="/">Cellscape</a> runs 1D-style
+    presets alongside classic 2D Life-like rules, all GPU-accelerated with color-by-age mapping,
+    long-exposure history, and non-planar (torus/sphere) rendering — free, in your browser.</p>
+  </div>
+
+  <h2 id="faq">Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>What are the main types of cellular automata?</summary>
+      <p>The main families are elementary (1D, 2-state, 3-cell neighborhood), Life-like (2D,
+      2-state, Moore neighborhood, B/S notation), multi-state (more than 2 states per cell, like
+      Brian's Brain), totalistic vs. outer-totalistic (whether a cell's own state counts toward
+      its neighbor sum), continuous (states are real numbers instead of discrete, like Lenia), and
+      higher-dimensional (3D/voxel automata).</p>
+    </details>
+    <details>
+      <summary>What's the difference between totalistic and outer-totalistic rules?</summary>
+      <p>A totalistic rule's next state depends only on the sum of all neighbor states including
+      the cell's own current state. An outer-totalistic rule (which includes Conway's Game of
+      Life) separates the cell's own state from its neighbor sum, applying different logic
+      depending on whether the cell itself is currently alive or dead — which is exactly what B/S
+      notation encodes.</p>
+    </details>
+    <details>
+      <summary>Is Lenia a cellular automaton?</summary>
+      <p>Lenia is often described as a continuous generalization of cellular automata: instead of
+      discrete alive/dead cells updated in fixed integer steps, Lenia uses continuous-valued
+      cells, a smooth neighborhood kernel, and continuous time steps. It produces smoothly moving,
+      organism-like blobs rather than Life's blocky patterns, while keeping the same core idea of
+      local rules producing global structure.</p>
+    </details>
+  </div>
+
+  <p style="margin-top:32px">For the narrative version — history, Conway's Game of Life in depth,
+  and how to turn any of this into art — see the
+  <a href="/blog/cellular-automata-art-guide/">complete guide to cellular automata art</a>, or
+  <a href="/">open Cellscape</a> to try several of these rule families yourself.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/blog/cellular-automata-art-guide/">Cellular Automata Art Guide</a>
+  <a href="/blog/">All guides</a>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>
