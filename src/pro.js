@@ -8,11 +8,12 @@
    lands on and shares. */
 import { $, toast, icon } from './util.js';
 
-/* Gumroad product. Set GUMROAD_PERMALINK to your product's /l/<slug> once
-   it exists (Gumroad → the product → Share → the URL after /l/). If your
-   Gumroad API rejects product_permalink, switch the body param below to
-   product_id and put the product id here instead. */
+/* Gumroad product "Cellscape Pro" (automanexus). PERMALINK builds the buy
+   link; PRODUCT_ID is what the licenses API verifies against — Gumroad shows
+   it under the product's license settings ("Use your product ID to verify
+   licenses through the API") and is the current, non-deprecated identifier. */
 const GUMROAD_PERMALINK = 'cellscape-pro';
+const GUMROAD_PRODUCT_ID = 'vTIfvUv7ID5kEokedm2JYg==';
 const GUMROAD_URL = `https://automanexus.gumroad.com/l/${GUMROAD_PERMALINK}`;
 const LS_KEY = 'cellscape_pro_license';
 /* Local dev/test key: unlocks the Pro UX before the Gumroad product is live.
@@ -53,7 +54,7 @@ export async function verifyLicense(key){
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        product_permalink: GUMROAD_PERMALINK,
+        product_id: GUMROAD_PRODUCT_ID,
         license_key: key,
         increment_uses_count: 'false'
       })
@@ -79,7 +80,7 @@ function restore(){
   fetch('https://api.gumroad.com/v2/licenses/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ product_permalink: GUMROAD_PERMALINK, license_key: key, increment_uses_count: 'false' })
+    body: new URLSearchParams({ product_id: GUMROAD_PRODUCT_ID, license_key: key, increment_uses_count: 'false' })
   }).then(r => r.json()).then(d => {
     if (d && d.success === false){ localStorage.removeItem(LS_KEY); setPro(false); }
   }).catch(() => {});
