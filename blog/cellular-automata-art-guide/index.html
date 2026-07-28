@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cellular Automata Art: The Complete Guide (Conway's Game of Life &amp; More) — Cellscape</title>
+<meta name="description" content="What cellular automata are, how Conway's Game of Life works, the other rule sets worth knowing, and how to turn any of them into print-quality generative wall art — free, in your browser.">
+<meta name="keywords" content="cellular automata, conway's game of life, algorithmic art, generative art, B3/S23, game of life rules, cellular automata art">
+<link rel="canonical" href="https://cellscape.art/blog/cellular-automata-art-guide/">
+<meta name="theme-color" content="#0a0a12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cellular Automata Art: The Complete Guide">
+<meta property="og:description" content="How Conway's Game of Life and other cellular automata work, and how to turn them into print-quality generative art.">
+<meta property="og:url" content="https://cellscape.art/blog/cellular-automata-art-guide/">
+<meta property="og:site_name" content="Cellscape">
+<meta property="og:image" content="https://cellscape.art/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cellular Automata Art: The Complete Guide">
+<meta name="twitter:description" content="How Conway's Game of Life and other cellular automata work, and how to turn them into print-quality generative art.">
+<meta name="twitter:image" content="https://cellscape.art/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../styles/blog.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Cellular Automata Art: The Complete Guide",
+  "description": "What cellular automata are, how Conway's Game of Life works, the other rule sets worth knowing, and how to turn any of them into print-quality generative wall art.",
+  "image": "https://cellscape.art/og-cover.png",
+  "author": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "publisher": { "@type": "Organization", "name": "Cellscape", "url": "https://cellscape.art/" },
+  "datePublished": "2026-07-28",
+  "dateModified": "2026-07-28",
+  "mainEntityOfPage": "https://cellscape.art/blog/cellular-automata-art-guide/"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Cellscape", "item": "https://cellscape.art/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://cellscape.art/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Cellular Automata Art: The Complete Guide", "item": "https://cellscape.art/blog/cellular-automata-art-guide/" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Conway's Game of Life a cellular automaton?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Conway's Game of Life is the most famous example of a cellular automaton: a 2D grid of cells, each either alive or dead, updated every generation by a fixed rule applied to every cell's 8 neighbors. Its specific rule is written B3/S23 — a cell is born with exactly 3 living neighbors, and survives with 2 or 3." },
+      "@id": "#faq-life-is-ca"
+    },
+    {
+      "@type": "Question",
+      "name": "What does the notation B3/S23 mean?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It's Golly/Wolfram 'birth/survival' notation for 2-state Life-like automata. B (birth) lists neighbor counts that turn a dead cell alive; S (survival) lists neighbor counts that keep a live cell alive. B3/S23 is Conway's Game of Life: born on 3 neighbors, survives on 2 or 3." },
+      "@id": "#faq-b3s23"
+    },
+    {
+      "@type": "Question",
+      "name": "Is Conway's Game of Life Turing complete?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. It has been proven that Conway's Game of Life can simulate any computer program, including a working Turing machine — patterns exist that implement logic gates, memory, and even a machine that constructs copies of itself. This makes it 'Turing complete,' one of the simplest known systems with that property." },
+      "@id": "#faq-turing"
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between cellular automata and generative art made with noise or AI?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Cellular automata are fully deterministic and rule-based: the same starting grid and rule always produce the exact same evolution, with no randomness (beyond the optional random seed) and no training data. Noise-based generative art relies on stochastic functions, and AI image generation relies on a model trained on other images. CA art is closer to a mathematical proof than a photograph — the beauty comes entirely from simple local rules producing complex global behavior, a property called emergence." },
+      "@id": "#faq-difference"
+    },
+    {
+      "@type": "Question",
+      "name": "Can cellular automata create genuinely unique, one-of-a-kind art?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Even with the same rule, a different starting pattern (or random seed), palette, generation count, and rendering surface produces a visually distinct result. Because CA evolution is chaotic in practice — tiny changes in the seed cascade into very different long-term patterns — no two runs typically look alike, even though the rule itself is fixed and reproducible." },
+      "@id": "#faq-unique"
+    },
+    {
+      "@type": "Question",
+      "name": "Why do cellular automata grids wrap around at the edges?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Wrapping opposite edges together (so the right side connects to the left, and top to bottom) turns the flat grid into a torus with no true boundary. This keeps every cell's neighborhood consistent everywhere on the grid — without it, cells at the edge would behave as if bordering an empty void, which distorts the rule and permanently deletes any pattern that drifts off the grid, like a glider flying off into nothing." },
+      "@id": "#faq-torus"
+    },
+    {
+      "@type": "Question",
+      "name": "Are 1D cellular automata (like Wolfram's Rule 30 and Rule 110) related to Conway's Game of Life?",
+      "acceptedAnswer": { "@type": "Answer", "text": "They're the same family of idea applied to a simpler grid: a single row of cells instead of a 2D grid. Stephen Wolfram catalogued all 256 possible 1D rules with a 3-cell neighborhood. Rule 110 has been proven Turing complete, just like Conway's Game of Life, showing that even a single row of cells with a tiny rule can in principle compute anything a full computer can." },
+      "@id": "#faq-1d"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="/">
+    <span class="brandmark"><i></i><i></i><i></i><i></i></span>
+    <span class="name">Cellscape</span>
+  </a>
+  <a class="btn-cta" href="/">Open the generator →</a>
+</div>
+
+<article>
+  <p class="kicker">Guide · Updated July 2026 · ~14 min read</p>
+  <h1>Cellular Automata Art: The Complete Guide to Growing Living Wall Art from Simple Rules</h1>
+  <p class="lede">A cellular automaton needs no brush, no camera, and no training data — just a grid, a
+  neighborhood, and one small rule repeated millions of times. This guide covers what cellular
+  automata actually are, how Conway's Game of Life works, the other rule families worth knowing,
+  and how to turn any of them into print-quality generative art you can hang on a wall.</p>
+
+  <nav class="toc">
+    <div class="toc-title">On this page</div>
+    <ol>
+      <li><a href="#what-is">What is a cellular automaton?</a></li>
+      <li><a href="#history">A short history: von Neumann → Conway → Wolfram</a></li>
+      <li><a href="#game-of-life">Conway's Game of Life, explained</a></li>
+      <li><a href="#beyond-conway">Beyond Conway: other Life-like rules &amp; Wolfram's 256</a></li>
+      <li><a href="#ca-as-art">From simulation to art</a></li>
+      <li><a href="#how-to">How to make your own cellular automata art</a></li>
+      <li><a href="#tips">Tips for print-quality results</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="what-is">What Is a Cellular Automaton?</h2>
+  <p>A <strong>cellular automaton</strong> (plural: automata) is a grid of cells where every cell
+  has a state — usually just "alive" or "dead" — and a single rule decides what happens to every
+  cell on every tick of time, based only on the states of its immediate neighbors. That's the
+  entire system. There is no central controller, no randomness beyond the starting pattern, and no
+  cell that knows anything beyond its neighborhood.</p>
+  <p>What makes cellular automata endlessly interesting is <strong>emergence</strong>: a rule that
+  fits in a single line of text can produce behavior so intricate it looks designed — self-repairing
+  structures, moving "creatures," stable crystal-like formations, and patterns that never repeat.
+  Nobody drew any of it. It grew from the rule.</p>
+  <p>Three things define any 2D cellular automaton:</p>
+  <ul>
+    <li><strong>The grid</strong> — usually a square lattice, sometimes wrapped into a torus
+    (edges connect, so nothing "falls off" the world) so patterns can move forever.</li>
+    <li><strong>The neighborhood</strong> — almost always the 8 surrounding cells (Moore
+    neighborhood) or just the 4 orthogonal ones (von Neumann neighborhood).</li>
+    <li><strong>The rule</strong> — a function of "how many of my neighbors are alive?" that
+    decides whether each cell is alive or dead next generation.</li>
+  </ul>
+
+  <h2 id="history">A Short History: From von Neumann to Conway to Wolfram</h2>
+  <p>Cellular automata predate personal computers. Mathematician <strong>John von Neumann</strong>
+  designed the first one in the late 1940s while trying to prove that a machine could build a copy
+  of itself — a self-replicating automaton with 29 possible cell states, decades before anyone had
+  the hardware to actually run it.</p>
+  <p>The rule most people now think of first, <strong>Conway's Game of Life</strong>, was published
+  by mathematician John Conway in 1970 in Martin Gardner's Scientific American column. Conway
+  wanted the simplest possible rule that balanced growth and decay — patterns that neither die out
+  immediately nor explode into an unbounded fill. B3/S23 was the result, and it became one of the
+  most studied systems in recreational mathematics.</p>
+  <p>In the 1980s, physicist <strong>Stephen Wolfram</strong> systematically catalogued every
+  possible 1D cellular automaton rule (256 of them, using 2 states and a 3-cell neighborhood) and
+  found that a handful — most famously "Rule 30" and "Rule 110" — generate genuinely
+  unpredictable, complex patterns from perfectly deterministic rules. That work became the basis
+  of his book <em>A New Kind of Science</em> and helped cement cellular automata as a serious lens
+  for studying how complexity arises from simplicity — in biology, physics, and computation alike.</p>
+
+  <h2 id="game-of-life">Conway's Game of Life, Explained</h2>
+  <p>Game of Life runs on a 2D grid where each cell is alive or dead, and the neighborhood is the
+  8 surrounding cells (Moore neighborhood). Every generation, all cells update simultaneously
+  using one rule:</p>
+  <div class="callout">
+    <p><strong>The rule (<span class="rule">B3/S23</span>):</strong></p>
+    <p>• A <strong>dead</strong> cell with exactly <strong>3</strong> living neighbors becomes alive (birth).</p>
+    <p>• A <strong>living</strong> cell with <strong>2 or 3</strong> living neighbors stays alive (survival).</p>
+    <p>• Every other cell dies or stays dead — from loneliness (fewer than 2 neighbors) or
+    overcrowding (more than 3).</p>
+  </div>
+  <p>That's the whole rule. What makes it famous is what emerges from it. A handful of stable
+  shapes — <strong>still lifes</strong> like the block and the beehive — never change once
+  formed. <strong>Oscillators</strong> like the blinker cycle between a small number of states
+  forever. And <strong>spaceships</strong> like the glider — a 5-cell pattern — translate
+  diagonally across the grid indefinitely, unchanged in shape, just shifted.</p>
+  <p>The single most important discovery in Life's history is the <strong>glider gun</strong>,
+  found by Bill Gosper in 1970: a pattern that periodically emits a fresh glider every 30
+  generations, forever. Its existence proved Life could produce unbounded growth from a finite
+  starting pattern — settling a question Conway had posed when he first published the rule.</p>
+  <p>Decades of study later, it was proven that Game of Life is <strong>Turing complete</strong>:
+  patterns exist inside it that implement logic gates, memory registers, and even a full computer
+  — including, eventually, a machine capable of constructing a copy of itself on the grid. A rule
+  simple enough to state in one sentence turns out to be capable, in principle, of running any
+  algorithm that exists.</p>
+
+  <h3>The classic patterns worth knowing</h3>
+  <p>Decades of exploration turned up a small vocabulary of named shapes that recur across almost
+  any Life session — spotting them is half the fun of watching the grid evolve:</p>
+  <table class="rule-table">
+    <thead><tr><th>Pattern</th><th>Type</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td>Block</td><td>Still life</td><td>A 2×2 square — the simplest stable shape, never changes</td></tr>
+      <tr><td>Beehive</td><td>Still life</td><td>A 6-cell hexagonal ring, one of the most common stable shapes to emerge</td></tr>
+      <tr><td>Blinker</td><td>Oscillator (period 2)</td><td>A row of 3 cells that flips between horizontal and vertical forever</td></tr>
+      <tr><td>Toad</td><td>Oscillator (period 2)</td><td>Two offset rows of cells that swap positions each tick</td></tr>
+      <tr><td>Pulsar</td><td>Oscillator (period 3)</td><td>A large, symmetric pattern that pulses through 3 distinct states</td></tr>
+      <tr><td>Glider</td><td>Spaceship</td><td>A 5-cell diagonal traveler — the smallest pattern that moves indefinitely</td></tr>
+      <tr><td>Lightweight spaceship (LWSS)</td><td>Spaceship</td><td>Travels orthogonally rather than diagonally, slightly larger than a glider</td></tr>
+      <tr><td>Gosper glider gun</td><td>Gun</td><td>Emits a new glider every 30 generations, forever — the pattern that proved unbounded growth was possible</td></tr>
+    </tbody>
+  </table>
+  <p>Each category matters for a different reason. Still lifes and oscillators are what a random
+  soup of cells eventually settles into once the chaos dies down — they're the "rest state" of
+  Life. Spaceships are what carry information and structure across the grid. Guns are what let a
+  finite pattern produce infinite, ever-growing output — the seed of everything from Turing-complete
+  Life computers to the long-exposure trails that make good wall art.</p>
+
+  <h3>1D cellular automata: Wolfram's 256 rules</h3>
+  <p>Not every interesting automaton needs a 2D grid. A <strong>1D cellular automaton</strong> runs
+  on a single row of cells, where each cell's next state depends only on itself and its two
+  immediate neighbors (3 cells total, each either 0 or 1). That gives exactly 2³=8 possible
+  neighborhood patterns, and since each one independently maps to 0 or 1, there are 2⁸=256 possible
+  rules — small enough that Stephen Wolfram catalogued and rendered every single one by stacking
+  each generation as a new row, turning time itself into the vertical axis of the image.</p>
+  <p>A few of Wolfram's 256 stand out. <strong>Rule 90</strong> produces a perfect Sierpiński
+  triangle from a single live cell — a fractal falling directly out of a rule with no fractal
+  concept built in. <strong>Rule 30</strong> produces output chaotic enough that Wolfram's own
+  software uses it as a random number generator. <strong>Rule 110</strong> is, like Conway's Life,
+  proven Turing complete — meaning a rule this small, applied to a single row of cells, is
+  theoretically capable of running any computable algorithm. The lesson repeats across every scale
+  of cellular automata: the ceiling on how complex the output can get is set by nothing about the
+  rule's own complexity.</p>
+
+  <h3>Why the grid wraps: toroidal boundaries</h3>
+  <p>Most simulators, Cellscape included, connect the grid's opposite edges — a glider that exits
+  the right side reappears on the left, top connects to bottom the same way. Topologically, this
+  turns a flat square into a <strong>torus</strong> (a donut shape) with no edges at all. Without
+  it, patterns that reach the boundary simply behave as if talking to an empty void with no
+  neighbors, which distorts the rule's real behavior and permanently deletes anything that drifts
+  off-grid. Wrapping the edges keeps every cell's neighborhood consistent no matter where it sits,
+  which is also what allows a glider gun to keep firing gliders that loop back around forever
+  instead of flying off into nothing after a few hundred generations.</p>
+
+  <h2 id="beyond-conway">Beyond Conway: Other Life-like Cellular Automata</h2>
+  <p>Game of Life is one point in a much larger space of possible rules. Any B/S combination
+  defines a valid "Life-like" automaton, and small changes to the birth/survival counts produce
+  wildly different personalities — some die out almost instantly, some fill the screen, and a
+  narrow band in between produces the same kind of rich, structured behavior Life is known for.
+  With an 8-cell Moore neighborhood there are technically 2⁹×2⁹ ≈ 262,144 possible B/S
+  combinations; only a small fraction land in that narrow, interesting band, and a handful of
+  those have been studied enough to earn their own names.</p>
+  <table class="rule-table">
+    <thead><tr><th>Rule</th><th>Notation</th><th>Character</th></tr></thead>
+    <tbody>
+      <tr><td>Conway's Life</td><td><code>B3/S23</code></td><td>The balanced original — gliders, guns, stable structures</td></tr>
+      <tr><td>HighLife</td><td><code>B36/S23</code></td><td>Life plus a "replicator" pattern that copies itself</td></tr>
+      <tr><td>Seeds</td><td><code>B2/S</code></td><td>No survival at all — every live cell dies next tick, producing explosive, lace-like growth</td></tr>
+      <tr><td>Day &amp; Night</td><td><code>B3678/S34678</code></td><td>Symmetric under color inversion — dead and alive regions mirror each other</td></tr>
+      <tr><td>Life without Death</td><td><code>B3/S012345678</code></td><td>Cells never die — patterns only ever grow, forming coral-like structures</td></tr>
+      <tr><td>Diamoeba</td><td><code>B35678/S5678</code></td><td>Amoeba-like blobs with self-stabilizing diamond boundaries</td></tr>
+    </tbody>
+  </table>
+  <p>There are also automata that step outside the Life-like B/S family entirely.
+  <strong>Brian's Brain</strong> uses three states (off, firing, dying) instead of two, producing
+  streams of traveling sparks rather than static structures. <strong>WireWorld</strong> was
+  designed specifically to let people build working logic circuits inside the automaton.
+  <strong>Von Neumann's original 29-state automaton</strong> remains the ancestor of the whole
+  field. Each rule has its own visual signature — some feel organic, some feel crystalline, some
+  feel electric — long before any color or rendering choice is applied.</p>
+
+  <h2 id="ca-as-art">From Simulation to Art: Why Cellular Automata Make Beautiful Wall Art</h2>
+  <p>A raw cellular automaton is just black-and-white cells flipping on and off — the art comes
+  from three choices layered on top of the simulation itself:</p>
+  <ul>
+    <li><strong>Color mapping.</strong> Instead of "alive = white," map a cell's age (how many
+    generations it has stayed alive) across a gradient. Young cells glow one color, older cells
+    shift toward another, and the population becomes a living heatmap of its own history.</li>
+    <li><strong>Long exposure.</strong> Accumulate every cell a pattern has ever touched, the way
+    a long-exposure photograph traces a car's headlights across a night sky. The automaton stops
+    looking like a simulation and starts looking like a photograph of light.</li>
+    <li><strong>Non-planar surfaces.</strong> The same rule, run on the same flat grid, can be
+    rendered onto a torus, a sphere, a Möbius strip, or even projected as an accretion-disk-style
+    gravitational lens. The simulation never changes — only the surface it's painted onto does.</li>
+  </ul>
+  <p>This is also why cellular automata sit in an unusual place between mathematics and art. Unlike
+  noise-based generative art or AI image synthesis, there is no randomness injected at render
+  time and no training data borrowed from other images — every pixel is a direct, deterministic
+  consequence of the rule and the starting pattern. The appeal for "math meets art" audiences is
+  that the beauty is <em>earned</em>, not applied: it was already latent in the rule, waiting for
+  someone to run it and look.</p>
+
+  <h2 id="how-to">How to Make Your Own Cellular Automata Art (Step by Step)</h2>
+  <p>You don't need to write any code to do this — a browser-based simulator handles the grid,
+  the rule, and the rendering. <a href="/">Cellscape</a> is a free one built specifically for this,
+  with the CA math running on the GPU so grids stay smooth even at high resolution. The process:</p>
+  <ol>
+    <li><strong>Pick a rule.</strong> Start from a preset — Conway's Life, Seeds, HighLife, Day &amp;
+    Night — or type your own B/S digits and watch the personality change instantly.</li>
+    <li><strong>Seed a pattern.</strong> Randomize the grid, hand-paint a shape, or drop in a known
+    structure like a glider gun, then hit play.</li>
+    <li><strong>Choose a palette and render mode.</strong> Live shows the current generation only;
+    long-exposure accumulates the whole history into a single glowing image.</li>
+    <li><strong>Try a surface.</strong> The same running pattern can be viewed flat, wrapped onto
+    a torus or sphere, or rendered as an exposure-based 3D terrain.</li>
+    <li><strong>Export.</strong> Save a signed PNG for free, or unlock print-resolution files (up
+    to 7200×10800 at 300dpi), transparent PNGs for garments, and video export with Cellscape Pro.</li>
+  </ol>
+  <div class="callout">
+    <p><strong>Try it now</strong> — <a href="/">open the Cellscape generator</a> and play with
+    Conway's Game of Life, Seeds, and 30+ other rules directly in your browser. It's free to use.</p>
+  </div>
+
+  <h2 id="tips">Tips for Print-Quality Results</h2>
+  <p>A cellular automaton that looks great animated on a screen doesn't automatically look great
+  as a still print — a few practical things make the difference:</p>
+  <ul>
+    <li><strong>Let it run before exporting.</strong> The first few generations of a random seed
+    are usually noisy and unstructured. Most rules settle into their characteristic look after a
+    few dozen generations — that's the moment to export, not generation zero.</li>
+    <li><strong>Match resolution to output size.</strong> A poster printed at 24×36″ needs roughly
+    7200×10800 pixels at 300dpi to avoid visible softness up close; a phone wallpaper needs far
+    less. Export at the resolution your final medium actually requires.</li>
+    <li><strong>High-contrast palettes print better than subtle ones.</strong> Screens and paper
+    render color differently — palettes with clear separation between "alive" and background tend
+    to survive the jump to ink more faithfully than low-contrast gradients.</li>
+    <li><strong>Use transparent backgrounds for garments.</strong> Printing on fabric (t-shirts,
+    tote bags) needs the cell pattern isolated from its background, not a rectangle of flat color
+    behind it.</li>
+    <li><strong>Long-exposure hides the grid, live mode shows the moment.</strong> If you want a
+    single generation frozen mid-action (a glider mid-flight), export in live mode; if you want the
+    whole run's story in one image, use long exposure.</li>
+    <li><strong>Non-planar surfaces read better at a distance.</strong> A torus or sphere
+    projection adds visible depth and curvature that a flat grid doesn't have — it tends to work
+    especially well for large-format prints viewed from across a room, where a flat grid can read
+    as static noise.</li>
+    <li><strong>Bigger grids, not just bigger pixels, add detail.</strong> Upscaling a small
+    low-resolution grid to a large canvas just produces bigger blocky cells. For genuinely
+    detailed, print-worthy texture, increase the simulation's grid size itself before exporting,
+    not only the output resolution.</li>
+  </ul>
+
+  <h2 id="faq">Frequently Asked Questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is Conway's Game of Life a cellular automaton?</summary>
+      <p>Yes. Conway's Game of Life is the most famous example of a cellular automaton: a 2D grid
+      of cells, each either alive or dead, updated every generation by a fixed rule applied to
+      every cell's 8 neighbors. Its specific rule is written B3/S23 — a cell is born with exactly
+      3 living neighbors, and survives with 2 or 3.</p>
+    </details>
+    <details>
+      <summary>What does the notation B3/S23 mean?</summary>
+      <p>It's the standard "birth/survival" notation for 2-state Life-like automata. B (birth)
+      lists neighbor counts that turn a dead cell alive; S (survival) lists neighbor counts that
+      keep a live cell alive. B3/S23 is Conway's Game of Life: born on 3 neighbors, survives on 2
+      or 3.</p>
+    </details>
+    <details>
+      <summary>Is Conway's Game of Life Turing complete?</summary>
+      <p>Yes. It has been proven that Conway's Game of Life can simulate any computer program,
+      including a working Turing machine — patterns exist that implement logic gates, memory, and
+      even a machine that constructs copies of itself. This makes it "Turing complete," one of the
+      simplest known systems with that property.</p>
+    </details>
+    <details>
+      <summary>What's the difference between cellular automata and generative art made with noise or AI?</summary>
+      <p>Cellular automata are fully deterministic and rule-based: the same starting grid and
+      rule always produce the exact same evolution, with no randomness beyond the optional random
+      seed and no training data. Noise-based generative art relies on stochastic functions, and AI
+      image generation relies on a model trained on other images. CA art is closer to a
+      mathematical proof than a photograph — the beauty comes entirely from simple local rules
+      producing complex global behavior, a property called emergence.</p>
+    </details>
+    <details>
+      <summary>Can cellular automata create genuinely unique, one-of-a-kind art?</summary>
+      <p>Yes. Even with the same rule, a different starting pattern (or random seed), palette,
+      generation count, and rendering surface produces a visually distinct result. Because CA
+      evolution is chaotic in practice — tiny changes in the seed cascade into very different
+      long-term patterns — no two runs typically look alike, even though the rule itself is fixed
+      and reproducible.</p>
+    </details>
+    <details>
+      <summary>Why do cellular automata grids wrap around at the edges?</summary>
+      <p>Wrapping opposite edges together (so the right side connects to the left, and top to
+      bottom) turns the flat grid into a torus with no true boundary. This keeps every cell's
+      neighborhood consistent everywhere on the grid — without it, cells at the edge would behave
+      as if bordering an empty void, which distorts the rule and permanently deletes any pattern
+      that drifts off the grid, like a glider flying off into nothing.</p>
+    </details>
+    <details>
+      <summary>Are 1D cellular automata (like Wolfram's Rule 30 and Rule 110) related to Conway's Game of Life?</summary>
+      <p>They're the same family of idea applied to a simpler grid: a single row of cells instead
+      of a 2D grid. Stephen Wolfram catalogued all 256 possible 1D rules with a 3-cell
+      neighborhood. Rule 110 has been proven Turing complete, just like Conway's Game of Life,
+      showing that even a single row of cells with a tiny rule can in principle compute anything a
+      full computer can.</p>
+    </details>
+  </div>
+
+  <h2 id="conclusion">Start Growing Your Own</h2>
+  <p>Every pattern in this guide — the glider, the glider gun, Seeds' lace-like explosions,
+  HighLife's replicator, even a slice of Wolfram's 256 one-dimensional rules — runs in real time
+  in a regular browser tab, no install and no code required. None of it was designed pixel by
+  pixel; all of it grew out of a single line of logic run against a grid of cells, generation
+  after generation, until a rule turned into a picture. <a href="/">Open Cellscape</a> and pick a
+  rule to see for yourself: grown, not drawn.</p>
+</article>
+
+<footer class="site-foot">
+  <span>© 2026 Cellscape</span>
+  <a href="/">Back to the generator</a>
+</footer>
+
+</body>
+</html>

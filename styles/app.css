@@ -19,8 +19,11 @@ body{
     radial-gradient(1000px 600px at 100% 110%, rgba(0,212,255,.10), transparent 60%);
   color:var(--text);
   font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
-  overflow:hidden;
+  overflow-x:hidden;
 }
+/* #app pins the tool to exactly one viewport (unchanged); body itself is
+   allowed to scroll vertically so the SEO content section below #app is
+   reachable (body no longer has overflow:hidden). */
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
 /* ── Header ─────────────────────────── */
@@ -379,3 +382,39 @@ body.is-pro .pro-badge{display:none}
 .pro-list .ic{color:#39ffb0;flex:0 0 auto}
 .pro-key-row{display:flex;gap:8px;margin-top:12px}
 .pro-key-row input{flex:1}
+
+/* ── SEO CONTENT — below the fold, after #app (100vh tool stays unchanged
+   above it). Gives crawlers real text content the canvas-based tool can't
+   provide on its own, and internally links to the blog pillar article. ── */
+.seo-content{
+  max-width:760px;margin:0 auto;padding:64px 24px 40px;
+  border-top:1px solid var(--panel-border);
+}
+.seo-content h2{
+  font-size:1.5rem;font-weight:800;letter-spacing:-.4px;margin:0 0 14px;color:#fff;
+}
+.seo-content > h2:not(:first-child){margin-top:46px}
+.seo-content p{font-size:.92rem;line-height:1.65;color:#c7c9e0;margin-bottom:14px}
+.seo-content a{color:var(--accent)}
+.seo-content .faq-mini details{
+  background:var(--panel);border:1px solid var(--panel-border);border-radius:11px;
+  padding:13px 17px;margin-bottom:9px;
+}
+.seo-content .faq-mini summary{
+  cursor:pointer;font-weight:700;font-size:.88rem;color:#fff;list-style:none;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.seo-content .faq-mini summary::-webkit-details-marker{display:none}
+.seo-content .faq-mini summary::after{content:'+';font-size:19px;color:var(--accent);font-weight:400;margin-left:12px}
+.seo-content .faq-mini details[open] summary::after{content:'\2013'}
+.seo-content .faq-mini details p{margin:10px 0 0;color:#b7b9d0}
+.seo-content .learn-more{
+  display:inline-flex;align-items:center;gap:7px;margin-top:6px;
+  font-weight:600;font-size:.88rem;text-decoration:none;
+}
+.seo-footer{
+  max-width:760px;margin:0 auto;padding:20px 24px 50px;color:var(--muted);
+  font-size:.72rem;display:flex;gap:16px;flex-wrap:wrap;
+}
+.seo-footer a{color:var(--muted)}
+.seo-footer a:hover{color:var(--accent)}

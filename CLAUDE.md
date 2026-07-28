@@ -45,10 +45,28 @@ cellular-art-generator/
 ├── img-example/            → print-quality reference images (NOT tracked in git)
 ├── openspec/               → OpenSpec design docs + architecture audit
 ├── research/               → Market research
+├── styles/blog.css         → standalone stylesheet for static content pages
+│                             (blog/gallery/etc.) — decoupled from app.css/#app
+├── blog/
+│   └── cellular-automata-art-guide/index.html → pillar article (3000+ words,
+│       targets "cellular automata" 2.9K/mo; Article+Breadcrumb+FAQPage JSON-LD)
 └── CLAUDE.md               → This file
 ```
-Planned but NOT yet created: blog/, gallery/, shop.html, faq.html, about.html
-(sprint 4 — separate static pages importing the shared src/ modules).
+Still planned (sprint 4): gallery/patterns/* (30+ pattern pages), 5 blog cluster
+articles linking to the pillar, faq.html, about.html. shop.html deferred with
+Printful (Fase A still validating digital conversion first).
+
+**SEO structure decision (2026-07-28):** the tool stays at `/` (index.html) —
+NOT split into a landing + separate `/generator` route as the original
+openspec c6-content spec proposed. Reasoning: "game of life"/"game of life
+simulator" are transactional queries (intent = use the tool now); a landing
+hop adds friction on the highest-volume keyword in the whole research set and
+splits SEO authority across two URLs. Instead, index.html got an SEO content
+section below the fold (`.seo-content` in app.css, requires `body` to allow
+scroll — `#app` still pins the tool to exactly 100vh, unchanged) with a
+condensed explainer, a mini-FAQ (own FAQPage JSON-LD), and a link to the blog
+pillar. All future content pages (blog/gallery) link back to `/`, never to a
+separate generator route.
 Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 
 ## Engine features (index.html)

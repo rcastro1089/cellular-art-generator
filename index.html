@@ -39,6 +39,39 @@
   ]
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is Cellscape free to use?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The full tool — every rule, palette, 3D surface, and one signed 1920×1080 PNG export — is free with no account required. Cellscape Pro is an optional one-time unlock for print-resolution export, transparent PNGs, video, and watermark removal." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to know how to code?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Every rule and pattern is chosen from the sidebar — you can also hand-paint cells directly on the grid. Writing your own B/S rule is optional, for anyone curious to experiment beyond the presets." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use what I create for prints or merch?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Cellscape Pro unlocks export at up to 7200×10800 pixels at 300dpi — enough for large posters and canvases — plus transparent PNGs sized for t-shirts and similar garments." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does \"B3/S23\" mean?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It's shorthand for the rule itself: a dead cell is Born with 3 living neighbors, and a living cell Survives with 2 or 3. It's the notation used for Conway's Game of Life and every other Life-like automaton Cellscape supports." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Cellscape work on mobile?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, in any modern mobile browser with WebGL2 support. For fine-grained rule editing and export, a larger screen is more comfortable, but playback and painting work on phones and tablets too." }
+    }
+  ]
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3Crect x='13' y='3' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='3' y='13' width='8' height='8' rx='2' fill='none' stroke='%237b2ff7' stroke-width='2'/%3E%3Crect x='13' y='13' width='8' height='8' rx='2' fill='%2300d4ff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles/app.css">
 </head>
@@ -401,6 +434,64 @@
     </aside>
   </main>
 </div>
+
+<!-- ── SEO CONTENT (below the fold — the tool above stays a fixed
+     100vh view; this is reachable by scrolling past it) ── -->
+<section class="seo-content">
+  <h2>What Is Cellscape?</h2>
+  <p>Cellscape is a free, browser-based generator for <strong>Conway's Game of Life</strong> and
+  other cellular automata — grid-based systems where a single simple rule, applied to every cell
+  and its neighbors, produces intricate, ever-changing patterns with no drawing involved. Pick a
+  rule, watch it evolve on the GPU in real time, and export the result as print-quality wall art,
+  a transparent PNG for garments, or a short video.</p>
+
+  <h2>Conway's Game of Life, in One Paragraph</h2>
+  <p>Every cell on the grid is alive or dead. Each generation, a dead cell with exactly 3 living
+  neighbors is born, and a living cell survives only with 2 or 3 living neighbors — written
+  <code>B3/S23</code>. That's the entire rule, and yet it produces stable shapes, oscillating
+  patterns, and "gliders" that travel across the grid forever. Cellscape ships with B3/S23 as its
+  default, alongside 30+ other Life-like rules to explore.
+  <a class="learn-more" href="/blog/cellular-automata-art-guide/">Read the complete guide to
+  cellular automata art →</a></p>
+
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-mini">
+    <details>
+      <summary>Is Cellscape free to use?</summary>
+      <p>Yes. The full tool — every rule, palette, 3D surface, and one signed 1920×1080 PNG export
+      — is free with no account required. Cellscape Pro is an optional one-time unlock for
+      print-resolution export, transparent PNGs, video, and watermark removal.</p>
+    </details>
+    <details>
+      <summary>Do I need to know how to code?</summary>
+      <p>No. Every rule and pattern is chosen from the sidebar — you can also hand-paint cells
+      directly on the grid. Writing your own B/S rule is optional, for anyone curious to
+      experiment beyond the presets.</p>
+    </details>
+    <details>
+      <summary>Can I use what I create for prints or merch?</summary>
+      <p>Yes. Cellscape Pro unlocks export at up to 7200×10800 pixels at 300dpi — enough for large
+      posters and canvases — plus transparent PNGs sized for t-shirts and similar garments.</p>
+    </details>
+    <details>
+      <summary>What does "B3/S23" mean?</summary>
+      <p>It's shorthand for the rule itself: a dead cell is <strong>B</strong>orn with 3 living
+      neighbors, and a living cell <strong>S</strong>urvives with 2 or 3. It's the notation used
+      for Conway's Game of Life and every other Life-like automaton Cellscape supports.</p>
+    </details>
+    <details>
+      <summary>Does Cellscape work on mobile?</summary>
+      <p>Yes, in any modern mobile browser with WebGL2 support. For fine-grained rule editing and
+      export, a larger screen is more comfortable, but playback and painting work on phones and
+      tablets too.</p>
+    </details>
+  </div>
+</section>
+<footer class="seo-footer">
+  <span>© 2026 Cellscape</span>
+  <a href="/blog/cellular-automata-art-guide/">Cellular Automata Art Guide</a>
+</footer>
+
 <!-- ── CELLSCAPE PRO unlock modal ── -->
 <div id="proModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="proModalTitle">
   <div class="modal-box">
