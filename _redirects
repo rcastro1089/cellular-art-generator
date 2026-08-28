@@ -1,0 +1,2 @@
+# Cloudflare Pages _redirects — serve a real 404 for unknown URLs (no SPA fallback)
+/* /404.html 404
