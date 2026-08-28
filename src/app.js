@@ -629,6 +629,9 @@ function frame(now){
     $('stFps').textContent = Math.round(frames * 1000 / (now - fpsTime));
     frames = 0; fpsTime = now;
   }
+  /* Background-tab throttling (seo-recovery Phase B): keep the loop
+     scheduled but do zero sim/render work while the tab is hidden. */
+  if (document.hidden){ requestAnimationFrame(frame); return; }
   requestAnimationFrame(frame);
 }
 
