@@ -418,3 +418,16 @@ body.is-pro .pro-badge{display:none}
 }
 .seo-footer a{color:var(--muted)}
 .seo-footer a:hover{color:var(--accent)}
+
+/* ── Mobile SEO intro + share (seo-recovery Phase D) ── */
+.seo-mobile-intro{display:none}
+.seo-share{max-width:900px;margin:0 auto;padding:18px 24px 8px;color:#dcdfee;font-size:14px;text-align:center}
+.seo-share a{color:#F59E0B;font-weight:700}
+.seo-share code{background:rgba(255,255,255,.08);padding:2px 8px;border-radius:6px;font-size:12px}
+@media (max-width:767px){
+  .seo-mobile-intro{display:block;padding:14px 18px 10px;text-align:center;background:linear-gradient(160deg,#0f172a,#1e3a8a 65%,#2563eb)}
+  .seo-mobile-intro .mi-title{font-size:16px;font-weight:800;color:#fff;margin:0 0 10px;line-height:1.4}
+  .seo-mobile-intro .mi-cta{font-size:13px;margin:0}
+  .seo-mobile-intro a{color:#F59E0B;font-weight:700}
+  .seo-mobile-intro .btn-cta{color:#0a0a12;background:#F59E0B;padding:7px 14px;border-radius:999px;text-decoration:none;display:inline-block;margin-right:8px}
+}
