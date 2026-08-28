@@ -9,7 +9,7 @@
 - [x] 1.5 Añadir JSON-LD CollectionPage/ItemList a /blog/
 - [x] 1.6 Añadir JSON-LD Organization (o WebSite) a /about/
 - [x] 1.7 Arreglar h1 vacío del shell de la app (h1 de marca o visibilidad)
-- [ ] 1.8 Convertir /blog/ en índice con mini-descripciones por post (refuerza keywords) + thumbnails si los hay
+- [x] 1.8 Convertir /blog/ en índice con mini-descripciones por post (refuerza keywords) + thumbnails si los hay
 - [x] 1.9 Cloudflare: verificar registro DNS www + redirect www→apex + certificado (resolver 525)
 - [x] 1.10 Actualizar lastmod de sitemap.xml (fecha real por página) y re-subir a GSC
 - [x] 1.11 Enviar Indexing API URL_UPDATED para el pillar y re-solicitar inspección por URL Inspection
@@ -64,6 +64,7 @@
 ⏳ **Pendientes del owner / verificación:**
 - 1.12 Pillar PASS: la indexación tarda 24-72h tras el ping (hoy: NEUTRAL "unknown") — verificar en 48h y re-hacer ping si sigue.
 - 3.4-3.6 Publicar Show HN, Product Hunt y posts Reddit (drafts listos en research/distribution-drafts.md) — requiere cuentas del owner.
+- ✅ 3.7: 2 PRs awesome abiertas (cellular-automata PR#7 + game-of-life PR#1).
 - 3.8 Pinterest: cuenta del owner + 10 pins (guía en distribution-drafts.md).
 - 3.9 Checkpoint 60 días de links (2026-10-27, anotado en research/links-log.md).
 - www→301: dominio www agregado en CF Pages (cert pendiente); regla de redirect 301 necesita dashboard (token sin permiso de Rules) — 2 clicks en Zone > Rules > Redirect Rules.
