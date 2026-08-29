@@ -668,6 +668,11 @@ requestAnimationFrame(frame);
     const name = Object.keys(PATTERNS).find(n => slug(n) === slug(pp));
     if (name) loadPattern(name);
   }
+  const pal = qs.get('palette');
+  if (pal){
+    const p = PALETTES.find(x => slug(x.name) === slug(pal));
+    if (p) setPalette(p);
+  }
 }
 console.log(`%cCellscape %c— grown, not drawn`,
   'font-size:16px;color:#00d4ff;font-weight:bold', 'font-size:12px;color:#8a8aa3');
