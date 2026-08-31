@@ -21,10 +21,37 @@ body{
   font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
   overflow-x:hidden;
 }
-/* #app pins the tool to exactly one viewport (unchanged); body itself is
-   allowed to scroll vertically so the SEO content section below #app is
-   reachable (body no longer has overflow:hidden). */
-#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+/* Persistent minimal site nav sits above #app; the tool then pins to exactly
+   one viewport MINUS the nav bar. Body itself still scrolls vertically so the
+   SEO content section below #app is reachable (no overflow:hidden). */
+:root{--nav-h:44px}
+.site-nav{
+  height:var(--nav-h);flex:0 0 auto;
+  display:flex;align-items:center;gap:16px;padding:0 16px;
+  border-bottom:1px solid var(--panel-border);
+  background:rgba(10,10,20,.72);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  position:sticky;top:0;z-index:30;
+}
+.site-nav .brand{
+  display:flex;align-items:center;gap:8px;text-decoration:none;
+  color:var(--text);font-weight:700;font-size:.9rem;letter-spacing:.02em;
+}
+.site-nav .brand .ic{width:18px;height:18px;color:var(--accent)}
+.site-nav .nav-links{display:flex;align-items:center;gap:16px;margin-left:auto}
+.site-nav .nav-links a{
+  text-decoration:none;color:var(--muted);font-size:.82rem;font-weight:500;
+  letter-spacing:.01em;transition:color .15s;
+}
+.site-nav .nav-links a:hover{color:var(--text)}
+.site-nav .nav-links a[aria-current="page"]{color:var(--accent)}
+@media (max-width:560px){
+  .site-nav{gap:10px;padding:0 12px}
+  .site-nav .nav-links{gap:11px}
+  .site-nav .nav-links a{font-size:.78rem}
+  .site-nav .brand .name{display:none}
+}
+#app{display:flex;flex-direction:column;height:calc(100vh - var(--nav-h));height:calc(100dvh - var(--nav-h))}
 
 /* ── Header ─────────────────────────── */
 header{

@@ -44,6 +44,10 @@ a:hover{color:#6fe6ff}
   white-space:nowrap;
 }
 .btn-cta:hover{filter:brightness(1.15);color:#fff}
+.topbar .nav-links{display:flex;align-items:center;gap:16px;margin-left:auto;flex-wrap:wrap}
+.topbar .nav-links a{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
+.topbar .nav-links a:hover{color:var(--text)}
+.topbar .nav-links a[aria-current="page"]{color:var(--accent)}
 
 /* ── Article shell ── */
 article{max-width:740px;margin:0 auto;padding:8px 24px 80px}
@@ -153,7 +157,9 @@ footer.site-foot a:hover{color:var(--accent)}
 .section-lede{color:var(--muted);font-size:14px;margin:8px 0 18px}
 
 @media (max-width:640px){
-  .topbar{padding:16px}
+  .topbar{padding:16px;flex-wrap:wrap;row-gap:10px}
+  .topbar .nav-links{gap:12px;font-size:13px;order:3;width:100%}
+  .topbar .nav-links a{font-size:13px}
   article{padding:4px 16px 60px}
   footer.site-foot{padding:16px 16px 40px}
 }
