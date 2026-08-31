@@ -164,6 +164,10 @@ Local dev: `npx http-server` (ES modules need HTTP, file:// won't load).
 - [x] tasks.md — EXECUTION PLAN
 
 ## Monetization — Fase A (validation, decided 2026-07-28)
+> **Canonical path decision (2026-08-31): `docs/strategy-2026-monetization.md`** —
+> Cellscape is digital-first (free tool + paid digital tiers); physical POD is
+> gated behind proven demand (≥50 digital sales + repeated print requests).
+> Social/TikTok is the traffic arm, optimized for email capture, not direct sales.
 > Full operational handoff (product IDs, API capabilities, test flow, pending
 > tasks) lives in **`docs/monetization.md`**. Summary below.
 - **Strategy:** research shows TOOL demand is proven ("game of life" 27.1K/mo)
